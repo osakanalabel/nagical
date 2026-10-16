@@ -5,19 +5,23 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ナギカル</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#F7F9F8">
+<meta name="theme-color" content="#0F2A47">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="ナギカル">
 <style>
 :root{
-  --paper:#F7F9F8; --ink:#13233A; --sub:#5B6B7C; --rule:#D5DEE3;
-  --water:#CFE6EF; --water-line:#2F6E8E; --magenta:#A3195B; --night:#E4EAEE;
-  --ok-bg:#DCEFE3; --ok:#1E5B3A; --ok-bar:#5FA67E;
-  --mid-bg:#FBEFC8; --mid:#6B4E00; --mid-bar:#D9A520;
-  --ng-bg:#F4D3E1; --ng:#A3195B; --ng-bar:#A3195B;
-  --rain:#8CC4DE; --snow:#6E7C88;
+  color-scheme:dark;
+  --paper:#0F2A47; --ink:#CAD7E3; --sub:#8FA6BB; --faint:#6F88A0; --rule:#2A4766;
+  --surface:#17375A; --accent:#285C8A; --line:#3E6185; --na-bg:#1A3352; --day:#15304F;
+  --water:#15395C; --water-line:#7DBBDC; --magenta:#E58AB0; --night:#0A1F36;
+  /* 判定のタイル（明るい地に濃い文字。元の配色から明度を一段落とした） */
+  --ok-bg:#C0E2CD; --ok:#1E5B3A; --mid-bg:#F8E4A2; --mid:#6B4E00; --ng-bg:#ECB2CB; --ng:#8E1550;
+  --rain:#6CB4D5; --snow:#6E7C88; --snow-text:#fff; --halo:#fff;
+  /* 暗い背景の上に置く判定色（表の文字・グラフの棒と線） */
+  --ok-text:#A9DDBE; --mid-text:#F0D58A; --ng-text:#F3A9C8;
+  --ok-bar:#4E9C72; --mid-bar:#C9A23A; --ng-bar:#D0588E;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -27,10 +31,10 @@ h1{font-size:26px;line-height:1.25;margin:2px 0 2px;font-weight:700}
 h2{font-size:15px;font-weight:700;margin:0 0 8px}
 .sub{font-size:13px;color:var(--sub);margin:0}
 section{margin-top:24px}
-button,select,input{font:inherit;font-size:15px;color:var(--ink);background:#fff;border:1px solid #9FB0BD;border-radius:6px;padding:8px 10px;min-height:42px}
+button,select,input{font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-height:42px}
 button{cursor:pointer}
 button:disabled{opacity:.55;cursor:default}
-button.primary{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
+button.primary{background:var(--accent);color:var(--ink);border-color:var(--accent);font-weight:700}
 button.link{border:0;background:none;padding:8px 0;color:var(--water-line);font-weight:700;min-height:0}
 :focus-visible{outline:3px solid var(--water-line);outline-offset:2px}
 .bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
@@ -44,7 +48,8 @@ button.link{border:0;background:none;padding:8px 0;color:var(--water-line);font-
 .grid-wrap{overflow-x:auto;margin:12px 0 0;padding:0}
 .grid{border-collapse:separate;border-spacing:3px;font-size:14px}
 .grid th{font-weight:400;font-size:12px;color:var(--sub);text-align:center;line-height:1.3;padding:2px 0 4px;min-width:52px}
-.grid th.far{color:#93A2AF}
+.grid th.far{color:var(--faint)}
+.grid th.fetched{vertical-align:bottom;font-size:11px;padding-bottom:4px}
 .grid th.wk{color:var(--ink);font-weight:700}
 .grid th.spot,.grid td.spot{position:sticky;left:0;background:var(--paper);text-align:left;min-width:84px;max-width:110px;padding-right:6px;z-index:1;box-shadow:-4px 0 0 var(--paper),4px 0 0 var(--paper)}
 .grid td.spot{font-weight:700;font-size:14px;line-height:1.3;word-break:break-all}
@@ -54,13 +59,13 @@ button.link{border:0;background:none;padding:8px 0;color:var(--water-line);font-
 .lv-ok{background:var(--ok-bg);color:var(--ok)}
 .lv-mid{background:var(--mid-bg);color:var(--mid)}
 .lv-ng{background:var(--ng-bg);color:var(--ng)}
-.grid td.spot.empty-name{font-weight:400;color:#93A2AF}
-.cell.empty{background:transparent;border:1.5px dashed #B9C6D0}
-.lv-na{background:#EEF1F3;color:var(--sub);font-weight:400;font-size:13px}
+.grid td.spot.empty-name{font-weight:400;color:var(--faint)}
+.cell.empty{background:transparent;border:1.5px dashed var(--line)}
+.lv-na{background:var(--na-bg);color:var(--sub);font-weight:400;font-size:13px}
 .grid th.col{padding:0}
 .grid th .hd{width:100%;border:0;background:none;padding:2px 0 4px;font:inherit;font-size:12px;color:inherit;line-height:1.3;min-height:0;cursor:pointer}
 .grid th.slim,.grid td.slim{min-width:26px;width:26px}
-.grid th.slim .hd{color:#93A2AF}
+.grid th.slim .hd{color:var(--faint)}
 .grid th.hol .hd{color:var(--magenta);font-weight:700}
 .cell.slim{min-height:52px;padding:0;border-radius:3px}
 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
@@ -71,8 +76,8 @@ h1.ttl{font-size:30px;line-height:1.1;margin:0}
 #reload.busy svg{animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){#reload.busy svg{animation:none}}
-dialog#help{border:0;border-radius:10px;padding:16px 18px 18px;max-width:min(520px,calc(100vw - 32px));max-height:85vh;color:var(--ink);background:#fff;font-size:15px;line-height:1.7}
-dialog#help::backdrop{background:rgba(19,35,58,.45)}
+dialog#help{border:0;border-radius:10px;padding:16px 18px 18px;max-width:min(520px,calc(100vw - 32px));max-height:85vh;color:var(--ink);background:var(--surface);font-size:15px;line-height:1.7}
+dialog#help::backdrop{background:rgba(0,0,0,.55)}
 .help-head{display:flex;justify-content:space-between;align-items:center}
 .help-head h2{font-size:18px;margin:0}
 #help h3{font-size:15px;margin:14px 0 4px}
@@ -86,10 +91,10 @@ dialog#help::backdrop{background:rgba(19,35,58,.45)}
 .winbar .range{font-size:13px;color:var(--sub)}
 .cell.rain{background-image:linear-gradient(to top left,var(--rain) 50%,transparent 50%)}
 .cell.snow{background-image:linear-gradient(to top left,var(--snow) 50%,transparent 50%);position:relative}
-.cell.snow::after{content:"雪";position:absolute;right:4px;bottom:2px;font-size:11px;font-weight:700;color:#fff;line-height:1;text-shadow:none}
+.cell.snow::after{content:"雪";position:absolute;right:4px;bottom:2px;font-size:11px;font-weight:700;color:var(--snow-text);line-height:1;text-shadow:none}
 .cell.slim.snow::after{right:2px;font-size:10px}
-.cell.rain,.cell.snow{text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 2px #fff}
-.cell.rain .arr,.cell.snow .arr{filter:drop-shadow(0 0 1.2px #fff) drop-shadow(0 0 1.2px #fff)}
+.cell.rain,.cell.snow{text-shadow:0 0 3px var(--halo),0 0 3px var(--halo),0 0 2px var(--halo)}
+.cell.rain .arr,.cell.snow .arr{filter:drop-shadow(0 0 1.2px var(--halo)) drop-shadow(0 0 1.2px var(--halo))}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;margin-top:10px}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:16px;height:16px;border-radius:3px;display:inline-block}
@@ -97,6 +102,7 @@ dialog#help::backdrop{background:rgba(19,35,58,.45)}
 /* 詳細 */
 .daynav{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-top:12px}
 .daynav b{text-align:center;font-size:18px}
+.cell,.verdict{--ink:#13233A;--water-line:#2F6E8E}
 .verdict{margin-top:14px;padding:10px 12px;border-radius:6px;font-size:15px}
 .verdict b{font-size:22px}
 .suns{display:flex;flex-wrap:wrap;gap:4px 20px;margin-top:10px;font-size:14px;color:var(--sub)}
@@ -115,7 +121,7 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
 .hr tr.win td:first-child{border-left-color:var(--water-line)}
 .hr td.w,.hr th:nth-child(4){text-align:left}
 .hr td.wind{font-weight:700}
-.hr tr.night td{background:var(--night);color:#3F4F60}
+.hr tr.night td{background:var(--night);color:var(--sub)}
 .hr tr.now td{box-shadow:inset 0 2px 0 var(--magenta)}
 .hr td.gust{color:var(--sub)}
 .hr .up{color:var(--water-line);font-weight:700}
@@ -126,9 +132,12 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
 .spotlist{list-style:none;margin:12px 0 0;padding:0;border-top:1px solid var(--rule)}
 .spotlist li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)}
 .spotlist small{display:block;color:var(--sub);font-size:12px}
-.banks{display:flex;gap:6px;overflow-x:auto;margin:16px -16px 0;padding:0 16px 2px;border-bottom:2px solid var(--ink)}
-.banks button{flex:none;border:1px solid #9FB0BD;border-bottom:0;border-radius:6px 6px 0 0;background:#fff;min-height:40px;padding:8px 14px}
-.banks button[aria-selected="true"]{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
+.spotlist .ops{display:flex;gap:6px;flex:none}
+/* 一覧の上部。リストのタブは、選択中のものを下線と同じ色で塗る */
+.head .ic{background:transparent;border-color:var(--line)}
+.banks{display:flex;gap:6px;overflow-x:auto;margin:14px -16px 0;padding:0 16px;border-bottom:2px solid var(--accent)}
+.banks button{flex:none;border:0;border-radius:6px 6px 0 0;background:rgba(255,255,255,.06);color:var(--sub);min-height:40px;padding:8px 14px}
+.banks button[aria-selected="true"]{background:var(--accent);color:var(--ink);font-weight:700}
 .bankbar{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:12px}
 .bankbar label{display:flex;flex-direction:column;font-size:13px;color:var(--sub);gap:2px;flex:1;min-width:10em}
 .bankbar input,.bankbar select{width:100%}
@@ -149,22 +158,23 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
 
 <!-- 一覧 -->
 <div id="v-list" hidden>
+ <div class="head">
   <div class="top">
     <h1 class="ttl">ナギカル</h1>
     <div class="icons">
       <button class="ic" id="help-btn" aria-label="使い方" title="使い方"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.4a2.8 2.8 0 1 1 3.9 2.6c-.8.4-1.2.9-1.2 1.8v.6"/><circle cx="12" cy="17.6" r=".6" fill="currentColor"/></svg></button>
       <button class="ic" id="reload" aria-label="最新の予報を取得" title="最新の予報を取得"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg></button>
-      <button class="ic" id="to-spots" aria-label="バンクと釣り場の管理" title="バンクと釣り場の管理"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--paper)"/><circle cx="15" cy="12" r="2.2" fill="var(--paper)"/><circle cx="8" cy="18" r="2.2" fill="var(--paper)"/></svg></button>
+      <button class="ic" id="to-spots" aria-label="リストと釣り場の管理" title="リストと釣り場の管理"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--paper)"/><circle cx="15" cy="12" r="2.2" fill="var(--paper)"/><circle cx="8" cy="18" r="2.2" fill="var(--paper)"/></svg></button>
     </div>
   </div>
-  <p class="sub" id="fetched"></p>
   <div class="msg" id="list-msg"></div>
   <div class="winbar">
     <select id="win" aria-label="判定する時間帯"><option value="morning">朝マヅメ</option><option value="day">日中</option><option value="evening">夕マヅメ〜夜</option><option value="custom">時刻を指定</option></select>
     <span id="win-custom" style="display:none;gap:4px;align-items:center"><select id="win-s" aria-label="開始"></select>〜<select id="win-e" aria-label="終了"></select></span>
     <span class="range" id="win-range"></span>
   </div>
-  <div class="banks" id="banks" role="tablist" aria-label="バンク"></div>
+  <div class="banks" id="banks" role="tablist" aria-label="リスト"></div>
+ </div>
   <div class="grid-wrap"><table class="grid" id="grid"></table></div>
 </div>
 
@@ -176,8 +186,8 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
     <span><i style="background:var(--ok-bg);outline:1px solid var(--ok-bar)"></i>4m/s未満 行ける</span>
     <span><i style="background:var(--mid-bg);outline:1px solid var(--mid-bar)"></i>4〜5m/s 迷う</span>
     <span><i style="background:var(--ng-bg);outline:1px solid var(--ng-bar)"></i>5m/s以上 見送り</span>
-    <span><i style="background:linear-gradient(to top left,var(--rain) 50%,#fff 50%);outline:1px solid #9FB0BD"></i>雨（降水確率50%以上）</span>
-    <span><i style="background:linear-gradient(to top left,var(--snow) 50%,#fff 50%);outline:1px solid #9FB0BD"></i>大雪</span>
+    <span><i style="background:linear-gradient(to top left,var(--rain) 50%,var(--surface) 50%);outline:1px solid var(--line)"></i>雨（降水確率50%以上）</span>
+    <span><i style="background:linear-gradient(to top left,var(--snow) 50%,var(--surface) 50%);outline:1px solid var(--line)"></i>大雪</span>
   </div>
   <p>時間帯の中に降水確率50%以上の時間があると、右下が水色になります。大雪か強いにわか雪の予報があると、右下が灰色になり「雪」と入ります。</p>
   <h3>時間帯</h3>
@@ -192,7 +202,7 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
     <dt>マス</dt><dd>押すと、その日の詳細を開きます</dd>
     <dt>平日の列</dt><dd>細くたたんであります。日付かマスを押すと開きます</dd>
     <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg></dt><dd>最新の予報を取得します。前の取得から30分たつまでは押せません（薄い表示のとき）。ページを開き直したときも、30分たった予報だけを取り直します</dd>
-    <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="#fff"/><circle cx="15" cy="12" r="2.2" fill="#fff"/><circle cx="8" cy="18" r="2.2" fill="#fff"/></svg></dt><dd>バンクと釣り場を管理します。1つのバンクに5か所まで、バンクは10個まで作れます</dd>
+    <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--surface)"/><circle cx="15" cy="12" r="2.2" fill="var(--surface)"/><circle cx="8" cy="18" r="2.2" fill="var(--surface)"/></svg></dt><dd>リストと釣り場を管理します。1つのリストに8か所まで、リストは10個まで作れます。リストと釣り場の並べ替えもここでできます</dd>
   </dl>
   <p class="note" style="margin-top:12px">予報はOpen-Meteoのモデルによるものです。6日目以降は精度が下がります。</p>
 </dialog>
@@ -230,18 +240,19 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
   <p class="note">データはOpen-Meteoの予報モデルです。水温・潮位は広域の推定値のため、港や湾の中では実際と差があります。釣行前に気象庁の潮汐表や現地の情報も確認してください。</p>
 </div>
 
-<!-- バンクと釣り場の管理 -->
+<!-- リストと釣り場の管理 -->
 <div id="v-spots" hidden>
   <button class="link" id="back2">一覧に戻る</button>
-  <h1>バンクと釣り場の管理</h1>
+  <h1>リストと釣り場の管理</h1>
   <div class="bankbar">
-    <label>編集するバンク<select id="m-bank"></select></label>
-    <button id="m-newbank">バンクを追加</button>
+    <label>編集するリスト<select id="m-bank"></select></label>
+    <button id="m-newbank">リストを追加</button>
   </div>
+  <div class="bankbar" style="align-items:center"><span class="count" style="margin:0;flex:1">一覧のタブの位置</span><button id="m-left">左へ</button><button id="m-right">右へ</button></div>
   <div class="bankbar">
-    <label>バンクの名前<input id="m-bankname" maxlength="12"></label>
+    <label>リストの名前<input id="m-bankname" maxlength="12"></label>
     <button id="m-rename">名前を変更</button>
-    <button id="m-delbank">このバンクを削除</button>
+    <button id="m-delbank">このリストを削除</button>
   </div>
   <p class="count" id="m-count"></p>
   <ul class="spotlist" id="spotlist"></ul>
@@ -276,7 +287,7 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
 const $=id=>document.getElementById(id);
 // 北海道の釣り場（fishing_spots_hokkaido.json を元に、小樽運河を「小樽港」に改名、石狩湾新港・古潭漁港・苫小牧東港を追加、苫小牧港 西港区を苫小牧西港に改名。新規3か所と苫小牧西港の座標は気象庁潮位観測点などによる）
 const DB=[{"n":"網走湖","k":"ワカサギ湖","r":"オホーツク","m":"網走市・大空町","lat":43.95,"lon":144.15,"note":"呼人・女満別の2会場"},{"n":"能取湖","k":"ワカサギ湖","r":"オホーツク","m":"網走市","lat":44.07,"lon":144.12},{"n":"藻琴湖","k":"ワカサギ湖","r":"オホーツク","m":"網走市","lat":43.94,"lon":144.33},{"n":"濤沸湖","k":"ワカサギ湖","r":"オホーツク","m":"網走市・小清水町","lat":43.92,"lon":144.43},{"n":"サロマ湖","k":"ワカサギ湖","r":"オホーツク","m":"北見市・佐呂間町・湧別町","lat":44.13,"lon":143.95},{"n":"阿寒湖","k":"ワカサギ湖","r":"釧路","m":"釧路市","lat":43.46,"lon":144.1,"note":"阿寒湖温泉街側に釣り場"},{"n":"塘路湖","k":"ワカサギ湖","r":"釧路","m":"標茶町","lat":43.13,"lon":144.57},{"n":"風蓮湖","k":"ワカサギ湖","r":"根室","m":"根室市・別海町","lat":43.3,"lon":145.25},{"n":"糠平湖","k":"ワカサギ湖","r":"十勝","m":"上士幌町","lat":43.37,"lon":143.2},{"n":"朱鞠内湖","k":"ワカサギ湖","r":"上川","m":"幌加内町","lat":44.3,"lon":142.2},{"n":"しのつ湖","k":"ワカサギ湖","r":"石狩","m":"新篠津村","lat":43.2,"lon":141.7},{"n":"茨戸川","k":"ワカサギ湖","r":"石狩","m":"札幌市北区・石狩市","lat":43.18,"lon":141.37},{"n":"大沼","k":"ワカサギ湖","r":"渡島","m":"七飯町","lat":41.98,"lon":140.68},{"n":"洞爺湖","k":"ワカサギ湖","r":"胆振","m":"洞爺湖町","lat":42.6,"lon":140.85},{"n":"ポロト湖","k":"ワカサギ湖","r":"胆振","m":"白老町","lat":42.553,"lon":141.355},{"n":"桂沢湖","k":"ワカサギ湖","r":"空知","m":"三笠市","lat":43.22,"lon":141.99},{"n":"かなやま湖","k":"ワカサギ湖","r":"空知","m":"南富良野町","lat":43.15,"lon":142.53},{"n":"小樽港","k":"港湾","r":"後志","m":"小樽市","lat":43.199,"lon":141.001},{"n":"厚田漁港","k":"漁港","r":"石狩","m":"石狩市","lat":43.35,"lon":141.43},{"n":"余市港","k":"港湾","r":"後志","m":"余市町","lat":43.2,"lon":140.78},{"n":"岩内港","k":"港湾","r":"後志","m":"岩内町","lat":42.98,"lon":140.51},{"n":"寿都漁港","k":"漁港","r":"後志","m":"寿都町","lat":42.79,"lon":140.23},{"n":"増毛漁港","k":"漁港","r":"留萌","m":"増毛町","lat":43.85,"lon":141.52},{"n":"留萌港","k":"港湾","r":"留萌","m":"留萌市","lat":43.94,"lon":141.63},{"n":"羽幌漁港","k":"漁港","r":"留萌","m":"羽幌町","lat":44.36,"lon":141.7},{"n":"稚内港","k":"港湾","r":"宗谷","m":"稚内市","lat":45.42,"lon":141.68},{"n":"鴛泊港","k":"港湾","r":"宗谷","m":"利尻富士町","lat":45.24,"lon":141.24},{"n":"香深港","k":"港湾","r":"宗谷","m":"礼文町","lat":45.3,"lon":141.04},{"n":"枝幸漁港","k":"漁港","r":"宗谷","m":"枝幸町","lat":44.94,"lon":142.58},{"n":"雄武漁港","k":"漁港","r":"オホーツク","m":"雄武町","lat":44.58,"lon":142.96},{"n":"紋別港","k":"港湾","r":"オホーツク","m":"紋別市","lat":44.36,"lon":143.37},{"n":"湧別漁港","k":"漁港","r":"オホーツク","m":"湧別町","lat":44.22,"lon":143.63},{"n":"常呂漁港","k":"漁港","r":"オホーツク","m":"北見市","lat":44.13,"lon":143.65},{"n":"網走港","k":"港湾","r":"オホーツク","m":"網走市","lat":44.02,"lon":144.28},{"n":"ウトロ漁港","k":"漁港","r":"オホーツク","m":"斜里町","lat":44.07,"lon":145.0},{"n":"羅臼漁港","k":"漁港","r":"根室","m":"羅臼町","lat":44.02,"lon":145.19},{"n":"根室港","k":"港湾","r":"根室","m":"根室市","lat":43.33,"lon":145.58},{"n":"花咲港","k":"港湾","r":"根室","m":"根室市","lat":43.28,"lon":145.57},{"n":"霧多布（浜中）","k":"漁港","r":"釧路","m":"浜中町","lat":43.09,"lon":145.12},{"n":"厚岸漁港","k":"漁港","r":"釧路","m":"厚岸町","lat":43.04,"lon":144.85},{"n":"釧路港","k":"港湾","r":"釧路","m":"釧路市","lat":42.97,"lon":144.37},{"n":"十勝港","k":"港湾","r":"十勝","m":"豊頃町","lat":42.73,"lon":143.68},{"n":"広尾漁港","k":"漁港","r":"十勝","m":"広尾町","lat":42.28,"lon":143.33},{"n":"様似漁港","k":"漁港","r":"日高","m":"様似町","lat":42.13,"lon":142.93},{"n":"浦河港","k":"港湾","r":"日高","m":"浦河町","lat":42.16,"lon":142.77},{"n":"鵡川漁港","k":"漁港","r":"胆振","m":"むかわ町","lat":42.55,"lon":141.93},{"n":"苫小牧西港","k":"港湾","r":"胆振","m":"苫小牧市","lat":42.6333,"lon":141.6167},{"n":"苫小牧東港","k":"港湾","r":"胆振","m":"苫小牧市・厚真町","lat":42.6,"lon":141.8167},{"n":"苫小牧海釣り施設（弁天）","k":"海釣り施設","r":"胆振","m":"苫小牧市","lat":42.61,"lon":141.77,"note":"住所は苫小牧市弁天。4月〜11月初旬の土日祝営業"},{"n":"白老漁港","k":"漁港","r":"胆振","m":"白老町","lat":42.54,"lon":141.35},{"n":"室蘭港","k":"港湾","r":"胆振","m":"室蘭市","lat":42.33,"lon":140.97},{"n":"伊達漁港","k":"漁港","r":"胆振","m":"伊達市","lat":42.46,"lon":140.86},{"n":"八雲漁港","k":"漁港","r":"渡島","m":"八雲町","lat":42.25,"lon":140.27},{"n":"森漁港","k":"漁港","r":"渡島","m":"森町","lat":42.11,"lon":140.58},{"n":"函館港","k":"港湾","r":"渡島","m":"函館市","lat":41.77,"lon":140.72},{"n":"戸井漁港","k":"漁港","r":"渡島","m":"函館市","lat":41.79,"lon":140.98},{"n":"松前港","k":"港湾","r":"渡島","m":"松前町","lat":41.43,"lon":140.11},{"n":"江差港","k":"港湾","r":"檜山","m":"江差町","lat":41.87,"lon":140.12},{"n":"石狩湾新港","k":"港湾","r":"石狩","m":"石狩市・小樽市","lat":43.2167,"lon":141.3},{"n":"古潭漁港","k":"漁港","r":"石狩","m":"石狩市厚田区","lat":43.3575,"lon":141.4261}].map(e=>Object.assign(e,{type:e.k==="ワカサギ湖"?"fresh":"sea"}));
-const MAX_SPOTS=5, MAX_BANKS=10;
+const MAX_SPOTS=8, MAX_BANKS=10;
 const fromDB=n=>{const e=DB.find(x=>x.n===n);return {name:e.n,lat:e.lat,lon:e.lon,type:e.type,...(e.note?{note:e.note}:{})}};
 const DEF_STATE=()=>({cur:0,banks:[
   {name:"海釣り",spots:["小樽港","石狩湾新港","古潭漁港","苫小牧西港"].map(fromDB)},
@@ -308,7 +319,7 @@ function saveSpots(){try{localStorage.setItem("nagical-banks",JSON.stringify(sta
 function setBank(i){state.cur=i;spots=state.banks[i].spots;saveSpots()}
 // 取得した予報はブラウザに保存し、再読み込みしても使い回す
 // ・取り直しは［最新の予報を取得］かページの再読み込みのときだけで、取得から30分たったものに限る
-// ・バンクの切り替えや釣り場の追加では、まだ取得していない釣り場だけを取る（自動で取り直さない）
+// ・リストの切り替えや釣り場の追加では、まだ取得していない釣り場だけを取る（自動で取り直さない）
 const COOLDOWN=30*60*1000;
 const KEEP=6*3600*1000;        // 6時間より古い保存データは捨てる
 const cache=(()=>{try{const c=JSON.parse(localStorage.getItem("nagical-cache"))||{};const n=Date.now();for(const k in c)if(!(c[k]&&n-c[k].at<KEEP))delete c[k];return c}catch(e){return {}}})();
@@ -421,17 +432,17 @@ $("win-s").onchange=$("win-e").onchange=()=>{state.win.s=+$("win-s").value;state
 function renderList(){
   const t=today(), days=[...Array(DAYS)].map((_,i)=>addDays(t,i));
   const ats=bankAts();
-  $("fetched").textContent=ats.length?`${hm(Math.min(...ats))} 取得`:"";
   updateReload(); renderWin();
   $("banks").innerHTML=state.banks.map((b,i)=>`<button role="tab" aria-selected="${i===state.cur}" data-b="${i}">${esc(b.name)}</button>`).join("");
   $("banks").querySelectorAll("button").forEach(b=>b.onclick=()=>{setBank(+b.dataset.b);renderList();loadAll(false)});
   const isOpen=d=>isOff(d)||opened.has(d);
-  let h=`<tr><th class="spot"></th>${days.map((d,i)=>{
+  // 表の左上のマスに、予報の取得時刻（いちばん古いもの）を出す
+  let h=`<tr><th class="spot fetched">${ats.length?`${hm(Math.min(...ats))}<br>取得`:""}</th>${days.map((d,i)=>{
     const o=isOpen(d), lab=i===0?"今日":i===1?"明日":md(d);
     const cls=["col",o?"":"slim",i>=5?"far":"",isOff(d)?"wk":"",HOL.has(d)?"hol":""].join(" ");
     const txt=o?`${lab}<br>${HOL.has(d)?"祝":wd(d)}`:`${+d.slice(8,10)}<br>${wd(d)}`;
     return `<th class="${cls}"><button class="hd" data-t="${d}" aria-expanded="${o}" aria-label="${md(d)}（${wd(d)}）の列を${o?"閉じる":"開く"}">${txt}</button></th>`}).join("")}</tr>`;
-  if(!spots.length)h+=`<tr><td class="spot" colspan="${DAYS+1}">このバンクには釣り場がありません。［バンクと釣り場の管理］から追加してください。</td></tr>`;
+  if(!spots.length)h+=`<tr><td class="spot" colspan="${DAYS+1}">このリストには釣り場がありません。［リストと釣り場の管理］から追加してください。</td></tr>`;
   spots.forEach((p,si)=>{
     const d=getD(p);
     h+=`<tr><td class="spot">${esc(p.name)}<small>${p.type==="fresh"?"淡水":"海"}</small></td>`;
@@ -447,8 +458,8 @@ function renderList(){
     });
     h+="</tr>";
   });
-  // 5か所に満たない分は、空の枠だけを表示する
-  for(let k=spots.length;k<MAX_SPOTS;k++){
+  // 上限に満たないときは、空の枠を1つだけ表示する（上限に達したら出さない）
+  if(spots.length<MAX_SPOTS){
     h+=`<tr aria-hidden="true"><td class="spot empty-name">未登録</td>${days.map(day=>{const o=isOpen(day);return `<td class="${o?"":"slim"}"><div class="cell empty ${o?"":"slim"}"></div></td>`}).join("")}</tr>`;
   }
   $("grid").innerHTML=h;
@@ -518,7 +529,7 @@ function renderDay(si,date){
   let h=`<tr><th>時刻</th><th>風（平均）</th><th>瞬間</th><th>天気</th><th>気温℃</th><th>降水</th>${sea?"<th>潮</th>":""}</tr>`;
   idx.forEach(i=>{
     const x=H.time[i], night=!(x.slice(0,13)>=sr.slice(0,13)&&x<=ss);
-    const v=H.wind_speed_10m[i], c=`var(--${lv(v)==="na"?"sub":lv(v)})`;
+    const v=H.wind_speed_10m[i], c=`var(--${lv(v)==="na"?"sub":lv(v)+"-text"})`;
     let tide="";
     if(sea){
       const j=MT.indexOf(x);
@@ -539,10 +550,10 @@ function windChart(H,idx,sr,ss,nh,wr){
   let g="";
   // 夜間の帯
   g+=`<rect x="${left}" y="${top}" width="${W-left-right}" height="${Hh-top-bot}" fill="var(--night)"/>`;
-  if(sr&&ss)g+=`<rect x="${toX(sr)}" y="${top}" width="${toX(ss)-toX(sr)}" height="${Hh-top-bot}" fill="#fff"/>`;
+  if(sr&&ss)g+=`<rect x="${toX(sr)}" y="${top}" width="${toX(ss)-toX(sr)}" height="${Hh-top-bot}" fill="var(--day)"/>`;
   if(wr){const x1=left+cw*wr[0]/60,x2=left+cw*Math.min(wr[1]+1,24*60)/60;g+=`<rect x="${x1}" y="${top}" width="${x2-x1}" height="${Hh-top-bot}" fill="var(--water)" opacity=".45"/><rect x="${x1}" y="${top-6}" width="${x2-x1}" height="4" fill="var(--water-line)"/>`}
   // 目盛り
-  [OK,NG].forEach(v=>{g+=`<line x1="${left}" x2="${W-right}" y1="${y(v)}" y2="${y(v)}" stroke="${v===NG?"var(--ng)":"var(--mid-bar)"}" stroke-width="1.5" stroke-dasharray="${v===NG?"0":"5 4"}"/><text x="${left-4}" y="${y(v)+4}" font-size="12" text-anchor="end" fill="${v===NG?"var(--ng)":"var(--mid)"}">${v}</text>`});
+  [OK,NG].forEach(v=>{g+=`<line x1="${left}" x2="${W-right}" y1="${y(v)}" y2="${y(v)}" stroke="${v===NG?"var(--ng-bar)":"var(--mid-bar)"}" stroke-width="1.5" stroke-dasharray="${v===NG?"0":"5 4"}"/><text x="${left-4}" y="${y(v)+4}" font-size="12" text-anchor="end" fill="${v===NG?"var(--ng-text)":"var(--mid-text)"}">${v}</text>`});
   g+=`<text x="${left-4}" y="${y(0)+4}" font-size="12" text-anchor="end" fill="var(--sub)">0</text>`;
   vals.forEach((v,k)=>{
     if(v==null)return;
@@ -557,7 +568,7 @@ function windChart(H,idx,sr,ss,nh,wr){
     if(hh(t)%3===0)g+=`<text x="${cx}" y="${Hh-6}" font-size="12" text-anchor="middle" fill="var(--sub)">${hh(t)}</text>`;
   });
   if(nh){const k=idx.findIndex(i=>H.time[i]===nh);if(k>=0)g+=`<line x1="${left+cw*k+cw/2}" x2="${left+cw*k+cw/2}" y1="${top}" y2="${Hh-bot}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 3"/><text x="${left+cw*k+cw/2+4}" y="${top+12}" font-size="12" fill="var(--ink)" font-weight="700">いま</text>`}
-  return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="1時間ごとの平均風速と風向">${g}</svg><p class="sub" style="margin-top:4px">青い線の範囲が判定する時間帯、白い帯が日の出から日の入りまで。下の矢印は風が吹いていく方向です（2時間ごと）。</p>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="1時間ごとの平均風速と風向">${g}</svg><p class="sub" style="margin-top:4px">青い線の範囲が判定する時間帯、明るい帯が日の出から日の入りまで。下の矢印は風が吹いていく方向です（2時間ごと）。</p>`;
 }
 
 function tideChart(T,L,s,e,nowI){
@@ -575,17 +586,17 @@ function tideChart(T,L,s,e,nowI){
   });
   const k=nowI>=0?nowI-s:-1;
   if(k>=0&&k<n){const nx=x(k),end=nx>W-40;g+=`<line x1="${nx}" x2="${nx}" y1="${top-4}" y2="${Hh-bot}" stroke="var(--magenta)" stroke-width="2"/><text x="${nx+(end?-5:5)}" y="${top+10}" font-size="13" font-weight="700" fill="var(--magenta)" text-anchor="${end?"end":"start"}">いま</text>`}
-  return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="潮位の推移"><polygon points="${area}" fill="#fff" opacity=".7"/><polyline points="${line}" fill="none" stroke="var(--water-line)" stroke-width="2.5" stroke-linejoin="round"/><line x1="${left}" x2="${W-right}" y1="${Hh-bot}" y2="${Hh-bot}" stroke="var(--water-line)"/>${g}</svg>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="潮位の推移"><polygon points="${area}" fill="var(--water-line)" opacity=".25"/><polyline points="${line}" fill="none" stroke="var(--water-line)" stroke-width="2.5" stroke-linejoin="round"/><line x1="${left}" x2="${W-right}" y1="${Hh-bot}" y2="${Hh-bot}" stroke="var(--water-line)"/>${g}</svg>`;
 }
 
-/* ---------- バンクと釣り場の管理 ---------- */
+/* ---------- リストと釣り場の管理 ---------- */
 let mb=state.cur, nearPos=null;
 const dist=(a,b)=>{const r=Math.PI/180,x=(b.lon-a.lon)*r*Math.cos((a.lat+b.lat)/2*r),y=(b.lat-a.lat)*r;return Math.sqrt(x*x+y*y)*6371};
 const msg=t=>{$("spot-msg").textContent=t};
 function addSpot(sp){
   const B=state.banks[mb];
-  if(B.spots.length>=MAX_SPOTS){msg(`1つのバンクに登録できるのは${MAX_SPOTS}か所までです。ほかの釣り場を削除してから追加してください`);return false}
-  if(B.spots.some(x=>x.name===sp.name&&x.lat===sp.lat&&x.lon===sp.lon)){msg(`${sp.name}はこのバンクに登録済みです`);return false}
+  if(B.spots.length>=MAX_SPOTS){msg(`1つのリストに登録できるのは${MAX_SPOTS}か所までです。ほかの釣り場を削除してから追加してください`);return false}
+  if(B.spots.some(x=>x.name===sp.name&&x.lat===sp.lat&&x.lon===sp.lon)){msg(`${sp.name}はこのリストに登録済みです`);return false}
   B.spots.push(sp); saveSpots(); msg(`${sp.name}を「${B.name}」に追加しました`); return true;
 }
 function renderSpots(){
@@ -596,9 +607,17 @@ function renderSpots(){
   $("m-bankname").value=B.name;
   $("m-newbank").disabled=state.banks.length>=MAX_BANKS;
   $("m-delbank").disabled=state.banks.length<=1;
+  $("m-left").disabled=mb<=0; $("m-right").disabled=mb>=state.banks.length-1;
   $("m-count").textContent=`「${B.name}」の釣り場　${B.spots.length}/${MAX_SPOTS}か所`;
-  $("spotlist").innerHTML=B.spots.length?B.spots.map((p,i)=>`<li><div><b>${esc(p.name)}</b><small>${p.type==="fresh"?"淡水":"海"}　${p.lat}, ${p.lon}</small></div><button data-i="${i}">削除</button></li>`).join(""):`<li>釣り場がありません。下の一覧か、緯度・経度の入力で追加してください。</li>`;
-  $("spotlist").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+  $("spotlist").innerHTML=B.spots.length?B.spots.map((p,i)=>`<li><div><b>${esc(p.name)}</b><small>${p.type==="fresh"?"淡水":"海"}　${p.lat}, ${p.lon}</small></div><span class="ops">`
+    +`<button data-mv="-1" data-i="${i}" ${i===0?"disabled":""}>上へ</button>`
+    +`<button data-mv="1" data-i="${i}" ${i===B.spots.length-1?"disabled":""}>下へ</button>`
+    +`<button data-del data-i="${i}">削除</button></span></li>`).join(""):`<li>釣り場がありません。下の一覧か、緯度・経度の入力で追加してください。</li>`;
+  $("spotlist").querySelectorAll("button[data-mv]").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i, j=i+(+b.dataset.mv); [B.spots[i],B.spots[j]]=[B.spots[j],B.spots[i]];
+    saveSpots(); msg(""); renderSpots();
+  });
+  $("spotlist").querySelectorAll("button[data-del]").forEach(b=>b.onclick=()=>{
     const i=+b.dataset.i; if(!confirm(`${B.spots[i].name}を「${B.name}」から削除しますか？`))return;
     B.spots.splice(i,1); saveSpots(); msg(""); renderSpots();
   });
@@ -619,15 +638,24 @@ $("db-region").onchange=$("db-kind").onchange=renderDB;
 $("m-bank").onchange=()=>{mb=+$("m-bank").value;msg("");renderSpots()};
 $("m-newbank").onclick=()=>{
   if(state.banks.length>=MAX_BANKS)return;
-  state.banks.push({name:`バンク${state.banks.length+1}`,spots:[]}); mb=state.banks.length-1; saveSpots();
-  msg("バンクを追加しました。名前を入力して［名前を変更］を押してください"); renderSpots(); $("m-bankname").focus();
+  state.banks.push({name:`リスト${state.banks.length+1}`,spots:[]}); mb=state.banks.length-1; saveSpots();
+  msg("リストを追加しました。名前を入力して［名前を変更］を押してください"); renderSpots(); $("m-bankname").focus();
 };
-$("m-rename").onclick=()=>{const n=$("m-bankname").value.trim();if(!n){msg("バンクの名前を入力してください");return}state.banks[mb].name=n;saveSpots();msg("名前を変更しました");renderSpots()};
+$("m-rename").onclick=()=>{const n=$("m-bankname").value.trim();if(!n){msg("リストの名前を入力してください");return}state.banks[mb].name=n;saveSpots();msg("名前を変更しました");renderSpots()};
 $("m-delbank").onclick=()=>{
   if(state.banks.length<=1)return;
-  if(!confirm(`バンク「${state.banks[mb].name}」を削除しますか？登録した釣り場もこのバンクから消えます`))return;
-  state.banks.splice(mb,1); if(state.cur>=state.banks.length||state.cur===mb)state.cur=0; spots=state.banks[state.cur].spots; mb=state.cur; saveSpots(); msg(""); renderSpots();
+  if(!confirm(`リスト「${state.banks[mb].name}」を削除しますか？登録した釣り場もこのリストから消えます`))return;
+  state.banks.splice(mb,1); if(state.cur===mb)state.cur=0; else if(state.cur>mb)state.cur--;  // 選んでいたリストを消したら先頭へ。左のリストを消したら番号を詰める
+  spots=state.banks[state.cur].spots; mb=state.cur; saveSpots(); msg(""); renderSpots();
 };
+// リストを左右に動かす。一覧で選んでいるリスト（state.cur）も一緒に付いていく
+function moveBank(d){
+  const j=mb+d; if(j<0||j>=state.banks.length)return;
+  [state.banks[mb],state.banks[j]]=[state.banks[j],state.banks[mb]];
+  if(state.cur===mb)state.cur=j; else if(state.cur===j)state.cur=mb;
+  mb=j; saveSpots(); msg(""); renderSpots();
+}
+$("m-left").onclick=()=>moveBank(-1); $("m-right").onclick=()=>moveBank(1);
 $("db-near").onclick=()=>{
   if(!navigator.geolocation){msg("この端末では位置情報を使えません");return}
   const b=$("db-near"); if(b.disabled)return; b.disabled=true;

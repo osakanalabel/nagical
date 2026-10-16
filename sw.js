@@ -1,7 +1,7 @@
 // ナギカルのサービスワーカー：アプリの外枠だけをキャッシュし、電波が弱くてもアプリを開けるようにする。
 // 予報（Open-Meteo）と祝日APIはここでは扱わない（アプリ側の localStorage で30分キャッシュしているため）。
 // 公開のたびに VERSION を上げる。上げないと、利用者の端末では古い index.html が使われ続ける。
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE = `nagical-${VERSION}`;
 const SHELL = [
   "./",
