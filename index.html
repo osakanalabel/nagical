@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ナギカル</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#F7F9F8">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ナギカル">
 <style>
 :root{
   --paper:#F7F9F8; --ink:#13233A; --sub:#5B6B7C; --rule:#D5DEE3;
@@ -661,6 +667,11 @@ $("help-close").onclick=()=>$("help").close?$("help").close():$("help").removeAt
 $("help").addEventListener("click",e=>{if(e.target===$("help"))$("help").close()});
 $("reload").onclick=()=>{if(!$("reload").disabled)loadAll(true)};
 route(); loadAll(true);  // ページを開いた（再読み込みした）ときは、30分たったものを取り直す
+
+// サービスワーカー：https か localhost のときだけ登録する（ファイルを直接開いたときはエラーにしない）
+if("serviceWorker" in navigator&&(location.protocol==="https:"||["localhost","127.0.0.1"].includes(location.hostname))){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
 </script>
 </body>
 </html>

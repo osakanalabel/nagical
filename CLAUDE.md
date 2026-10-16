@@ -13,6 +13,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 index.html             アプリ本体（HTML・CSS・JS・釣り場データをすべて1ファイルに収める。ビルドなし）
+manifest.webmanifest   PWAのマニフェスト
+sw.js                  サービスワーカー（アプリの外枠のキャッシュ）
+icons/                 アイコン（元データのSVGと、書き出したPNG）
 tools/mock_check.py    Playwrightで仮データを流し込み、表示確認と通信回数の確認をする補助スクリプト
 fishing_spots_hokkaido.json  釣り場データの元（ユーザー提供。アプリからは読まない。DBはHTML内に埋め込み済み）
 shots/                 mock_check.py が出すスクリーンショット（生成物）
@@ -118,6 +121,20 @@ CLAUDE.md              このファイル
 - URLはリンクかQRコードで広めるため、nagical が自動修正で magical になる問題は気にしない。
 - 一般公開の前に確かめること：商標と同名サービスの有無、連想の点検（釣り仲間に聞かせて「薙ぎ刈る」「カルト」などを思い浮かべないか）、「nagical」で検索したときに「magical」に埋もれないか。
 
+## PWA・公開
+- 公開先：GitHub Pages（https://osakanalabel.github.io/nagical/ 、`main` の / (root) から配信）。サブパスで配信されるので、ファイルの参照はすべて相対パスにする。
+- マニフェスト：`start_url`・`scope` は `./`、`display:standalone`、`background_color`・`theme_color` は `#F7F9F8`（画面の背景色）。
+- アイコン：「波が凪になる線」。空 `#87CEEB`、海 `#0077BE`、白い線（512基準で太さ24）。文字なし。
+  - `icon.svg`／`icon-maskable.svg` が元データ。maskable は線を端まで通し、波の山は中央80%の円に収める。
+  - PNG（`icon-192`・`icon-512`・`icon-maskable-512`・`apple-touch-icon`（180、透過なし）・`favicon-32`）はSVGから書き出す。図案を変えたら全部書き出し直す。
+- キャッシュの役割分担：
+  - `sw.js`：アプリの外枠（`./`、`index.html`、マニフェスト、アイコン）をキャッシュ優先で返す。電波が弱くてもアプリを開くため。
+  - 予報・祝日APIなど、ほかのサイトへの通信は `sw.js` では扱わない（アプリ側の localStorage の30分キャッシュに任せ、二重にしない）。
+- バージョン：**公開のたびに `sw.js` の `VERSION` を上げる**（`v1` → `v2` …）。キャッシュ優先なので、上げないと利用者の端末で古い `index.html` が使われ続ける。新しい版が有効になると古い `nagical-*` キャッシュは消える。外枠のファイルを増やしたら `SHELL` にも足す。
+- 登録は https か localhost のときだけ。ファイルを直接開いたときは登録しない（エラーにしない）。
+- 公開の手順：`VERSION` を上げる → コミット → `main` にプッシュ → 1〜2分で Pages に反映。
+- ローカルでの確認：`python -m http.server 8000` で起動し、`http://localhost:8000/` を開く（サービスワーカーとマニフェストは file:// では動かない）。
+
 ## 動作確認
 - サンドボックスなどで Open-Meteo に届かない場合は `tools/mock_check.py` で仮データを流し込んで確認する。
   - `python tools/mock_check.py`（Windowsでは `python3` がストアのスタブなので `python` を使う。要 `pip install playwright` と `python -m playwright install chromium`）。`--snow` で大雪の日を混ぜる。
@@ -151,5 +168,5 @@ CLAUDE.md              このファイル
 - 厚田漁港の座標の確認。概略座標の港で潮位が取れない場合の座標補正。
 - 時刻指定で日をまたぐ時間帯（夜釣り）への対応。
 - 今日が平日のとき、今日の列もたたまれる（いつも開くかは未決）。
-- スマホでの配置方法（ファイルを端末で開く／どこかに置いてURLで開く）は未決。
+- `<meta name="mobile-web-app-capable">` を足すか（Chrome が `apple-mobile-web-app-capable` を古い書き方として警告する）。
 - 内蔵の祝日一覧は2027年まで。2028年以降は追加が必要（APIが取れれば影響なし）。
