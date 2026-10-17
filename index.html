@@ -60,7 +60,8 @@ a{color:var(--water-line)}
 .lv-ok{background:var(--ok-bg);color:var(--ok)}
 .lv-mid{background:var(--mid-bg);color:var(--mid)}
 .lv-ng{background:var(--ng-bg);color:var(--ng)}
-.grid td.spot.empty-name{font-weight:400;color:var(--faint)}
+.grid tr.addrow{cursor:pointer}
+.grid td.spot .addlink{padding:0;min-height:0;font-size:14px}
 .cell.empty{background:transparent;border:1.5px dashed var(--line)}
 .lv-na{background:var(--na-bg);color:var(--sub);font-weight:400;font-size:13px}
 .grid th.col{padding:0}
@@ -255,7 +256,7 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
   <div class="verdict" id="d-verdict"></div>
   <div class="suns" id="d-sun"></div>
 
-  <section>
+  <section id="d-windbox">
     <h2>風（1時間ごとの平均風速）</h2>
     <div id="d-wind"></div>
   </section>
@@ -267,7 +268,7 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
     <div class="tide-ev" id="d-tideev"></div>
   </section>
 
-  <section>
+  <section id="d-tablebox">
     <h2>1時間ごとの予報</h2>
     <div class="tbl"><table class="hr" id="d-table"></table></div>
   </section>
@@ -418,19 +419,28 @@ async function fetchSpot(p){
   ]);
   return {w,m:m&&m.hourly?m.hourly:null};
 }
+// 取得に失敗したときの文。原因（圏外かサーバー側か）は決めつけず、前の予報を出している場合はその古さを書く
+function failMsg(nNone,nOld,allOld,t){
+  const again="しばらくしてから［最新の予報を取得］を押してください";
+  if(!nNone&&!nOld)return "";
+  if(!nOld)return `${nNone}か所の予報を取得できませんでした。通信できる状態か確かめて、${again}`;
+  if(!nNone)return allOld?`最新の予報を取得できませんでした。前回（${t}）の予報を表示しています。${again}`:`${nOld}か所は最新の予報を取得できず、前回（${t}）の予報を表示しています。${again}`;
+  return `${nNone+nOld}か所の予報を取得できませんでした。うち${nOld}か所は前回（${t}）の予報を表示しています。${again}`;
+}
 async function loadAll(force){
   const now=Date.now();
   const need=spots.filter(p=>{const c=cache[key(p)];if(!c)return true;return force&&now-c.at>=COOLDOWN});
   if(!need.length){route();updateReload();return}
   busy++; updateReload();
-  let fail=0;
-  const jobs=need.map(p=>fetchOnce(p).catch(()=>{fail++}));
+  // 失敗した釣り場を、前の予報があるもの（old）とないもの（none）に分ける
+  const none=[], old=[];
+  const jobs=need.map(p=>fetchOnce(p).catch(()=>{(cache[key(p)]?old:none).push(p)}));
   // 取得中は、その行の中央にくるくるを出す（文字は出さない）。一瞬で消えないよう最低0.8秒は見せる
   if(!$("v-list").hidden)renderList();
   await Promise.all([Promise.all(jobs),new Promise(r=>setTimeout(r,800))]);
   busy--;
   updateReload();
-  $("list-msg").textContent=fail?`${fail}か所の予報を取得できませんでした。電波の届く場所で［最新の予報を取得］を押してください`:"";
+  $("list-msg").textContent=failMsg(none.length,old.length,old.length===need.length,old.length?hm(Math.min(...old.map(p=>cache[key(p)].at))):"");
   route();
 }
 
@@ -514,7 +524,7 @@ function renderList(){
     const cls=["col",o?"":"slim",i>=5?"far":"",isOff(d)?"wk":"",HOL.has(d)?"hol":""].join(" ");
     const txt=o?`${lab}<br>${HOL.has(d)?"祝":wd(d)}`:`${+d.slice(8,10)}<br>${wd(d)}`;
     return `<th class="${cls}"><button class="hd" data-t="${d}" aria-expanded="${o}" aria-label="${md(d)}（${wd(d)}）の列を${o?"閉じる":"開く"}">${txt}</button></th>`}).join("")}</tr>`;
-  if(!spots.length)h+=`<tr><td class="spot" colspan="${DAYS+1}">このリストには釣り場がありません。［アプリの設定］から追加してください。</td></tr>`;
+  if(!spots.length)h+=`<tr><td class="spot" colspan="${DAYS+1}">このリストには釣り場がありません。下の［＋ 追加］から足してください。</td></tr>`;
   spots.forEach((p,si)=>{
     const d=getD(p), ld=!!pending[key(p)];
     h+=`<tr${ld?` class="loading"`:""}><td class="spot">${esc(p.name)}<small>${p.type==="fresh"?"淡水":"海"}</small>${ld?SPIN:""}</td>`;
@@ -530,11 +540,12 @@ function renderList(){
     });
     h+="</tr>";
   });
-  // 上限に満たないときは、空の枠を1つだけ表示する（上限に達したら出さない）
+  // 上限に満たないときは、空の枠を1つだけ表示する（上限に達したら出さない）。行のどこを押しても、このリストの釣り場の追加を開く
   if(spots.length<MAX_SPOTS){
-    h+=`<tr aria-hidden="true"><td class="spot empty-name">未登録</td>${days.map(day=>{const o=isOpen(day);return `<td class="${o?"":"slim"}"><div class="cell empty ${o?"":"slim"}"></div></td>`}).join("")}</tr>`;
+    h+=`<tr class="addrow"><td class="spot"><button class="link addlink" aria-label="「${esc(state.banks[state.cur].name)}」に釣り場を追加">＋ 追加</button></td>${days.map(day=>{const o=isOpen(day);return `<td class="${o?"":"slim"}" aria-hidden="true"><div class="cell empty ${o?"":"slim"}"></div></td>`}).join("")}</tr>`;
   }
   $("grid").innerHTML=h;
+  const ar=$("grid").querySelector("tr.addrow"); if(ar)ar.onclick=()=>{location.hash=`#/settings/${state.cur}/add?from=list`};
   $("grid").querySelectorAll("button.cell[data-d]").forEach(b=>b.onclick=()=>{location.hash=`#/d/${b.dataset.s}/${b.dataset.d}`});
   $("grid").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{
     const d=b.dataset.t; if(isOff(d))return;
@@ -555,7 +566,9 @@ function renderDay(si,date){
   $("prev").disabled=date<=t; $("next").disabled=date>=addDays(t,DAYS-1);
   $("prev").onclick=()=>{location.hash=`#/d/${si}/${addDays(date,-1)}`};
   $("next").onclick=()=>{location.hash=`#/d/${si}/${addDays(date,1)}`};
-  if(!d){$("d-verdict").className="verdict lv-na";$("d-verdict").textContent=d===undefined?"予報を取得しています":"この釣り場の予報を取得できませんでした";["d-sun","d-wind","d-table"].forEach(x=>$(x).innerHTML="");$("d-tidebox").hidden=true;return}
+  // 予報がない（取得中・失敗）ときは判定欄の文だけにして、風・潮位・表の見出しは出さない
+  ["d-windbox","d-tablebox"].forEach(x=>$(x).hidden=!d);
+  if(!d){$("d-verdict").className="verdict lv-na";$("d-verdict").textContent=d===undefined?"予報を取得しています":"この釣り場の予報を取得できませんでした。一覧に戻り、しばらくしてから［最新の予報を取得］を押してください";["d-sun","d-wind","d-table"].forEach(x=>$(x).innerHTML="");$("d-tidebox").hidden=true;return}
 
   const W=d.w,H=W.hourly,DY=W.daily,dIdx=DY.time.indexOf(date);
   const sr=DY.sunrise[dIdx]||"",ss=DY.sunset[dIdx]||"";
@@ -806,7 +819,7 @@ function renderAdd(bi){
 }
 (function(){const regs=[...new Set(DB.map(e=>e.r))];$("db-region").innerHTML=`<option value="">すべての地域</option>`+regs.map(r=>`<option>${r}</option>`).join("")})();
 $("db-q").oninput=$("db-region").onchange=$("db-kind").onchange=()=>renderAdd(bankIdx());
-$("add-done").onclick=()=>{location.hash=`#/settings/${bankIdx()}`};
+$("add-done").onclick=()=>{location.hash=location.hash.endsWith("?from=list")?"#/":`#/settings/${bankIdx()}`};
 function getPos(btn,ok,ng){
   if(!navigator.geolocation){addMsg("この端末では位置情報を使えません");return}
   if(btn.disabled)return; btn.disabled=true;  // 取得中は押せない
@@ -829,7 +842,7 @@ function route(){
   const h=location.hash||"#/";
   if(h==="#/spots"){location.replace("#/settings");return}  // 古いURL
   const m=h.match(/^#\/d\/(\d+)\/(\d{4}-\d{2}-\d{2})$/);
-  const s=h.match(/^#\/settings(?:\/(\d+)(\/add)?)?$/);
+  const s=h.match(/^#\/settings(?:\/(\d+)(\/add(?:\?from=list)?)?)?$/);  // ?from=list は一覧から来た印（［完了］で一覧に戻る）
   if(s&&s[1]!=null&&!state.banks[+s[1]]){location.replace("#/settings");return}  // ないリスト
   const view=m?"day":!s?"list":s[2]?"add":s[1]!=null?"bank":"set";
   // 画面を移ったら「元に戻す」は閉じる
