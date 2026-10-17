@@ -18,7 +18,7 @@
   --water:#15395C; --water-line:#7DBBDC; --magenta:#E58AB0; --night:#0A1F36;
   /* 判定のタイル（明るい地に濃い文字。元の配色から明度を一段落とした） */
   --ok-bg:#C0E2CD; --ok:#1E5B3A; --mid-bg:#F8E4A2; --mid:#6B4E00; --ng-bg:#ECB2CB; --ng:#8E1550;
-  --rain:#6CB4D5; --snow:#6E7C88; --snow-text:#fff; --halo:#fff;
+  --rain:#6CB4D5; --snow:#8592A0;
   /* 暗い背景の上に置く判定色（表の文字・グラフの棒と線） */
   --ok-text:#A9DDBE; --mid-text:#F0D58A; --ng-text:#F3A9C8;
   --ok-bar:#4E9C72; --mid-bar:#C9A23A; --ng-bar:#D0588E;
@@ -76,7 +76,13 @@ h1.ttl{font-size:30px;line-height:1.1;margin:0}
 .ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #reload.busy svg{animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){#reload.busy svg{animation:none}}
+/* 取得中の行：マスを薄くし、見えている範囲（釣り場名の列より右）の中央にくるくるを重ねる */
+.grid-wrap{container-type:inline-size}
+.grid tr.loading .cell{opacity:.35}
+.grid td.spot .spin{position:absolute;top:50%;left:calc(100% + (100cqw - 100%) / 2);transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;min-width:36px;height:36px;border-radius:18px;background:var(--surface);border:1px solid var(--line);z-index:2}
+.spin svg{width:22px;height:22px;fill:none;stroke-width:2.5;stroke-linecap:round;animation:spin 1s linear infinite}
+.spin circle{stroke:var(--line)}
+.spin path{stroke:var(--ink)}
 dialog#help{border:0;border-radius:10px;padding:16px 18px 18px;max-width:min(520px,calc(100vw - 32px));max-height:85vh;color:var(--ink);background:var(--surface);font-size:15px;line-height:1.7}
 dialog#help::backdrop{background:rgba(0,0,0,.55)}
 .help-head{display:flex;justify-content:space-between;align-items:center}
@@ -91,11 +97,7 @@ dialog#help::backdrop{background:rgba(0,0,0,.55)}
 .winbar label{display:flex;flex-direction:column;font-size:13px;color:var(--sub);gap:2px}
 .winbar .range{font-size:13px;color:var(--sub)}
 .cell.rain{background-image:linear-gradient(to top left,var(--rain) 50%,transparent 50%)}
-.cell.snow{background-image:linear-gradient(to top left,var(--snow) 50%,transparent 50%);position:relative}
-.cell.snow::after{content:"雪";position:absolute;right:4px;bottom:2px;font-size:11px;font-weight:700;color:var(--snow-text);line-height:1;text-shadow:none}
-.cell.slim.snow::after{right:2px;font-size:10px}
-.cell.rain,.cell.snow{text-shadow:0 0 3px var(--halo),0 0 3px var(--halo),0 0 2px var(--halo)}
-.cell.rain .arr,.cell.snow .arr{filter:drop-shadow(0 0 1.2px var(--halo)) drop-shadow(0 0 1.2px var(--halo))}
+.cell.snow{background-image:linear-gradient(to top left,var(--snow) 50%,transparent 50%)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;margin-top:10px}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:16px;height:16px;border-radius:3px;display:inline-block}
@@ -165,7 +167,7 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
     <div class="icons">
       <button class="ic" id="help-btn" aria-label="使い方" title="使い方"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.4a2.8 2.8 0 1 1 3.9 2.6c-.8.4-1.2.9-1.2 1.8v.6"/><circle cx="12" cy="17.6" r=".6" fill="currentColor"/></svg></button>
       <button class="ic" id="reload" aria-label="最新の予報を取得" title="最新の予報を取得"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg></button>
-      <button class="ic" id="to-spots" aria-label="リストと釣り場の管理" title="リストと釣り場の管理"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--paper)"/><circle cx="15" cy="12" r="2.2" fill="var(--paper)"/><circle cx="8" cy="18" r="2.2" fill="var(--paper)"/></svg></button>
+      <button class="ic" id="to-spots" aria-label="アプリの設定" title="アプリの設定"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--paper)"/><circle cx="15" cy="12" r="2.2" fill="var(--paper)"/><circle cx="8" cy="18" r="2.2" fill="var(--paper)"/></svg></button>
     </div>
   </div>
   <div class="msg" id="list-msg"></div>
@@ -182,15 +184,15 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
 <dialog id="help" aria-labelledby="help-ttl">
   <div class="help-head"><h2 id="help-ttl">使い方</h2><button class="ic" id="help-close" aria-label="閉じる"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <h3>タイルの見方</h3>
-  <p>数字は、選んだ時間帯で最も強い平均風速（m/s）です。色は4m/s未満が「行ける」、4〜5m/sが「迷う」、5m/s以上が「見送り」です。矢印は風が吹いていく方向で、北風なら下を向きます。</p>
+  <p>数字は、選んだ時間帯で最も強い平均風速（m/s）です。色は<span class="th-ok">3</span>m/s未満が「行ける」、<span class="th-ok">3</span>〜<span class="th-ng">5</span>m/sが「微妙」、<span class="th-ng">5</span>m/s以上が「厳しい」です（境目はアプリの設定で変えられます）。矢印は風が吹いていく方向で、北風なら下を向きます。</p>
   <div class="legend" style="margin:4px 0 10px">
-    <span><i style="background:var(--ok-bg);outline:1px solid var(--ok-bar)"></i>4m/s未満 行ける</span>
-    <span><i style="background:var(--mid-bg);outline:1px solid var(--mid-bar)"></i>4〜5m/s 迷う</span>
-    <span><i style="background:var(--ng-bg);outline:1px solid var(--ng-bar)"></i>5m/s以上 見送り</span>
+    <span><i style="background:var(--ok-bg);outline:1px solid var(--ok-bar)"></i><span class="th-ok">3</span>m/s未満 行ける</span>
+    <span><i style="background:var(--mid-bg);outline:1px solid var(--mid-bar)"></i><span class="th-ok">3</span>〜<span class="th-ng">5</span>m/s 微妙</span>
+    <span><i style="background:var(--ng-bg);outline:1px solid var(--ng-bar)"></i><span class="th-ng">5</span>m/s以上 厳しい</span>
     <span><i style="background:linear-gradient(to top left,var(--rain) 50%,var(--surface) 50%);outline:1px solid var(--line)"></i>雨（降水確率50%以上）</span>
     <span><i style="background:linear-gradient(to top left,var(--snow) 50%,var(--surface) 50%);outline:1px solid var(--line)"></i>大雪</span>
   </div>
-  <p>時間帯の中に降水確率50%以上の時間があると、右下が水色になります。大雪か強いにわか雪の予報があると、右下が灰色になり「雪」と入ります。</p>
+  <p>時間帯の中に降水確率50%以上の時間があると、右下が水色になります。大雪か強いにわか雪の予報があると、右下が灰色になります。</p>
   <h3>時間帯</h3>
   <dl class="help-dl">
     <dt>朝マヅメ</dt><dd>日の出の1時間前から3時間後まで</dd>
@@ -203,7 +205,7 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
     <dt>マス</dt><dd>押すと、その日の詳細を開きます</dd>
     <dt>平日の列</dt><dd>細くたたんであります。日付かマスを押すと開きます</dd>
     <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg></dt><dd>最新の予報を取得します。前の取得から30分たつまでは押せません（薄い表示のとき）。ページを開き直したときも、30分たった予報だけを取り直します</dd>
-    <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--surface)"/><circle cx="15" cy="12" r="2.2" fill="var(--surface)"/><circle cx="8" cy="18" r="2.2" fill="var(--surface)"/></svg></dt><dd>リストと釣り場を管理します。1つのリストに8か所まで、リストは10個まで作れます。リストと釣り場の並べ替えもここでできます</dd>
+    <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--surface)"/><circle cx="15" cy="12" r="2.2" fill="var(--surface)"/><circle cx="8" cy="18" r="2.2" fill="var(--surface)"/></svg></dt><dd>アプリの設定を開きます。判定の風速の境目を変えられます。リストと釣り場の管理もここで行います（1つのリストに8か所まで、リストは10個まで。並べ替えもできます）</dd>
   </dl>
   <p class="note" style="margin-top:12px">予報はOpen-Meteoのモデルによるものです。6日目以降は精度が下がります。<br>予報：<a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>（<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>）／祝日：<a href="https://github.com/holidays-jp/api" target="_blank" rel="noopener">holidays-jp</a></p>
 </dialog>
@@ -241,10 +243,23 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
   <p class="note">データはOpen-Meteoの予報モデルです。水温・潮位は広域の推定値のため、港や湾の中では実際と差があります。釣行前に気象庁の潮汐表や現地の情報も確認してください。</p>
 </div>
 
-<!-- リストと釣り場の管理 -->
+<!-- アプリの設定 -->
 <div id="v-spots" hidden>
   <button class="link" id="back2">一覧に戻る</button>
-  <h1>リストと釣り場の管理</h1>
+  <h1>アプリの設定</h1>
+
+  <section>
+    <h2>判定の風速</h2>
+    <div class="bankbar">
+      <label>行ける（m/s未満）<select id="th-ok"></select></label>
+      <label>厳しい（m/s以上）<select id="th-ng"></select></label>
+      <button id="th-reset">リセット</button>
+    </div>
+    <p class="note" style="margin-top:6px">その間が「微妙」です。変えるとすぐ一覧と詳細の色に反映されます。</p>
+  </section>
+
+  <section>
+  <h2>リストと釣り場</h2>
   <div class="bankbar">
     <label>編集するリスト<select id="m-bank"></select></label>
     <button id="m-newbank">リストを追加</button>
@@ -258,6 +273,7 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
   <p class="count" id="m-count"></p>
   <ul class="spotlist" id="spotlist"></ul>
   <div class="msg" id="spot-msg"></div>
+  </section>
 
   <section>
     <h2>北海道の釣り場から追加</h2>
@@ -296,15 +312,15 @@ const DEF_STATE=()=>({cur:0,banks:[
 const WX={0:"快晴",1:"晴",2:"薄曇",3:"曇",45:"霧",48:"霧",51:"霧雨",53:"霧雨",55:"霧雨",56:"雨",57:"雨",61:"雨",63:"雨",65:"大雨",66:"雨",67:"雨",71:"雪",73:"雪",75:"大雪",77:"雪",80:"にわか雨",81:"にわか雨",82:"強いにわか雨",85:"にわか雪",86:"にわか雪",95:"雷雨",96:"雷雨",99:"雷雨"};
 const DIR=["北","北北東","北東","東北東","東","東南東","南東","南南東","南","南南西","南西","西南西","西","西北西","北西","北北西"];
 const WEEK="日月火水木金土";
-const DAYS=11, OK=4, NG=5;
+const DAYS=11, DEF_TH={ok:3,ng:5};  // 判定の境目の初期値（m/s）。実際の値は state.th
 const dirName=d=>d==null?"":DIR[Math.round(d/22.5)%16];
 const f1=v=>v==null?"-":(Math.round(v*10)/10).toFixed(1);
 const md=s=>`${+s.slice(5,7)}/${+s.slice(8,10)}`;
 const wdi=s=>new Date(s.slice(0,10)+"T00:00:00Z").getUTCDay();
 const wd=s=>WEEK[wdi(s)];
 const hh=s=>+s.slice(11,13);
-const lv=v=>v==null?"na":v<OK?"ok":v<NG?"mid":"ng";
-const LVTXT={ok:"行ける",mid:"迷う",ng:"見送り",na:"-"};
+const lv=v=>v==null?"na":v<state.th.ok?"ok":v<state.th.ng?"mid":"ng";
+const LVTXT={ok:"行ける",mid:"微妙",ng:"厳しい",na:"-"};
 const addDays=(s,n)=>{const d=new Date(s+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
 const jstNow=()=>new Date().toLocaleString("sv-SE",{timeZone:"Asia/Tokyo"}).replace(" ","T");
 const today=()=>jstNow().slice(0,10);
@@ -364,9 +380,11 @@ async function loadAll(force){
   const need=spots.filter(p=>{const c=cache[key(p)];if(!c)return true;return force&&now-c.at>=COOLDOWN});
   if(!need.length){route();updateReload();return}
   busy++; updateReload();
-  $("list-msg").textContent="予報を取得しています";
   let fail=0;
-  await Promise.all(need.map(p=>fetchOnce(p).catch(()=>{fail++})));
+  const jobs=need.map(p=>fetchOnce(p).catch(()=>{fail++}));
+  // 取得中は、その行の中央にくるくるを出す（文字は出さない）。一瞬で消えないよう最低0.8秒は見せる
+  if(!$("v-list").hidden)renderList();
+  await Promise.all([Promise.all(jobs),new Promise(r=>setTimeout(r,800))]);
   busy--;
   updateReload();
   $("list-msg").textContent=fail?`${fail}か所の予報を取得できませんでした。電波の届く場所で［最新の予報を取得］を押してください`:"";
@@ -382,6 +400,14 @@ const opened=new Set();
 // 判定する時間帯（アプリ全体で1つ）
 const WIN_NAME={morning:"朝マヅメ",day:"日中",evening:"夕マヅメ〜夜",custom:"指定の時間帯"};
 if(!state.win)state.win={k:"morning",s:5,e:9};
+// 判定の境目（アプリ全体で1つ）。保存がないか値がおかしいときは初期値
+const TH_STEPS=Array.from({length:19},(_,i)=>1+i*.5);  // 1〜10m/s、0.5刻み
+if(!(state.th&&TH_STEPS.includes(state.th.ok)&&TH_STEPS.includes(state.th.ng)&&state.th.ok<state.th.ng))state.th={...DEF_TH};
+function renderTh(){
+  document.querySelectorAll(".th-ok").forEach(e=>e.textContent=state.th.ok);
+  document.querySelectorAll(".th-ng").forEach(e=>e.textContent=state.th.ng);
+}
+renderTh();
 const toMin=t=>{const [a,b]=t.slice(11,16).split(":").map(Number);return a*60+b};
 const fmtMin=m=>`${Math.floor(m/60)}:${String(m%60).padStart(2,"0")}`;
 // その日の時間帯を「0時からの分」で返す
@@ -430,6 +456,8 @@ $("win").onchange=()=>{state.win.k=$("win").value;saveSpots();renderList()};
 $("win-s").onchange=$("win-e").onchange=()=>{state.win.s=+$("win-s").value;state.win.e=+$("win-e").value;saveSpots();renderList()};
 
 /* ---------- 一覧 ---------- */
+// 取得中の行に重ねるくるくる。読み込み中の表示なので、動きを減らす設定の端末でも回す
+const SPIN=`<span class="spin" role="status" aria-label="予報を取得しています"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></svg></span>`;
 function renderList(){
   const t=today(), days=[...Array(DAYS)].map((_,i)=>addDays(t,i));
   const ats=bankAts();
@@ -443,14 +471,14 @@ function renderList(){
     const cls=["col",o?"":"slim",i>=5?"far":"",isOff(d)?"wk":"",HOL.has(d)?"hol":""].join(" ");
     const txt=o?`${lab}<br>${HOL.has(d)?"祝":wd(d)}`:`${+d.slice(8,10)}<br>${wd(d)}`;
     return `<th class="${cls}"><button class="hd" data-t="${d}" aria-expanded="${o}" aria-label="${md(d)}（${wd(d)}）の列を${o?"閉じる":"開く"}">${txt}</button></th>`}).join("")}</tr>`;
-  if(!spots.length)h+=`<tr><td class="spot" colspan="${DAYS+1}">このリストには釣り場がありません。［リストと釣り場の管理］から追加してください。</td></tr>`;
+  if(!spots.length)h+=`<tr><td class="spot" colspan="${DAYS+1}">このリストには釣り場がありません。［アプリの設定］から追加してください。</td></tr>`;
   spots.forEach((p,si)=>{
-    const d=getD(p);
-    h+=`<tr><td class="spot">${esc(p.name)}<small>${p.type==="fresh"?"淡水":"海"}</small></td>`;
+    const d=getD(p), ld=!!pending[key(p)];
+    h+=`<tr${ld?` class="loading"`:""}><td class="spot">${esc(p.name)}<small>${p.type==="fresh"?"淡水":"海"}</small>${ld?SPIN:""}</td>`;
     days.forEach(day=>{
       const pk=d===undefined?undefined:dayPeak(d,day);
       const o=isOpen(day);
-      if(pk===undefined){h+=`<td class="${o?"":"slim"}"><div class="cell lv-na ${o?"":"slim"}">${o?"…":""}</div></td>`;return}
+      if(pk===undefined){h+=`<td class="${o?"":"slim"}"><div class="cell lv-na ${o?"":"slim"}">${o&&!ld?"…":""}</div></td>`;return}
       if(!pk){h+=`<td class="${o?"":"slim"}"><div class="cell lv-na ${o?"":"slim"}">${o?"-":""}</div></td>`;return}
       const L=lv(pk.v);
       const wc=wxCls(pk), wt=wxTxt(pk);
@@ -554,7 +582,7 @@ function windChart(H,idx,sr,ss,nh,wr){
   if(sr&&ss)g+=`<rect x="${toX(sr)}" y="${top}" width="${toX(ss)-toX(sr)}" height="${Hh-top-bot}" fill="var(--day)"/>`;
   if(wr){const x1=left+cw*wr[0]/60,x2=left+cw*Math.min(wr[1]+1,24*60)/60;g+=`<rect x="${x1}" y="${top}" width="${x2-x1}" height="${Hh-top-bot}" fill="var(--water)" opacity=".45"/><rect x="${x1}" y="${top-6}" width="${x2-x1}" height="4" fill="var(--water-line)"/>`}
   // 目盛り
-  [OK,NG].forEach(v=>{g+=`<line x1="${left}" x2="${W-right}" y1="${y(v)}" y2="${y(v)}" stroke="${v===NG?"var(--ng-bar)":"var(--mid-bar)"}" stroke-width="1.5" stroke-dasharray="${v===NG?"0":"5 4"}"/><text x="${left-4}" y="${y(v)+4}" font-size="12" text-anchor="end" fill="${v===NG?"var(--ng-text)":"var(--mid-text)"}">${v}</text>`});
+  [[state.th.ok,false],[state.th.ng,true]].forEach(([v,ng])=>{g+=`<line x1="${left}" x2="${W-right}" y1="${y(v)}" y2="${y(v)}" stroke="${ng?"var(--ng-bar)":"var(--mid-bar)"}" stroke-width="1.5" stroke-dasharray="${ng?"0":"5 4"}"/><text x="${left-4}" y="${y(v)+4}" font-size="12" text-anchor="end" fill="${ng?"var(--ng-text)":"var(--mid-text)"}">${v}</text>`});
   g+=`<text x="${left-4}" y="${y(0)+4}" font-size="12" text-anchor="end" fill="var(--sub)">0</text>`;
   vals.forEach((v,k)=>{
     if(v==null)return;
@@ -590,7 +618,20 @@ function tideChart(T,L,s,e,nowI){
   return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="潮位の推移"><polygon points="${area}" fill="var(--water-line)" opacity=".25"/><polyline points="${line}" fill="none" stroke="var(--water-line)" stroke-width="2.5" stroke-linejoin="round"/><line x1="${left}" x2="${W-right}" y1="${Hh-bot}" y2="${Hh-bot}" stroke="var(--water-line)"/>${g}</svg>`;
 }
 
-/* ---------- リストと釣り場の管理 ---------- */
+/* ---------- アプリの設定 ---------- */
+// 判定の風速：「行ける」は「厳しい」より小さい値しか選べない
+function renderThForm(){
+  const {ok,ng}=state.th;
+  $("th-ok").innerHTML=TH_STEPS.map(v=>`<option value="${v}" ${v>=ng?"disabled":""}>${v}</option>`).join("");
+  $("th-ng").innerHTML=TH_STEPS.map(v=>`<option value="${v}" ${v<=ok?"disabled":""}>${v}</option>`).join("");
+  $("th-ok").value=ok; $("th-ng").value=ng;
+  $("th-reset").disabled=ok===DEF_TH.ok&&ng===DEF_TH.ng;
+}
+function setTh(th){state.th=th;saveSpots();renderTh();renderThForm()}
+$("th-ok").onchange=()=>setTh({ok:+$("th-ok").value,ng:state.th.ng});
+$("th-ng").onchange=()=>setTh({ok:state.th.ok,ng:+$("th-ng").value});
+$("th-reset").onclick=()=>setTh({...DEF_TH});
+
 let mb=state.cur, nearPos=null;
 const dist=(a,b)=>{const r=Math.PI/180,x=(b.lon-a.lon)*r*Math.cos((a.lat+b.lat)/2*r),y=(b.lat-a.lat)*r;return Math.sqrt(x*x+y*y)*6371};
 const msg=t=>{$("spot-msg").textContent=t};
@@ -601,6 +642,7 @@ function addSpot(sp){
   B.spots.push(sp); saveSpots(); msg(`${sp.name}を「${B.name}」に追加しました`); return true;
 }
 function renderSpots(){
+  renderThForm();
   if(!(mb>=0&&mb<state.banks.length))mb=state.cur;
   const B=state.banks[mb];
   $("m-bank").innerHTML=state.banks.map((b,i)=>`<option value="${i}">${esc(b.name)}（${b.spots.length}/${MAX_SPOTS}）</option>`).join("");
