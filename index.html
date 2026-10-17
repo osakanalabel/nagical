@@ -99,7 +99,7 @@ dialog#help::backdrop{background:rgba(0,0,0,.55)}
 .cell.rain{background-image:linear-gradient(to top left,var(--rain) 50%,transparent 50%)}
 .cell.snow{background-image:linear-gradient(to top left,var(--snow) 50%,transparent 50%)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;margin-top:10px}
-.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend>span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:16px;height:16px;border-radius:3px;display:inline-block}
 
 /* 詳細 */
@@ -131,11 +131,39 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
 .hr .dn{color:var(--sub)}
 .windcell{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}
 
-/* 釣り場の管理 */
-.spotlist{list-style:none;margin:12px 0 0;padding:0;border-top:1px solid var(--rule)}
-.spotlist li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)}
-.spotlist small{display:block;color:var(--sub);font-size:12px}
-.spotlist .ops{display:flex;gap:6px;flex:none}
+/* アプリの設定・リストの画面：行の一覧。右端に［×］とつまみ（≡）を出す */
+.sec-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sec-head h2{margin:0}
+.sec-head button{min-height:36px;padding:4px 12px;font-size:14px}
+.rows{list-style:none;margin:8px 0 0;padding:0;border-top:1px solid var(--rule)}
+.rows li{display:flex;align-items:center;gap:4px;min-height:56px;border-bottom:1px solid var(--rule);background:var(--paper)}
+.rows .rowtxt{flex:1;min-width:0;padding:10px 0;display:flex;align-items:baseline;gap:10px}
+.rows .rowtxt b{overflow-wrap:anywhere}
+.rows .rowtxt small{color:var(--sub);font-size:13px;flex:none}
+.rows .rowbtn{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:none;border:0;border-radius:0;padding:10px 0;min-height:56px;text-align:left}
+.rows .rowbtn .rowtxt{padding:0}
+.rows .x,.rows .grip{flex:none;width:44px;height:44px;min-height:0;padding:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:0}
+.rows .rowbtn .edit{flex:none;width:44px;display:inline-flex;justify-content:center}
+.rows .edit svg,.rows .x svg,.rows .grip svg{width:20px;height:20px;fill:none;stroke:var(--sub);stroke-width:2;stroke-linecap:round}
+.rows .grip{touch-action:none;cursor:grab}
+.rows li.drag{position:relative;z-index:3;background:var(--surface);box-shadow:0 6px 16px rgba(0,0,0,.45)}
+.rows li.empty{color:var(--sub);font-size:14px;padding:10px 0}
+.addbtn{width:100%;margin-top:12px}
+.namefield{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--sub);margin-top:8px}
+.namefield input{font-size:22px;font-weight:700;padding:6px 10px}
+.saved{margin-left:10px;color:var(--ok-text);opacity:0;transition:opacity .3s}
+.saved.on{opacity:1}
+/* 削除したときの「元に戻す」 */
+.toast{position:fixed;left:16px;right:16px;bottom:16px;max-width:608px;margin:0 auto;display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 6px 6px 14px;z-index:10;font-size:14px;box-shadow:0 6px 16px rgba(0,0,0,.45)}
+.toast span{flex:1}
+.toast button{flex:none;background:var(--accent);border-color:var(--accent);font-weight:700}
+/* 釣り場の追加：上部は完了ボタンと件数を固定して出す */
+.addbar{position:sticky;top:0;z-index:5;background:var(--paper);display:flex;justify-content:space-between;align-items:center;gap:8px;margin:-14px -16px 10px;padding:12px 16px 8px;border-bottom:1px solid var(--rule)}
+.addbar h1{font-size:20px;margin:0}
+.addbar button{flex:none;min-width:5em}
+input[type=search]{width:100%}
+details.manual{margin-top:20px;border-top:1px solid var(--rule)}
+details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12px 0;color:var(--water-line)}
 /* 一覧の上部。リストのタブは、選択中のものを下線と同じ色で塗る */
 .head .ic{background:transparent;border-color:var(--line)}
 .banks{display:flex;gap:6px;overflow-x:auto;margin:14px -16px 0;padding:0 16px;border-bottom:2px solid var(--accent)}
@@ -144,13 +172,16 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
 .bankbar{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:12px}
 .bankbar label{display:flex;flex-direction:column;font-size:13px;color:var(--sub);gap:2px;flex:1;min-width:10em}
 .bankbar input,.bankbar select{width:100%}
-.count{font-size:13px;color:var(--sub);margin:12px 0 0}
 .dbtools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .dbtools select{flex:1;min-width:8em}
-.dblist{list-style:none;margin:10px 0 0;padding:0;border-top:1px solid var(--rule);max-height:60vh;overflow-y:auto}
-.dblist li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule)}
+.dblist{list-style:none;margin:10px 0 0;padding:0;border-top:1px solid var(--rule)}
+.dblist li{border-bottom:1px solid var(--rule)}
+.dblist li.empty{color:var(--sub);font-size:14px;padding:10px 0}
 .dblist small{display:block;color:var(--sub);font-size:12px}
-.dblist button{flex:none;min-width:4.5em}
+.dbrow{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;background:none;border:0;border-radius:0;padding:10px 0;min-height:56px;text-align:left}
+.dbrow .st{flex:none;color:var(--water-line);font-size:14px;font-weight:700}
+.dbrow.done:disabled{opacity:1}
+.dbrow.done .st{color:var(--sub);font-weight:400}
 .form{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .form label{display:flex;flex-direction:column;font-size:13px;color:var(--sub);gap:2px}
 .form .full{grid-column:1/-1}
@@ -186,9 +217,9 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
   <h3>タイルの見方</h3>
   <p>数字は、選んだ時間帯で最も強い平均風速（m/s）です。色は<span class="th-ok">3</span>m/s未満が「行ける」、<span class="th-ok">3</span>〜<span class="th-ng">5</span>m/sが「微妙」、<span class="th-ng">5</span>m/s以上が「厳しい」です（境目はアプリの設定で変えられます）。矢印は風が吹いていく方向で、北風なら下を向きます。</p>
   <div class="legend" style="margin:4px 0 10px">
-    <span><i style="background:var(--ok-bg);outline:1px solid var(--ok-bar)"></i><span class="th-ok">3</span>m/s未満 行ける</span>
-    <span><i style="background:var(--mid-bg);outline:1px solid var(--mid-bar)"></i><span class="th-ok">3</span>〜<span class="th-ng">5</span>m/s 微妙</span>
-    <span><i style="background:var(--ng-bg);outline:1px solid var(--ng-bar)"></i><span class="th-ng">5</span>m/s以上 厳しい</span>
+    <span><i style="background:var(--ok-bg);outline:1px solid var(--ok-bar)"></i><span><span class="th-ok">3</span>m/s未満 行ける</span></span>
+    <span><i style="background:var(--mid-bg);outline:1px solid var(--mid-bar)"></i><span><span class="th-ok">3</span>〜<span class="th-ng">5</span>m/s 微妙</span></span>
+    <span><i style="background:var(--ng-bg);outline:1px solid var(--ng-bar)"></i><span><span class="th-ng">5</span>m/s以上 厳しい</span></span>
     <span><i style="background:linear-gradient(to top left,var(--rain) 50%,var(--surface) 50%);outline:1px solid var(--line)"></i>雨（降水確率50%以上）</span>
     <span><i style="background:linear-gradient(to top left,var(--snow) 50%,var(--surface) 50%);outline:1px solid var(--line)"></i>大雪</span>
   </div>
@@ -244,8 +275,8 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
 </div>
 
 <!-- アプリの設定 -->
-<div id="v-spots" hidden>
-  <button class="link" id="back2">一覧に戻る</button>
+<div id="v-set" hidden>
+  <button class="link" id="set-back">一覧に戻る</button>
   <h1>アプリの設定</h1>
 
   <section>
@@ -255,39 +286,48 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
       <label>厳しい（m/s以上）<select id="th-ng"></select></label>
       <button id="th-reset">リセット</button>
     </div>
-    <p class="note" style="margin-top:6px">その間が「微妙」です。変えるとすぐ一覧と詳細の色に反映されます。</p>
-  </section>
-
-  <section>
-  <h2>リストと釣り場</h2>
-  <div class="bankbar">
-    <label>編集するリスト<select id="m-bank"></select></label>
-    <button id="m-newbank">リストを追加</button>
-  </div>
-  <div class="bankbar" style="align-items:center"><span class="count" style="margin:0;flex:1">一覧のタブの位置</span><button id="m-left">左へ</button><button id="m-right">右へ</button></div>
-  <div class="bankbar">
-    <label>リストの名前<input id="m-bankname" maxlength="12"></label>
-    <button id="m-rename">名前を変更</button>
-    <button id="m-delbank">このリストを削除</button>
-  </div>
-  <p class="count" id="m-count"></p>
-  <ul class="spotlist" id="spotlist"></ul>
-  <div class="msg" id="spot-msg"></div>
-  </section>
-
-  <section>
-    <h2>北海道の釣り場から追加</h2>
-    <div class="dbtools">
-      <select id="db-region" aria-label="地域"></select>
-      <select id="db-kind" aria-label="種別"><option value="">すべての種別</option><option value="fresh">淡水（ワカサギ湖）</option><option value="sea">海（漁港・港湾・海釣り施設）</option></select>
-      <button id="db-near">現在地から近い順</button>
+    <div class="legend">
+      <span><i style="background:var(--ok-bg);outline:1px solid var(--ok-bar)"></i><span><span class="th-ok">3</span>m/s未満 行ける</span></span>
+      <span><i style="background:var(--mid-bg);outline:1px solid var(--mid-bar)"></i><span><span class="th-ok">3</span>〜<span class="th-ng">5</span>m/s 微妙</span></span>
+      <span><i style="background:var(--ng-bg);outline:1px solid var(--ng-bar)"></i><span><span class="th-ng">5</span>m/s以上 厳しい</span></span>
     </div>
-    <ul class="dblist" id="dblist"></ul>
-    <p class="note">座標は公的地図で照合していない概略値です。漁港・岸壁には立入禁止や釣り禁止の区域があります。釣行前に現地の掲示や管理者の案内を確認してください。</p>
   </section>
 
   <section>
-    <h2>緯度・経度を入力して追加</h2>
+    <div class="sec-head"><h2>リスト</h2></div>
+    <ul class="rows" id="set-banks"></ul>
+    <button id="set-newbank" class="addbtn">リストを追加</button>
+  </section>
+</div>
+
+<!-- リストの画面 -->
+<div id="v-bank" hidden>
+  <button class="link" id="bank-back">アプリの設定に戻る</button>
+  <label class="namefield"><span>リストの名前<span class="saved" id="bank-saved">保存しました</span></span><input id="bank-name" maxlength="12" enterkeyhint="done"></label>
+  <section>
+    <div class="sec-head"><h2 id="bank-count"></h2></div>
+    <ul class="rows" id="bank-spots"></ul>
+    <button id="bank-add" class="primary addbtn">釣り場を追加</button>
+  </section>
+</div>
+
+<!-- 釣り場の追加 -->
+<div id="v-add" hidden>
+  <div class="addbar">
+    <div><h1>釣り場を追加</h1><p class="sub" id="add-count"></p></div>
+    <button class="primary" id="add-done">完了</button>
+  </div>
+  <input type="search" id="db-q" placeholder="名前で探す（例：小樽）" aria-label="名前で探す">
+  <div class="dbtools">
+    <select id="db-region" aria-label="地域"></select>
+    <select id="db-kind" aria-label="種別"><option value="">すべての種別</option><option value="fresh">淡水</option><option value="sea">海</option></select>
+    <button id="db-near">近い順</button>
+  </div>
+  <div class="msg" id="add-msg"></div>
+  <ul class="dblist" id="dblist"></ul>
+  <p class="note">座標は公的地図で照合していない概略値です。漁港・岸壁には立入禁止や釣り禁止の区域があります。釣行前に現地の掲示や管理者の案内を確認してください。</p>
+  <details class="manual">
+    <summary>緯度・経度で追加</summary>
     <div class="form">
       <label class="full">名前<input id="f-name" placeholder="例：ポロト湖"></label>
       <label>緯度<input id="f-lat" inputmode="decimal" placeholder="43.1998"></label>
@@ -297,8 +337,11 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
       <button class="primary full" id="f-add">追加</button>
     </div>
     <p class="note">緯度・経度は、Googleマップで地点を長押しすると表示されます。</p>
-  </section>
+  </details>
 </div>
+
+<!-- 削除したときの「元に戻す」 -->
+<div class="toast" id="toast" role="status" hidden><span id="toast-t"></span><button id="toast-undo">元に戻す</button></div>
 
 <script>
 const $=id=>document.getElementById(id);
@@ -632,107 +675,177 @@ $("th-ok").onchange=()=>setTh({ok:+$("th-ok").value,ng:state.th.ng});
 $("th-ng").onchange=()=>setTh({ok:state.th.ok,ng:+$("th-ng").value});
 $("th-reset").onclick=()=>setTh({...DEF_TH});
 
-let mb=state.cur, nearPos=null;
 const dist=(a,b)=>{const r=Math.PI/180,x=(b.lon-a.lon)*r*Math.cos((a.lat+b.lat)/2*r),y=(b.lat-a.lat)*r;return Math.sqrt(x*x+y*y)*6371};
-const msg=t=>{$("spot-msg").textContent=t};
-function addSpot(sp){
-  const B=state.banks[mb];
-  if(B.spots.length>=MAX_SPOTS){msg(`1つのリストに登録できるのは${MAX_SPOTS}か所までです。ほかの釣り場を削除してから追加してください`);return false}
-  if(B.spots.some(x=>x.name===sp.name&&x.lat===sp.lat&&x.lon===sp.lon)){msg(`${sp.name}はこのリストに登録済みです`);return false}
-  B.spots.push(sp); saveSpots(); msg(`${sp.name}を「${B.name}」に追加しました`); return true;
+const sameSpot=(a,b)=>a.name===b.name&&a.lat===b.lat&&a.lon===b.lon;
+const ICON_X=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>`;
+const ICON_EDIT=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>`;
+const ICON_GRIP=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14M5 12h14M5 16h14"/></svg>`;
+let nearPos=null, focusName=false;
+
+// 配列の要素を from から to へ動かす
+const moveItem=(a,from,to)=>{a.splice(to,0,a.splice(from,1)[0])};
+// 行のつまみ（≡）を指で引っぱって並べ替える。つまみに触れたときだけ動くので、行のほかの所はふつうにスクロールできる。
+// キーボードでは、つまみを選んで上下の矢印キーで動かす
+function sortable(ul,onMove){
+  ul.querySelectorAll(".grip").forEach(g=>{
+    g.onpointerdown=e=>{
+      e.preventDefault();
+      const li=g.closest("li"), from=[...ul.children].indexOf(li);
+      g.setPointerCapture(e.pointerId); li.classList.add("drag");
+      let y0=e.clientY;
+      g.onpointermove=ev=>{
+        let n;
+        // 隣の行の半分を越えたら入れ替える
+        while((n=li.nextElementSibling)&&ev.clientY-y0>n.offsetHeight/2){ul.insertBefore(n,li);y0+=n.offsetHeight}
+        while((n=li.previousElementSibling)&&ev.clientY-y0<-n.offsetHeight/2){ul.insertBefore(li,n);y0-=n.offsetHeight}
+        li.style.transform=`translateY(${ev.clientY-y0}px)`;
+      };
+      g.onpointerup=g.onpointercancel=()=>{
+        g.onpointermove=g.onpointerup=g.onpointercancel=null;
+        li.classList.remove("drag"); li.style.transform="";
+        const to=[...ul.children].indexOf(li); if(to!==from)onMove(from,to);
+      };
+    };
+    g.onkeydown=e=>{
+      if(e.key!=="ArrowUp"&&e.key!=="ArrowDown")return;
+      e.preventDefault();
+      const n=ul.querySelectorAll(".grip").length, from=+g.dataset.i, to=from+(e.key==="ArrowUp"?-1:1);
+      if(to<0||to>=n)return;
+      onMove(from,to); ul.querySelectorAll(".grip")[to].focus();
+    };
+  });
 }
-function renderSpots(){
+const editBtns=(i,name,canDel=true)=>`<button class="x" data-del="${i}" aria-label="${esc(name)}を削除" ${canDel?"":"disabled"}>${ICON_X}</button><button class="grip" data-i="${i}" aria-label="${esc(name)}を並べ替え（上下の矢印キーで移動）">${ICON_GRIP}</button>`;
+
+// 削除したときの「元に戻す」（約5秒）
+let toastT=0;
+function hideToast(){clearTimeout(toastT);$("toast").hidden=true}
+function toast(text,undo){
+  $("toast-t").textContent=text; $("toast").hidden=false;
+  $("toast-undo").onclick=()=>{hideToast();undo()};
+  clearTimeout(toastT); toastT=setTimeout(hideToast,5000);
+}
+
+/* アプリの設定：リストの一覧 */
+function renderSet(){
   renderThForm();
-  if(!(mb>=0&&mb<state.banks.length))mb=state.cur;
-  const B=state.banks[mb];
-  $("m-bank").innerHTML=state.banks.map((b,i)=>`<option value="${i}">${esc(b.name)}（${b.spots.length}/${MAX_SPOTS}）</option>`).join("");
-  $("m-bank").value=mb;
-  $("m-bankname").value=B.name;
-  $("m-newbank").disabled=state.banks.length>=MAX_BANKS;
-  $("m-delbank").disabled=state.banks.length<=1;
-  $("m-left").disabled=mb<=0; $("m-right").disabled=mb>=state.banks.length-1;
-  $("m-count").textContent=`「${B.name}」の釣り場　${B.spots.length}/${MAX_SPOTS}か所`;
-  $("spotlist").innerHTML=B.spots.length?B.spots.map((p,i)=>`<li><div><b>${esc(p.name)}</b><small>${p.type==="fresh"?"淡水":"海"}　${p.lat}, ${p.lon}</small></div><span class="ops">`
-    +`<button data-mv="-1" data-i="${i}" ${i===0?"disabled":""}>上へ</button>`
-    +`<button data-mv="1" data-i="${i}" ${i===B.spots.length-1?"disabled":""}>下へ</button>`
-    +`<button data-del data-i="${i}">削除</button></span></li>`).join(""):`<li>釣り場がありません。下の一覧か、緯度・経度の入力で追加してください。</li>`;
-  $("spotlist").querySelectorAll("button[data-mv]").forEach(b=>b.onclick=()=>{
-    const i=+b.dataset.i, j=i+(+b.dataset.mv); [B.spots[i],B.spots[j]]=[B.spots[j],B.spots[i]];
-    saveSpots(); msg(""); renderSpots();
-  });
-  $("spotlist").querySelectorAll("button[data-del]").forEach(b=>b.onclick=()=>{
-    const i=+b.dataset.i; if(!confirm(`${B.spots[i].name}を「${B.name}」から削除しますか？`))return;
-    B.spots.splice(i,1); saveSpots(); msg(""); renderSpots();
-  });
-  renderDB();
+  const one=state.banks.length<=1;
+  $("set-newbank").disabled=state.banks.length>=MAX_BANKS;
+  // 名前か鉛筆を押すとリストの画面を開く。右端の［×］とつまみは常に出す
+  $("set-banks").innerHTML=state.banks.map((b,i)=>`<li><button class="rowbtn" data-open="${i}" aria-label="${esc(b.name)}（${b.spots.length}/${MAX_SPOTS}か所）を編集"><span class="rowtxt"><b>${esc(b.name)}</b><small>${b.spots.length}/${MAX_SPOTS}か所</small></span><span class="edit">${ICON_EDIT}</span></button>${editBtns(i,b.name,!one)}</li>`).join("");
+  $("set-banks").querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{location.hash=`#/settings/${b.dataset.open}`});
+  $("set-banks").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>delBank(+b.dataset.del));
+  // リストを動かしても、一覧で選んでいるリスト（state.cur）は同じものを指したままにする
+  sortable($("set-banks"),(from,to)=>{const cur=state.banks[state.cur];moveItem(state.banks,from,to);setBank(state.banks.indexOf(cur));renderSet()});
 }
-function renderDB(){
-  const B=state.banks[mb], full=B.spots.length>=MAX_SPOTS;
-  const reg=$("db-region").value, kind=$("db-kind").value;
-  let list=DB.filter(e=>(!reg||e.r===reg)&&(!kind||e.type===kind));
+function delBank(i){
+  if(state.banks.length<=1)return;
+  const B=state.banks[i], n=B.spots.length;
+  if(!confirm(n?`「${B.name}」と中の釣り場${n}か所を削除しますか？`:`「${B.name}」を削除しますか？`))return;
+  const cur=state.banks[state.cur];
+  state.banks.splice(i,1);
+  setBank(cur===B?0:state.banks.indexOf(cur));  // 選んでいたリストを消したら先頭へ
+  renderSet();
+}
+$("set-newbank").onclick=()=>{
+  if(state.banks.length>=MAX_BANKS)return;
+  state.banks.push({name:`リスト${state.banks.length+1}`,spots:[]}); saveSpots();
+  focusName=true; location.hash=`#/settings/${state.banks.length-1}`;
+};
+
+/* リストの画面 */
+function renderBank(bi){
+  const B=state.banks[bi];
+  if(document.activeElement!==$("bank-name"))$("bank-name").value=B.name;
+  $("bank-count").textContent=`釣り場　${B.spots.length}/${MAX_SPOTS}か所`;
+  $("bank-add").disabled=B.spots.length>=MAX_SPOTS;
+  $("bank-add").textContent=B.spots.length>=MAX_SPOTS?`釣り場を追加（${MAX_SPOTS}か所まで）`:"釣り場を追加";
+  $("bank-spots").innerHTML=B.spots.length?B.spots.map((p,i)=>{
+    const txt=`<span class="rowtxt"><b>${esc(p.name)}</b><small>${p.type==="fresh"?"淡水":"海"}</small></span>`;
+    return `<li>${txt}${editBtns(i,p.name)}</li>`;  // 編集のための画面なので、［×］とつまみは常に出す
+  }).join(""):`<li class="empty">釣り場がありません。［釣り場を追加］から足してください。</li>`;
+  $("bank-spots").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.del, sp=B.spots[i];
+    B.spots.splice(i,1); saveSpots(); renderBank(bi);
+    toast(`${sp.name}を削除しました`,()=>{if(B.spots.length<MAX_SPOTS){B.spots.splice(Math.min(i,B.spots.length),0,sp);saveSpots()}route()});
+  });
+  sortable($("bank-spots"),(from,to)=>{moveItem(B.spots,from,to);saveSpots();renderBank(bi)});
+  if(focusName){focusName=false;$("bank-name").focus();$("bank-name").select()}
+}
+const bankIdx=()=>{const m=location.hash.match(/^#\/settings\/(\d+)/);return m?+m[1]:-1};
+// 名前は入力欄から離れるか改行キーで保存する。空なら元に戻す
+$("bank-name").onchange=()=>{
+  const B=state.banks[bankIdx()]; if(!B)return;
+  const n=$("bank-name").value.trim();
+  if(!n){$("bank-name").value=B.name;return}
+  B.name=n; saveSpots();
+  const s=$("bank-saved"); s.classList.add("on"); clearTimeout(s.t); s.t=setTimeout(()=>s.classList.remove("on"),1500);
+};
+$("bank-name").onkeydown=e=>{if(e.key==="Enter")$("bank-name").blur()};
+$("bank-add").onclick=()=>{location.hash=`#/settings/${bankIdx()}/add`};
+$("bank-back").onclick=()=>{location.hash="#/settings"};
+
+/* 釣り場の追加 */
+const addMsg=t=>{$("add-msg").textContent=t};
+function addSpot(B,sp){
+  if(B.spots.length>=MAX_SPOTS){addMsg(`1つのリストに登録できるのは${MAX_SPOTS}か所までです`);return false}
+  if(B.spots.some(x=>sameSpot(x,sp))){addMsg(`${sp.name}はこのリストに登録済みです`);return false}
+  B.spots.push(sp); saveSpots(); return true;
+}
+function renderAdd(bi){
+  const B=state.banks[bi], full=B.spots.length>=MAX_SPOTS;
+  $("add-count").textContent=`「${B.name}」${B.spots.length}/${MAX_SPOTS}か所`+(full?"（いっぱいです）":"");
+  const q=$("db-q").value.trim(), reg=$("db-region").value, kind=$("db-kind").value;
+  // 名前・市町村・地域のどれかに含まれていれば出す
+  let list=DB.filter(e=>(!q||(e.n+e.m+e.r).includes(q))&&(!reg||e.r===reg)&&(!kind||e.type===kind));
   if(nearPos)list=list.map(e=>({...e,d:dist(nearPos,e)})).sort((a,b)=>a.d-b.d);
   $("dblist").innerHTML=list.length?list.map(e=>{
-    const inBank=B.spots.some(x=>x.name===e.n&&x.lat===e.lat&&x.lon===e.lon);
-    return `<li><div><b>${esc(e.n)}</b><small>${e.r}　${esc(e.m)}　${e.k}${e.d!=null?`　約${Math.round(e.d)}km`:""}</small>${e.note?`<small>${esc(e.note)}</small>`:""}</div><button data-n="${esc(e.n)}" ${inBank||full?"disabled":""}>${inBank?"登録済み":"追加"}</button></li>`}).join(""):`<li>条件に合う釣り場がありません。</li>`;
-  $("dblist").querySelectorAll("button[data-n]").forEach(b=>b.onclick=()=>{if(addSpot(fromDB(b.dataset.n)))renderSpots()});
+    const done=B.spots.some(x=>sameSpot(x,{name:e.n,lat:e.lat,lon:e.lon}));
+    return `<li><button class="dbrow${done?" done":""}" data-n="${esc(e.n)}" ${done||full?"disabled":""}><span><b>${esc(e.n)}</b><small>${e.r}　${esc(e.m)}　${e.type==="fresh"?"淡水":"海"}${e.d!=null?`　約${Math.round(e.d)}km`:""}</small>${e.note?`<small>${esc(e.note)}</small>`:""}</span><span class="st">${done?"追加済み":"追加"}</span></button></li>`}).join(""):`<li class="empty">条件に合う釣り場がありません。</li>`;
+  $("dblist").querySelectorAll("button[data-n]").forEach(b=>b.onclick=()=>{addMsg("");if(addSpot(B,fromDB(b.dataset.n)))renderAdd(bi)});
 }
 (function(){const regs=[...new Set(DB.map(e=>e.r))];$("db-region").innerHTML=`<option value="">すべての地域</option>`+regs.map(r=>`<option>${r}</option>`).join("")})();
-$("db-region").onchange=$("db-kind").onchange=renderDB;
-$("m-bank").onchange=()=>{mb=+$("m-bank").value;msg("");renderSpots()};
-$("m-newbank").onclick=()=>{
-  if(state.banks.length>=MAX_BANKS)return;
-  state.banks.push({name:`リスト${state.banks.length+1}`,spots:[]}); mb=state.banks.length-1; saveSpots();
-  msg("リストを追加しました。名前を入力して［名前を変更］を押してください"); renderSpots(); $("m-bankname").focus();
-};
-$("m-rename").onclick=()=>{const n=$("m-bankname").value.trim();if(!n){msg("リストの名前を入力してください");return}state.banks[mb].name=n;saveSpots();msg("名前を変更しました");renderSpots()};
-$("m-delbank").onclick=()=>{
-  if(state.banks.length<=1)return;
-  if(!confirm(`リスト「${state.banks[mb].name}」を削除しますか？登録した釣り場もこのリストから消えます`))return;
-  state.banks.splice(mb,1); if(state.cur===mb)state.cur=0; else if(state.cur>mb)state.cur--;  // 選んでいたリストを消したら先頭へ。左のリストを消したら番号を詰める
-  spots=state.banks[state.cur].spots; mb=state.cur; saveSpots(); msg(""); renderSpots();
-};
-// リストを左右に動かす。一覧で選んでいるリスト（state.cur）も一緒に付いていく
-function moveBank(d){
-  const j=mb+d; if(j<0||j>=state.banks.length)return;
-  [state.banks[mb],state.banks[j]]=[state.banks[j],state.banks[mb]];
-  if(state.cur===mb)state.cur=j; else if(state.cur===j)state.cur=mb;
-  mb=j; saveSpots(); msg(""); renderSpots();
+$("db-q").oninput=$("db-region").onchange=$("db-kind").onchange=()=>renderAdd(bankIdx());
+$("add-done").onclick=()=>{location.hash=`#/settings/${bankIdx()}`};
+function getPos(btn,ok,ng){
+  if(!navigator.geolocation){addMsg("この端末では位置情報を使えません");return}
+  if(btn.disabled)return; btn.disabled=true;  // 取得中は押せない
+  addMsg("位置情報を取得しています");
+  navigator.geolocation.getCurrentPosition(p=>{btn.disabled=false;addMsg("");ok(p.coords)},()=>{btn.disabled=false;addMsg(ng)},{timeout:10000});
 }
-$("m-left").onclick=()=>moveBank(-1); $("m-right").onclick=()=>moveBank(1);
-$("db-near").onclick=()=>{
-  if(!navigator.geolocation){msg("この端末では位置情報を使えません");return}
-  const b=$("db-near"); if(b.disabled)return; b.disabled=true;
-  msg("位置情報を取得しています");
-  navigator.geolocation.getCurrentPosition(p=>{b.disabled=false;nearPos={lat:p.coords.latitude,lon:p.coords.longitude};msg("");renderDB()},()=>{b.disabled=false;msg("位置情報を取得できませんでした")},{timeout:10000});
-};
-$("f-gps").onclick=()=>{
-  if(!navigator.geolocation){msg("この端末では位置情報を使えません");return}
-  const b=$("f-gps"); if(b.disabled)return; b.disabled=true;
-  msg("位置情報を取得しています");
-  navigator.geolocation.getCurrentPosition(
-    p=>{b.disabled=false;$("f-lat").value=p.coords.latitude.toFixed(4);$("f-lon").value=p.coords.longitude.toFixed(4);msg("")},
-    ()=>{b.disabled=false;msg("位置情報を取得できませんでした。緯度と経度を入力してください")},
-    {timeout:10000});
-};
+$("db-near").onclick=()=>getPos($("db-near"),c=>{nearPos={lat:c.latitude,lon:c.longitude};renderAdd(bankIdx())},"位置情報を取得できませんでした");
+$("f-gps").onclick=()=>getPos($("f-gps"),c=>{$("f-lat").value=c.latitude.toFixed(4);$("f-lon").value=c.longitude.toFixed(4)},"位置情報を取得できませんでした。緯度と経度を入力してください");
 $("f-add").onclick=()=>{
+  const B=state.banks[bankIdx()]; if(!B)return;
   const name=$("f-name").value.trim(), la=parseFloat($("f-lat").value), lo=parseFloat($("f-lon").value);
-  if(!name){msg("名前を入力してください");return}
-  if(isNaN(la)||isNaN(lo)||Math.abs(la)>90||Math.abs(lo)>180){msg("緯度と経度を数字で入力してください");return}
-  if(addSpot({name,lat:la,lon:lo,type:$("f-type").value})){["f-name","f-lat","f-lon"].forEach(x=>$(x).value="");renderSpots()}
+  if(!name){addMsg("名前を入力してください");return}
+  if(isNaN(la)||isNaN(lo)||Math.abs(la)>90||Math.abs(lo)>180){addMsg("緯度と経度を数字で入力してください");return}
+  if(addSpot(B,{name,lat:la,lon:lo,type:$("f-type").value})){["f-name","f-lat","f-lon"].forEach(x=>$(x).value="");renderAdd(bankIdx());addMsg(`${name}を追加しました`)}
 };
 
 /* ---------- 画面の切り替え ---------- */
+let lastView="";
 function route(){
   const h=location.hash||"#/";
+  if(h==="#/spots"){location.replace("#/settings");return}  // 古いURL
   const m=h.match(/^#\/d\/(\d+)\/(\d{4}-\d{2}-\d{2})$/);
-  $("v-list").hidden=!(h==="#/"||(!m&&h!=="#/spots"));
-  $("v-day").hidden=!m; $("v-spots").hidden=h!=="#/spots";
-  if(m)renderDay(+m[1],m[2]); else if(h==="#/spots")renderSpots(); else renderList();
+  const s=h.match(/^#\/settings(?:\/(\d+)(\/add)?)?$/);
+  if(s&&s[1]!=null&&!state.banks[+s[1]]){location.replace("#/settings");return}  // ないリスト
+  const view=m?"day":!s?"list":s[2]?"add":s[1]!=null?"bank":"set";
+  // 画面を移ったら「元に戻す」は閉じる
+  if(view!==lastView){hideToast();if(view==="add"){$("db-q").value="";addMsg("")}}
+  lastView=view;
+  ["list","day","set","bank","add"].forEach(v=>$("v-"+v).hidden=v!==view);
+  if(view==="day")renderDay(+m[1],m[2]);
+  else if(view==="set")renderSet();
+  else if(view==="bank")renderBank(+s[1]);
+  else if(view==="add")renderAdd(+s[1]);
+  else renderList();
 }
 window.addEventListener("hashchange",()=>{route();window.scrollTo(0,0);if(!$("v-list").hidden)loadAll(false)});
-$("to-spots").onclick=()=>{mb=state.cur;location.hash="#/spots"};
+$("to-spots").onclick=()=>{location.hash="#/settings"};
 $("back1").onclick=()=>{location.hash="#/"};
-$("back2").onclick=()=>{location.hash="#/";loadAll(false)};
+$("set-back").onclick=()=>{location.hash="#/"};
 $("help-btn").onclick=()=>{const d=$("help");if(d.showModal)d.showModal();else d.setAttribute("open","")};
 $("help-close").onclick=()=>$("help").close?$("help").close():$("help").removeAttribute("open");
 $("help").addEventListener("click",e=>{if(e.target===$("help"))$("help").close()});
