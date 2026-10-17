@@ -42,6 +42,7 @@ button.link{border:0;background:none;padding:8px 0;color:var(--water-line);font-
 .msg{color:var(--magenta);font-size:14px;font-weight:700;margin:8px 0 0}
 .msg:empty{display:none}
 .note{font-size:12px;color:var(--sub);line-height:1.7;margin-top:24px}
+a{color:var(--water-line)}
 .arr{width:14px;height:14px;display:inline-block;vertical-align:-2px;flex:none}
 
 /* 一覧 */
@@ -204,7 +205,7 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
     <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg></dt><dd>最新の予報を取得します。前の取得から30分たつまでは押せません（薄い表示のとき）。ページを開き直したときも、30分たった予報だけを取り直します</dd>
     <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--surface)"/><circle cx="15" cy="12" r="2.2" fill="var(--surface)"/><circle cx="8" cy="18" r="2.2" fill="var(--surface)"/></svg></dt><dd>リストと釣り場を管理します。1つのリストに8か所まで、リストは10個まで作れます。リストと釣り場の並べ替えもここでできます</dd>
   </dl>
-  <p class="note" style="margin-top:12px">予報はOpen-Meteoのモデルによるものです。6日目以降は精度が下がります。</p>
+  <p class="note" style="margin-top:12px">予報はOpen-Meteoのモデルによるものです。6日目以降は精度が下がります。<br>予報：<a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>（<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>）／祝日：<a href="https://github.com/holidays-jp/api" target="_blank" rel="noopener">holidays-jp</a></p>
 </dialog>
 
 <!-- 詳細 -->

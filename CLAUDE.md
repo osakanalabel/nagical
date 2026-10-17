@@ -19,6 +19,8 @@ icons/                 アイコン（元データのSVGと、書き出したPNG
 tools/mock_check.py    Playwrightで仮データを流し込み、表示確認と通信回数の確認をする補助スクリプト
 fishing_spots_hokkaido.json  釣り場データの元（ユーザー提供。アプリからは読まない。DBはHTML内に埋め込み済み）
 shots/                 mock_check.py が出すスクリーンショット（生成物）
+README.md              リポジトリの説明（紹介・公開URL・QR・出典・開発メモ）
+qr.svg                 公開URLのQRコード（README用。segnoで作成、白地に黒）
 CLAUDE.md              このファイル
 ```
 
