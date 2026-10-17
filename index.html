@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ナギカル</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0F2A47">
+<meta name="theme-color" content="#0B3A6F">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,9 +13,10 @@
 <style>
 :root{
   color-scheme:dark;
-  --paper:#0F2A47; --ink:#CAD7E3; --sub:#8FA6BB; --faint:#6F88A0; --rule:#2A4766;
-  --surface:#17375A; --accent:#285C8A; --line:#3E6185; --na-bg:#1A3352; --day:#15304F;
-  --water:#15395C; --water-line:#7DBBDC; --magenta:#E58AB0; --night:#0A1F36;
+  /* 深い青の地（D2）。鮮やかさを上げて、黒っぽい紺ではなく青に見えるようにする */
+  --paper:#0B3A6F; --ink:#D6E4F2; --sub:#A2BDD7; --faint:#7694B2; --rule:#255388;
+  --surface:#154B89; --accent:#25659D; --line:#3C6A9F; --na-bg:#13447C; --day:#0C417D;
+  --water:#0E488B; --water-line:#86C8F0; --magenta:#EE8DB6; --night:#08294F;
   /* 判定のタイル（明るい地に濃い文字。元の配色から明度を一段落とした） */
   --ok-bg:#C0E2CD; --ok:#1E5B3A; --mid-bg:#F8E4A2; --mid:#6B4E00; --ng-bg:#ECB2CB; --ng:#8E1550;
   --rain:#6CB4D5; --snow:#8592A0;
@@ -71,7 +72,9 @@ a{color:var(--water-line)}
 .grid th.hol .hd{color:var(--magenta);font-weight:700}
 .cell.slim{min-height:52px;padding:0;border-radius:3px}
 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
-h1.ttl{font-size:30px;line-height:1.1;margin:0}
+h1.ttl{font-size:30px;line-height:1.1;margin:0;letter-spacing:.08em;display:flex;align-items:center;gap:10px}
+/* タイトルの左にアプリのアイコン（オフラインでも出るよう、キャッシュ対象のPNGを使う） */
+h1.ttl img{width:34px;height:34px;border-radius:8px;flex:none}
 .icons{display:flex;gap:6px;flex:none}
 .ic{width:42px;height:42px;min-height:0;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
 .ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -94,7 +97,7 @@ dialog#help::backdrop{background:rgba(0,0,0,.55)}
 .help-dl dt{font-weight:700;white-space:nowrap}
 .help-dl dd{margin:0}
 .ico-s{width:20px;height:20px;fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
-.winbar{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:10px}
+.winbar{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:18px}
 .winbar label{display:flex;flex-direction:column;font-size:13px;color:var(--sub);gap:2px}
 .winbar .range{font-size:13px;color:var(--sub)}
 .cell.rain{background-image:linear-gradient(to top left,var(--rain) 50%,transparent 50%)}
@@ -195,7 +198,7 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
 <div id="v-list" hidden>
  <div class="head">
   <div class="top">
-    <h1 class="ttl">ナギカル</h1>
+    <h1 class="ttl"><img src="icons/icon-192.png" alt="">ナギカル</h1>
     <div class="icons">
       <button class="ic" id="help-btn" aria-label="使い方" title="使い方"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.4a2.8 2.8 0 1 1 3.9 2.6c-.8.4-1.2.9-1.2 1.8v.6"/><circle cx="12" cy="17.6" r=".6" fill="currentColor"/></svg></button>
       <button class="ic" id="reload" aria-label="最新の予報を取得" title="最新の予報を取得"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg></button>
@@ -231,6 +234,12 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
     <dt>日中</dt><dd>日の出から日の入りまで</dd>
     <dt>夕マヅメ〜夜</dt><dd>日の入りの2時間前から22時まで</dd>
     <dt>時刻を指定</dt><dd>開始と終了を1時間単位で選びます</dd>
+  </dl>
+  <h3>詳細画面の風のグラフ</h3>
+  <dl class="help-dl">
+    <dt>青い線</dt><dd>判定する時間帯</dd>
+    <dt>明るい帯</dt><dd>日の出から日の入りまで</dd>
+    <dt>下の矢印</dt><dd>風が吹いていく方向（2時間ごと）</dd>
   </dl>
   <h3>操作</h3>
   <dl class="help-dl">
@@ -653,7 +662,7 @@ function windChart(H,idx,sr,ss,nh,wr){
     if(hh(t)%3===0)g+=`<text x="${cx}" y="${Hh-6}" font-size="12" text-anchor="middle" fill="var(--sub)">${hh(t)}</text>`;
   });
   if(nh){const k=idx.findIndex(i=>H.time[i]===nh);if(k>=0)g+=`<line x1="${left+cw*k+cw/2}" x2="${left+cw*k+cw/2}" y1="${top}" y2="${Hh-bot}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 3"/><text x="${left+cw*k+cw/2+4}" y="${top+12}" font-size="12" fill="var(--ink)" font-weight="700">いま</text>`}
-  return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="1時間ごとの平均風速と風向">${g}</svg><p class="sub" style="margin-top:4px">青い線の範囲が判定する時間帯、明るい帯が日の出から日の入りまで。下の矢印は風が吹いていく方向です（2時間ごと）。</p>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="1時間ごとの平均風速と風向">${g}</svg>`;
 }
 
 function tideChart(T,L,s,e,nowI){

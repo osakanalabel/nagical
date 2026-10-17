@@ -2,6 +2,8 @@
 
 北海道の釣り場で、どの日にどこへ行くかを風で決めるためのスマホ向けウェブアプリです。
 
+名前は「凪（なぎ）」と「カレンダー（calendar）」の「cal」を合わせたものです。風の弱い凪の日を、カレンダーのように見渡して探せます。
+
 https://osakanalabel.github.io/nagical/
 
 <img src="qr.svg" width="160" alt="ナギカルのQRコード">
