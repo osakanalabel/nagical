@@ -51,10 +51,30 @@ def forecast(seed):
     }
 
 
-MARINE = {"hourly": {"time": T, "sea_surface_temperature": [15.3] * N,
-                     "sea_level_height_msl": [0.2 * math.sin(i / 12.4 * 6.28) for i in range(N)]}}
+# 海洋APIは past_days=7（水温の前後1週間）。予報は9日先までで、その先は null
+start7 = start - datetime.timedelta(days=6)
+N7 = 18 * 24
+T7 = [(start7 + datetime.timedelta(hours=i)).strftime("%Y-%m-%dT%H:%M") for i in range(N7)]
+D7 = [(start7 + datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(18)]
+MARINE = {"hourly": {"time": T7, "sea_surface_temperature": [15.3] * N7,
+                     "sea_level_height_msl": [0.2 * math.sin(i / 12.4 * 6.28) for i in range(N7)]},
+          "daily": {"time": D7, "sea_surface_temperature_mean": [round(17.5 - 0.2 * i, 1) if i < 16 else None for i in range(18)]}}
 
-count = {"forecast": 0}
+count = {"forecast": 0, "lastyear": 0}
+
+
+def on_marine(route):
+    url = route.request.url
+    if "start_date=" in url:  # 前年の水温（日付を指定）
+        count["lastyear"] += 1
+        q = dict(x.split("=", 1) for x in url.split("?", 1)[1].split("&"))
+        a = datetime.date.fromisoformat(q["start_date"])
+        b = datetime.date.fromisoformat(q["end_date"])
+        days = [(a + datetime.timedelta(days=i)).isoformat() for i in range((b - a).days + 1)]
+        body = {"daily": {"time": days, "sea_surface_temperature_mean": [round(18.6 - 0.18 * i, 1) for i in range(len(days))]}}
+    else:
+        body = MARINE
+    route.fulfill(body=json.dumps(body), content_type="application/json")
 
 
 def on_forecast(route):
@@ -71,8 +91,7 @@ with sync_playwright() as p:
     page.route("**/fonts.googleapis.com/**", lambda r: r.abort())
     page.route("**/holidays-jp.github.io/**", lambda r: r.abort())
     page.route("**/api.open-meteo.com/**", on_forecast)
-    page.route("**/marine-api.open-meteo.com/**",
-               lambda r: r.fulfill(body=json.dumps(MARINE), content_type="application/json"))
+    page.route("**/marine-api.open-meteo.com/**", on_marine)
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
 
@@ -88,6 +107,13 @@ with sync_playwright() as p:
     page.click("button.cell[data-d] >> nth=0")
     page.wait_for_timeout(300)
     page.screenshot(path=str(SHOTS / "2-detail.png"), full_page=True)
+    print("詳細を開いた後の前年水温の取得回数（1）:", count["lastyear"])
+    page.click("#next")
+    page.wait_for_timeout(300)
+    page.reload()
+    page.wait_for_timeout(500)
+    page.screenshot(path=str(SHOTS / "2b-detail-next.png"), full_page=True)
+    print("次の日・リロード後の前年水温の取得回数（1のまま）:", count["lastyear"])
 
     page.goto(HTML + "#/spots")
     page.wait_for_timeout(400)

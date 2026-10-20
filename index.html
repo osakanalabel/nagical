@@ -241,6 +241,11 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
     <dt>明るい帯</dt><dd>日の出から日の入りまで</dd>
     <dt>下の矢印</dt><dd>風が吹いていく方向（2時間ごと）</dd>
   </dl>
+  <h3>詳細画面の水温のグラフ（海のみ）</h3>
+  <dl class="help-dl">
+    <dt>青い線</dt><dd>今年の日ごとの平均水温。表示している日を真ん中に前後1週間を描きます。予報は9日先ごろまでで、その先は線が切れます</dd>
+    <dt>点線</dt><dd>前年の同じ日の水温</dd>
+  </dl>
   <h3>操作</h3>
   <dl class="help-dl">
     <dt>マス</dt><dd>押すと、その日の詳細を開きます</dd>
@@ -275,6 +280,11 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
     <div class="tide-now" id="d-tidenow"></div>
     <div id="d-tide"></div>
     <div class="tide-ev" id="d-tideev"></div>
+  </section>
+
+  <section id="d-sstbox" hidden>
+    <h2>水温（日ごとの平均・目安）</h2>
+    <div id="d-sst"></div>
   </section>
 
   <section id="d-tablebox">
@@ -421,12 +431,33 @@ function updateReload(){
 
 async function fetchSpot(p){
   const sea=p.type!=="fresh";
-  const q=`latitude=${p.lat}&longitude=${p.lon}&timezone=Asia%2FTokyo&past_days=1&forecast_days=${DAYS}`;
+  const q=`latitude=${p.lat}&longitude=${p.lon}&timezone=Asia%2FTokyo&forecast_days=${DAYS}`;
+  // 海は水温の前後1週間を描くため、7日前から取る（日ごとの平均水温も同じ通信で取る）
   const [w,m]=await Promise.all([
-    fetch(`https://api.open-meteo.com/v1/forecast?${q}&wind_speed_unit=ms&daily=sunrise,sunset&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m`).then(r=>{if(!r.ok)throw 0;return r.json()}),
-    sea?fetch(`https://marine-api.open-meteo.com/v1/marine?${q}&hourly=sea_surface_temperature,sea_level_height_msl`).then(r=>r.ok?r.json():null).catch(()=>null):Promise.resolve(null)
+    fetch(`https://api.open-meteo.com/v1/forecast?${q}&past_days=1&wind_speed_unit=ms&daily=sunrise,sunset&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m`).then(r=>{if(!r.ok)throw 0;return r.json()}),
+    sea?fetch(`https://marine-api.open-meteo.com/v1/marine?${q}&past_days=7&hourly=sea_surface_temperature,sea_level_height_msl&daily=sea_surface_temperature_mean`).then(r=>r.ok?r.json():null).catch(()=>null):Promise.resolve(null)
   ]);
-  return {w,m:m&&m.hourly?m.hourly:null};
+  return {w,m:m&&m.hourly?m.hourly:null,sst:m&&m.daily?m.daily:null};
+}
+// 前年の水温（日ごとの平均）。過去の値は変わらないので予報のキャッシュとは分けて保存し、釣り場ごとに1日1回だけ取る
+// 去年の「今日の7日前〜17日後」をまとめて取り、詳細で開ける日（今日〜10日先）の前後1週間すべてに使う
+const lyDate=s=>`${+s.slice(0,4)-1}-${s.slice(5)==="02-29"?"02-28":s.slice(5)}`;
+const lyCache=(()=>{try{return JSON.parse(localStorage.getItem("nagical-sst-ly"))||{}}catch(e){return {}}})();
+const lyPending={}, lyFailed={};
+const getLy=p=>{const c=lyCache[key(p)];return c&&c.for===today()?c:null};
+function fetchLy(p){
+  const k=key(p), t=today();
+  if(lyPending[k]||lyFailed[k]===t)return;  // 失敗したらその日は取り直さない（開くたびに通信しない）
+  lyPending[k]=fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${p.lat}&longitude=${p.lon}&timezone=Asia%2FTokyo&daily=sea_surface_temperature_mean&start_date=${lyDate(addDays(t,-7))}&end_date=${lyDate(addDays(t,DAYS+6))}`)
+    .then(r=>{if(!r.ok)throw 0;return r.json()})
+    .then(j=>{
+      lyCache[k]={for:t,time:j.daily.time,v:j.daily.sea_surface_temperature_mean};
+      // どのリストにもない釣り場の分は消す
+      const all=new Set(state.banks.flatMap(b=>b.spots.map(key)));for(const x in lyCache)if(!all.has(x))delete lyCache[x];
+      try{localStorage.setItem("nagical-sst-ly",JSON.stringify(lyCache))}catch(e){}
+      if(!$("v-day").hidden)route();
+    },()=>{lyFailed[k]=t})
+    .finally(()=>{delete lyPending[k]});
 }
 // 取得に失敗したときの文。原因（圏外かサーバー側か）は決めつけず、前の予報を出している場合はその古さを書く
 function failMsg(nNone,nOld,allOld,t){
@@ -438,7 +469,8 @@ function failMsg(nNone,nOld,allOld,t){
 }
 async function loadAll(force){
   const now=Date.now();
-  const need=spots.filter(p=>{const c=cache[key(p)];if(!c)return true;return force&&now-c.at>=COOLDOWN});
+  // 水温の推移を足す前に保存した海の予報（sst がない）は、未取得として取り直す
+  const need=spots.filter(p=>{const c=cache[key(p)];if(!c||(p.type!=="fresh"&&c.d.m&&!c.d.sst))return true;return force&&now-c.at>=COOLDOWN});
   if(!need.length){route();updateReload();return}
   busy++; updateReload();
   // 失敗した釣り場を、前の予報があるもの（old）とないもの（none）に分ける
@@ -577,7 +609,7 @@ function renderDay(si,date){
   $("next").onclick=()=>{location.hash=`#/d/${si}/${addDays(date,1)}`};
   // 予報がない（取得中・失敗）ときは判定欄の文だけにして、風・潮位・表の見出しは出さない
   ["d-windbox","d-tablebox"].forEach(x=>$(x).hidden=!d);
-  if(!d){$("d-verdict").className="verdict lv-na";$("d-verdict").textContent=d===undefined?"予報を取得しています":"この釣り場の予報を取得できませんでした。一覧に戻り、しばらくしてから［最新の予報を取得］を押してください";["d-sun","d-wind","d-table"].forEach(x=>$(x).innerHTML="");$("d-tidebox").hidden=true;return}
+  if(!d){$("d-verdict").className="verdict lv-na";$("d-verdict").textContent=d===undefined?"予報を取得しています":"この釣り場の予報を取得できませんでした。一覧に戻り、しばらくしてから［最新の予報を取得］を押してください";["d-sun","d-wind","d-table"].forEach(x=>$(x).innerHTML="");$("d-tidebox").hidden=$("d-sstbox").hidden=true;return}
 
   const W=d.w,H=W.hourly,DY=W.daily,dIdx=DY.time.indexOf(date);
   const sr=DY.sunrise[dIdx]||"",ss=DY.sunset[dIdx]||"";
@@ -617,6 +649,18 @@ function renderDay(si,date){
       }
     }
   }else $("d-tidebox").hidden=true;
+
+  // 水温の推移：表示中の日の前後1週間（日ごとの平均）に、前年の同じ日を重ねる
+  const S=sea&&d.sst, sv=S&&S.sea_surface_temperature_mean;
+  let sstSvg="";
+  if(sv){
+    const ly=getLy(p); if(!ly)fetchLy(p);
+    const days=[...Array(15)].map((_,i)=>addDays(date,i-7));
+    const cur=days.map(x=>{const j=S.time.indexOf(x);return j>=0?sv[j]:null});
+    const prev=ly&&days.map(x=>{const j=ly.time.indexOf(lyDate(x));return j>=0?ly.v[j]:null});
+    sstSvg=sstChart(days,cur,prev,t);
+  }
+  $("d-sst").innerHTML=sstSvg; $("d-sstbox").hidden=!sstSvg;
 
   // 時間ごとの表
   const MT=M?M.time:[];
@@ -681,6 +725,30 @@ function tideChart(T,L,s,e,nowI){
   const k=nowI>=0?nowI-s:-1;
   if(k>=0&&k<n){const nx=x(k),end=nx>W-40;g+=`<line x1="${nx}" x2="${nx}" y1="${top-4}" y2="${Hh-bot}" stroke="var(--magenta)" stroke-width="2"/><text x="${nx+(end?-5:5)}" y="${top+10}" font-size="13" font-weight="700" fill="var(--magenta)" text-anchor="${end?"end":"start"}">いま</text>`}
   return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="潮位の推移"><polygon points="${area}" fill="var(--water-line)" opacity=".25"/><polyline points="${line}" fill="none" stroke="var(--water-line)" stroke-width="2.5" stroke-linejoin="round"/><line x1="${left}" x2="${W-right}" y1="${Hh-bot}" y2="${Hh-bot}" stroke="var(--water-line)"/>${g}</svg>`;
+}
+
+// days は表示中の日を真ん中（7番目）にした15日分。cur は今年、prev は前年（未取得なら null）
+function sstChart(days,cur,prev,t){
+  const n=days.length, c=7, all=cur.concat(prev||[]).filter(v=>v!=null); if(!cur.some(v=>v!=null))return"";
+  const W=360,Hh=150,top=24,bot=22,left=24,right=6;
+  let mn=Math.floor(Math.min(...all)-.3), mx=Math.ceil(Math.max(...all)+.3); if(mx-mn<3)mx=mn+3;
+  const step=mx-mn>8?2:1;
+  const x=i=>left+(W-left-right)*i/(n-1), y=v=>Hh-bot-(Hh-top-bot)*(v-mn)/(mx-mn);
+  // 値のない日は線を切る
+  const path=a=>{let s="",on=false;a.forEach((v,i)=>{if(v==null){on=false;return}s+=`${on?"L":"M"}${x(i).toFixed(1)} ${y(v).toFixed(1)}`;on=true});return s};
+  let g=`<rect x="${x(c-.5)}" y="${top-6}" width="${x(1)-x(0)}" height="${Hh-bot-top+6}" fill="var(--surface)"/>`;
+  for(let v=Math.ceil(mn/step)*step;v<=mx;v+=step)g+=`<line x1="${left}" x2="${W-right}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/><text x="${left-4}" y="${y(v)+4}" font-size="12" text-anchor="end" fill="var(--sub)">${v}</text>`;
+  days.forEach((d,i)=>{if(i%2===1)g+=`<text x="${x(i)}" y="${Hh-6}" font-size="12" text-anchor="middle" fill="var(--${i===c?"ink":"sub"})" font-weight="${i===c?700:400}">${md(d)}</text>`});
+  const ti=days.indexOf(t);
+  if(ti>=0&&ti!==c)g+=`<line x1="${x(ti)}" x2="${x(ti)}" y1="${top-6}" y2="${Hh-bot}" stroke="var(--magenta)" stroke-width="1.5" stroke-dasharray="3 3"/><text x="${x(ti)+(ti>c?-4:4)}" y="${top+6}" font-size="12" font-weight="700" fill="var(--magenta)" text-anchor="${ti>c?"end":"start"}">今日</text>`;
+  if(prev)g+=`<path d="${path(prev)}" fill="none" stroke="var(--faint)" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round"/>`;
+  g+=`<path d="${path(cur)}" fill="none" stroke="var(--water-line)" stroke-width="2.5" stroke-linejoin="round"/>`;
+  cur.forEach((v,i)=>{if(v!=null)g+=`<circle cx="${x(i)}" cy="${y(v)}" r="${i===c?4.5:2.5}" fill="var(--water-line)"/>`});
+  // 真ん中の日の値。前年の値は、今年の値と重ならない側に書く
+  const a=cur[c], b=prev&&prev[c], up=b==null||a==null||a>=b;
+  if(a!=null)g+=`<text x="${x(c)}" y="${y(a)+(up?-9:20)}" font-size="14" font-weight="700" text-anchor="middle" fill="var(--ink)">${f1(a)}</text>`;
+  if(b!=null)g+=`<circle cx="${x(c)}" cy="${y(b)}" r="3" fill="var(--faint)"/><text x="${x(c)}" y="${y(b)+(up?18:-8)}" font-size="12" text-anchor="middle" fill="var(--sub)">${f1(b)}</text>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="${md(days[c])}の前後1週間の水温${a!=null?`。この日は${f1(a)}℃`:""}${b!=null?`、前年の同じ日は${f1(b)}℃`:""}">${g}</svg>`;
 }
 
 /* ---------- アプリの設定 ---------- */
