@@ -1,0 +1,267 @@
+{
+  "meta": {
+    "title": "北海道 釣り場データベース",
+    "created": "2026-10-16",
+    "crs": "WGS84（十進度）",
+    "scope": "北海道全域の代表的な漁港・港湾と、釣りのできる湖・川",
+    "caution": "座標は概略値です（2026-10 に OpenStreetMap と照合し、大きなずれは修正済み）。accuracy_km は想定誤差の目安（km）です。漁港・岸壁は立入制限や釣り禁止区域がある場合があります。",
+    "kinds": [
+      "湖",
+      "川",
+      "汽水湖",
+      "漁港",
+      "港湾"
+    ],
+    "updated": "2026-10-22",
+    "kind_type": "湖・川は淡水、汽水湖・漁港・港湾は海（潮位・水温を出す）",
+    "format": {
+      "id": "全国で一意（例：hokkaido-port-016）。アプリ内の参照・保存はすべてこれ",
+      "pref": "都道府県",
+      "region": "県の中の地域（北海道は振興局）。追加画面の絞り込みに使う",
+      "area": "自動のリストの単位（海は地域名、淡水は区分名など）。8か所を超えたら東西・南北に分ける。分け方を変えたいときはここに圏域名（例：紋別圏）を入れる",
+      "type": "sea＝海（潮位・水温を出す）／fresh＝淡水。kindから推測せず明示する",
+      "status": "省略＝ok／restricted＝一部禁止／banned＝釣り禁止／paid＝有料。banned はおすすめリストに入れない（自分で足すのは止めない）",
+      "prefs": "県ごとの地域の並び（regions）・見出しの区分（sections）・プリセット（presets。spots は id）"
+    }
+  },
+  "prefs": [
+    {
+      "name": "北海道",
+      "regions": [
+        "空知",
+        "石狩",
+        "後志",
+        "胆振",
+        "日高",
+        "渡島",
+        "檜山",
+        "上川",
+        "留萌",
+        "宗谷",
+        "オホーツク",
+        "十勝",
+        "釧路",
+        "根室"
+      ],
+      "sections": [
+        [
+          "道央",
+          [
+            "空知",
+            "石狩",
+            "後志",
+            "胆振",
+            "日高"
+          ]
+        ],
+        [
+          "道南",
+          [
+            "渡島",
+            "檜山"
+          ]
+        ],
+        [
+          "道北",
+          [
+            "上川",
+            "留萌",
+            "宗谷"
+          ]
+        ],
+        [
+          "道東",
+          [
+            "オホーツク",
+            "十勝",
+            "釧路",
+            "根室"
+          ]
+        ]
+      ],
+      "presets": [
+        {
+          "section": "道央",
+          "name": "道央・海",
+          "spots": [
+            "hokkaido-port-001",
+            "hokkaido-port-003",
+            "hokkaido-port-042",
+            "hokkaido-port-043",
+            "hokkaido-port-002",
+            "hokkaido-port-030",
+            "hokkaido-port-041"
+          ]
+        },
+        {
+          "section": "道南",
+          "name": "道南・海",
+          "spots": [
+            "hokkaido-port-045",
+            "hokkaido-port-046",
+            "hokkaido-port-040",
+            "hokkaido-port-039",
+            "hokkaido-port-037",
+            "hokkaido-port-038",
+            "hokkaido-port-036",
+            "hokkaido-port-035"
+          ]
+        },
+        {
+          "section": "道北",
+          "name": "道北・海",
+          "spots": [
+            "hokkaido-port-006",
+            "hokkaido-port-007",
+            "hokkaido-port-052",
+            "hokkaido-port-008",
+            "hokkaido-port-053",
+            "hokkaido-port-009",
+            "hokkaido-port-055",
+            "hokkaido-port-012"
+          ]
+        },
+        {
+          "section": "道東",
+          "name": "道東・海",
+          "spots": [
+            "hokkaido-port-014",
+            "hokkaido-port-017",
+            "hokkaido-port-018",
+            "hokkaido-port-019",
+            "hokkaido-port-020",
+            "hokkaido-port-023",
+            "hokkaido-port-024",
+            "hokkaido-port-026"
+          ]
+        },
+        {
+          "section": "道東",
+          "name": "道東・氷上のチカ",
+          "spots": [
+            "hokkaido-lake-005",
+            "hokkaido-lake-002",
+            "hokkaido-lake-008"
+          ]
+        },
+        {
+          "section": "道央",
+          "name": "道央・ワカサギ",
+          "spots": [
+            "hokkaido-lake-012",
+            "hokkaido-lake-011",
+            "hokkaido-lake-015",
+            "hokkaido-lake-016"
+          ]
+        },
+        {
+          "section": "道央",
+          "name": "道央・ヒメマス",
+          "spots": [
+            "hokkaido-lake-018",
+            "hokkaido-lake-014"
+          ]
+        },
+        {
+          "section": "道東",
+          "name": "道東・ワカサギ",
+          "spots": [
+            "hokkaido-lake-001",
+            "hokkaido-lake-006",
+            "hokkaido-lake-007",
+            "hokkaido-lake-009",
+            "hokkaido-lake-021"
+          ]
+        },
+        {
+          "section": "道東",
+          "name": "道東・湖のトラウト",
+          "spots": [
+            "hokkaido-lake-006",
+            "hokkaido-lake-019",
+            "hokkaido-lake-020"
+          ]
+        }
+      ]
+    }
+  ],
+  "spots": [
+    {"id": "hokkaido-lake-001", "name": "網走湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "オホーツク", "area": "道東", "municipality": "網走市・大空町", "lat": 43.95, "lon": 144.15, "accuracy_km": 5, "notes": "呼人・女満別の2会場"},
+    {"id": "hokkaido-lake-006", "name": "阿寒湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "釧路", "area": "道東", "municipality": "釧路市", "lat": 43.46, "lon": 144.1, "accuracy_km": 5, "notes": "阿寒湖温泉街側に釣り場"},
+    {"id": "hokkaido-lake-007", "name": "塘路湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "釧路", "area": "道東", "municipality": "標茶町", "lat": 43.13, "lon": 144.57, "accuracy_km": 4},
+    {"id": "hokkaido-lake-009", "name": "糠平湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "十勝", "area": "道東", "municipality": "上士幌町", "lat": 43.37, "lon": 143.2, "accuracy_km": 6},
+    {"id": "hokkaido-lake-010", "name": "朱鞠内湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "上川", "area": "道北", "municipality": "幌加内町", "lat": 44.3, "lon": 142.2, "accuracy_km": 8},
+    {"id": "hokkaido-lake-011", "name": "しのつ湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "石狩", "area": "道央", "municipality": "新篠津村", "lat": 43.2, "lon": 141.7, "accuracy_km": 10},
+    {"id": "hokkaido-lake-012", "name": "茨戸川", "kind": "川", "type": "fresh", "pref": "北海道", "region": "石狩", "area": "道央", "municipality": "札幌市北区・石狩市", "lat": 43.18, "lon": 141.37, "accuracy_km": 4},
+    {"id": "hokkaido-lake-013", "name": "大沼", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "渡島", "area": "道南", "municipality": "七飯町", "lat": 41.98, "lon": 140.68, "accuracy_km": 4},
+    {"id": "hokkaido-lake-014", "name": "洞爺湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "胆振", "area": "道央", "municipality": "洞爺湖町", "lat": 42.6, "lon": 140.85, "accuracy_km": 8, "notes": "冬も全面は凍らないことが多い"},
+    {"id": "hokkaido-lake-015", "name": "ポロト湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "胆振", "area": "道央", "municipality": "白老町", "lat": 42.553, "lon": 141.355, "accuracy_km": 3},
+    {"id": "hokkaido-lake-016", "name": "桂沢湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "空知", "area": "道央", "municipality": "三笠市", "lat": 43.22, "lon": 141.99, "accuracy_km": 6},
+    {"id": "hokkaido-lake-017", "name": "かなやま湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "上川", "area": "道北", "municipality": "南富良野町", "lat": 43.15, "lon": 142.53, "accuracy_km": 6},
+    {"id": "hokkaido-lake-018", "name": "支笏湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "石狩", "area": "道央", "municipality": "千歳市", "lat": 42.754, "lon": 141.328, "accuracy_km": 5},
+    {"id": "hokkaido-lake-019", "name": "屈斜路湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "釧路", "area": "道東", "municipality": "弟子屈町", "lat": 43.617, "lon": 144.311, "accuracy_km": 5},
+    {"id": "hokkaido-lake-020", "name": "然別湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "十勝", "area": "道東", "municipality": "鹿追町", "lat": 43.282, "lon": 143.117, "accuracy_km": 2, "notes": "釣りは期間限定・人数制限あり"},
+    {"id": "hokkaido-lake-021", "name": "チミケップ湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "オホーツク", "area": "道東", "municipality": "津別町", "lat": 43.637, "lon": 143.875, "accuracy_km": 2},
+    {"id": "hokkaido-lake-022", "name": "岩尾内湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "上川", "area": "道北", "municipality": "士別市", "lat": 44.108, "lon": 142.716, "accuracy_km": 4},
+    {"id": "hokkaido-lake-002", "name": "能取湖", "kind": "汽水湖", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "網走市", "lat": 44.07, "lon": 144.12, "accuracy_km": 5, "notes": "海とつながった汽水湖。冬は氷上でチカ・コマイ"},
+    {"id": "hokkaido-lake-005", "name": "サロマ湖", "kind": "汽水湖", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "北見市・佐呂間町・湧別町", "lat": 44.13, "lon": 143.95, "accuracy_km": 10, "notes": "海とつながった汽水湖。冬は氷上でチカ・コマイ"},
+    {"id": "hokkaido-lake-008", "name": "風蓮湖", "kind": "汽水湖", "type": "sea", "pref": "北海道", "region": "根室", "area": "根室", "municipality": "根室市・別海町", "lat": 43.31, "lon": 145.34, "accuracy_km": 10, "notes": "海とつながった汽水湖"},
+    {"id": "hokkaido-port-001", "name": "小樽港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "後志", "area": "後志", "municipality": "小樽市", "lat": 43.199, "lon": 141.001, "accuracy_km": 1},
+    {"id": "hokkaido-port-002", "name": "厚田漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "石狩", "area": "石狩", "municipality": "石狩市", "lat": 43.398, "lon": 141.432, "accuracy_km": 1},
+    {"id": "hokkaido-port-003", "name": "余市港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "後志", "area": "後志", "municipality": "余市町", "lat": 43.2, "lon": 140.78, "accuracy_km": 3},
+    {"id": "hokkaido-port-004", "name": "岩内港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "後志", "area": "後志", "municipality": "岩内町", "lat": 42.98, "lon": 140.51, "accuracy_km": 2},
+    {"id": "hokkaido-port-005", "name": "寿都漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "後志", "area": "後志", "municipality": "寿都町", "lat": 42.79, "lon": 140.23, "accuracy_km": 2},
+    {"id": "hokkaido-port-006", "name": "増毛港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "留萌", "area": "留萌", "municipality": "増毛町", "lat": 43.857, "lon": 141.526, "accuracy_km": 2},
+    {"id": "hokkaido-port-007", "name": "留萌港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "留萌", "area": "留萌", "municipality": "留萌市", "lat": 43.94, "lon": 141.63, "accuracy_km": 2},
+    {"id": "hokkaido-port-008", "name": "羽幌港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "留萌", "area": "留萌", "municipality": "羽幌町", "lat": 44.36, "lon": 141.7, "accuracy_km": 2},
+    {"id": "hokkaido-port-009", "name": "稚内港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "宗谷", "area": "宗谷", "municipality": "稚内市", "lat": 45.42, "lon": 141.68, "accuracy_km": 2},
+    {"id": "hokkaido-port-010", "name": "鴛泊港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "宗谷", "area": "宗谷", "municipality": "利尻富士町", "lat": 45.24, "lon": 141.24, "accuracy_km": 3},
+    {"id": "hokkaido-port-011", "name": "香深港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "宗谷", "area": "宗谷", "municipality": "礼文町", "lat": 45.3, "lon": 141.04, "accuracy_km": 3},
+    {"id": "hokkaido-port-012", "name": "枝幸港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "宗谷", "area": "宗谷", "municipality": "枝幸町", "lat": 44.933, "lon": 142.592, "accuracy_km": 3},
+    {"id": "hokkaido-port-013", "name": "雄武漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "雄武町", "lat": 44.58, "lon": 142.96, "accuracy_km": 3},
+    {"id": "hokkaido-port-014", "name": "紋別港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "紋別市", "lat": 44.36, "lon": 143.37, "accuracy_km": 2},
+    {"id": "hokkaido-port-015", "name": "湧別漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "湧別町", "lat": 44.22, "lon": 143.63, "accuracy_km": 5},
+    {"id": "hokkaido-port-016", "name": "常呂漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "北見市", "lat": 44.126, "lon": 144.102, "accuracy_km": 1},
+    {"id": "hokkaido-port-017", "name": "網走港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "網走市", "lat": 44.02, "lon": 144.28, "accuracy_km": 2},
+    {"id": "hokkaido-port-018", "name": "ウトロ漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "斜里町", "lat": 44.07, "lon": 145.0, "accuracy_km": 3},
+    {"id": "hokkaido-port-019", "name": "羅臼漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "根室", "area": "根室", "municipality": "羅臼町", "lat": 44.02, "lon": 145.19, "accuracy_km": 3},
+    {"id": "hokkaido-port-020", "name": "根室港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "根室", "area": "根室", "municipality": "根室市", "lat": 43.33, "lon": 145.58, "accuracy_km": 2},
+    {"id": "hokkaido-port-021", "name": "花咲港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "根室", "area": "根室", "municipality": "根室市", "lat": 43.28, "lon": 145.57, "accuracy_km": 2},
+    {"id": "hokkaido-port-022", "name": "霧多布港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "釧路", "area": "釧路", "municipality": "浜中町", "lat": 43.09, "lon": 145.12, "accuracy_km": 4},
+    {"id": "hokkaido-port-023", "name": "厚岸漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "釧路", "area": "釧路", "municipality": "厚岸町", "lat": 43.04, "lon": 144.85, "accuracy_km": 3},
+    {"id": "hokkaido-port-024", "name": "釧路港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "釧路", "area": "釧路", "municipality": "釧路市", "lat": 42.97, "lon": 144.37, "accuracy_km": 3},
+    {"id": "hokkaido-port-025", "name": "大津漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "十勝", "area": "十勝", "municipality": "豊頃町", "lat": 42.674, "lon": 143.639, "accuracy_km": 1},
+    {"id": "hokkaido-port-026", "name": "十勝港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "十勝", "area": "十勝", "municipality": "広尾町", "lat": 42.285, "lon": 143.325, "accuracy_km": 1.5},
+    {"id": "hokkaido-port-027", "name": "様似漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "日高", "area": "日高", "municipality": "様似町", "lat": 42.13, "lon": 142.93, "accuracy_km": 3},
+    {"id": "hokkaido-port-028", "name": "浦河港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "日高", "area": "日高", "municipality": "浦河町", "lat": 42.16, "lon": 142.77, "accuracy_km": 3},
+    {"id": "hokkaido-port-029", "name": "鵡川漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "胆振", "area": "胆振", "municipality": "むかわ町", "lat": 42.55, "lon": 141.93, "accuracy_km": 3},
+    {"id": "hokkaido-port-030", "name": "苫小牧西港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "胆振", "area": "胆振", "municipality": "苫小牧市", "lat": 42.6333, "lon": 141.6167, "accuracy_km": 1},
+    {"id": "hokkaido-port-032", "name": "白老港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "胆振", "area": "胆振", "municipality": "白老町", "lat": 42.523, "lon": 141.318, "accuracy_km": 3, "status": "banned"},
+    {"id": "hokkaido-port-033", "name": "室蘭港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "胆振", "area": "胆振", "municipality": "室蘭市", "lat": 42.33, "lon": 140.97, "accuracy_km": 3},
+    {"id": "hokkaido-port-034", "name": "伊達漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "胆振", "area": "胆振", "municipality": "伊達市", "lat": 42.46, "lon": 140.86, "accuracy_km": 3},
+    {"id": "hokkaido-port-035", "name": "八雲漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "渡島", "area": "渡島", "municipality": "八雲町", "lat": 42.25, "lon": 140.27, "accuracy_km": 4},
+    {"id": "hokkaido-port-036", "name": "森港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "渡島", "area": "渡島", "municipality": "森町", "lat": 42.113, "lon": 140.592, "accuracy_km": 3},
+    {"id": "hokkaido-port-037", "name": "函館港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "渡島", "area": "渡島", "municipality": "函館市", "lat": 41.77, "lon": 140.72, "accuracy_km": 3},
+    {"id": "hokkaido-port-038", "name": "戸井漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "渡島", "area": "渡島", "municipality": "函館市", "lat": 41.72, "lon": 140.99, "accuracy_km": 2},
+    {"id": "hokkaido-port-039", "name": "松前港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "渡島", "area": "渡島", "municipality": "松前町", "lat": 41.43, "lon": 140.11, "accuracy_km": 2},
+    {"id": "hokkaido-port-040", "name": "江差港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "檜山", "area": "檜山", "municipality": "江差町", "lat": 41.87, "lon": 140.12, "accuracy_km": 2},
+    {"id": "hokkaido-port-041", "name": "苫小牧東港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "胆振", "area": "胆振", "municipality": "苫小牧市・厚真町", "lat": 42.6, "lon": 141.8167, "accuracy_km": 1},
+    {"id": "hokkaido-port-042", "name": "石狩湾新港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "石狩", "area": "石狩", "municipality": "石狩市・小樽市", "lat": 43.2167, "lon": 141.3, "accuracy_km": 1},
+    {"id": "hokkaido-port-043", "name": "古潭漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "石狩", "area": "石狩", "municipality": "石狩市", "lat": 43.3575, "lon": 141.4261, "accuracy_km": 1},
+    {"id": "hokkaido-port-044", "name": "美国漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "後志", "area": "後志", "municipality": "積丹町", "lat": 43.297, "lon": 140.606, "accuracy_km": 1},
+    {"id": "hokkaido-port-045", "name": "瀬棚港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "檜山", "area": "檜山", "municipality": "せたな町", "lat": 42.453, "lon": 139.851, "accuracy_km": 2},
+    {"id": "hokkaido-port-046", "name": "乙部漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "檜山", "area": "檜山", "municipality": "乙部町", "lat": 41.969, "lon": 140.134, "accuracy_km": 2},
+    {"id": "hokkaido-port-047", "name": "奥尻港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "檜山", "area": "檜山", "municipality": "奥尻町", "lat": 42.176, "lon": 139.517, "accuracy_km": 1},
+    {"id": "hokkaido-port-048", "name": "木古内漁港（札苅）", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "渡島", "area": "渡島", "municipality": "木古内町", "lat": 41.699, "lon": 140.483, "accuracy_km": 1},
+    {"id": "hokkaido-port-049", "name": "門別漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "日高", "area": "日高", "municipality": "日高町", "lat": 42.473, "lon": 142.073, "accuracy_km": 1},
+    {"id": "hokkaido-port-050", "name": "静内漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "日高", "area": "日高", "municipality": "新ひだか町", "lat": 42.324, "lon": 142.372, "accuracy_km": 1},
+    {"id": "hokkaido-port-051", "name": "えりも港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "日高", "area": "日高", "municipality": "えりも町", "lat": 42.016, "lon": 143.145, "accuracy_km": 1},
+    {"id": "hokkaido-port-052", "name": "苫前漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "留萌", "area": "留萌", "municipality": "苫前町", "lat": 44.313, "lon": 141.651, "accuracy_km": 2},
+    {"id": "hokkaido-port-053", "name": "天塩港", "kind": "港湾", "type": "sea", "pref": "北海道", "region": "留萌", "area": "留萌", "municipality": "天塩町", "lat": 44.874, "lon": 141.737, "accuracy_km": 1},
+    {"id": "hokkaido-port-054", "name": "浜鬼志別漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "宗谷", "area": "宗谷", "municipality": "猿払村", "lat": 45.342, "lon": 142.168, "accuracy_km": 1},
+    {"id": "hokkaido-port-055", "name": "頓別漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "宗谷", "area": "宗谷", "municipality": "浜頓別町", "lat": 45.135, "lon": 142.394, "accuracy_km": 1},
+    {"id": "hokkaido-port-056", "name": "興部漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "興部町", "lat": 44.478, "lon": 143.142, "accuracy_km": 1},
+    {"id": "hokkaido-port-057", "name": "斜里漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "斜里町", "lat": 43.921, "lon": 144.668, "accuracy_km": 1},
+    {"id": "hokkaido-port-058", "name": "白糠漁港", "kind": "漁港", "type": "sea", "pref": "北海道", "region": "釧路", "area": "釧路", "municipality": "白糠町", "lat": 42.952, "lon": 144.085, "accuracy_km": 1}
+  ]
+}

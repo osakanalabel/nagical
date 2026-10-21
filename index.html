@@ -173,6 +173,8 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
 .banks{display:flex;gap:6px;overflow-x:auto;margin:14px -16px 0;padding:0 16px;border-bottom:2px solid var(--accent)}
 .banks button{flex:none;border:0;border-radius:6px 6px 0 0;background:rgba(255,255,255,.06);color:var(--sub);min-height:40px;padding:8px 14px}
 .banks button[aria-selected="true"]{background:var(--accent);color:var(--ink);font-weight:700}
+.banks .tabs{display:flex;gap:6px;flex:none}
+.banks button.banknew{background:none;color:var(--water-line);font-weight:700}
 .bankbar{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:12px}
 .bankbar label{display:flex;flex-direction:column;font-size:13px;color:var(--sub);gap:2px;flex:1;min-width:10em}
 .bankbar input,.bankbar select{width:100%}
@@ -183,9 +185,18 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
 .dblist li.empty{color:var(--sub);font-size:14px;padding:10px 0}
 .dblist small{display:block;color:var(--sub);font-size:12px}
 .dbrow{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;background:none;border:0;border-radius:0;padding:10px 0;min-height:56px;text-align:left}
-.dbrow .st{flex:none;color:var(--water-line);font-size:14px;font-weight:700}
-.dbrow.done:disabled{opacity:1}
-.dbrow.done .st{color:var(--sub);font-weight:400}
+.dbrow .st{flex:none;width:44px;display:flex;justify-content:center;color:var(--water-line)}
+.dbrow .st svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* 追加済みの行は全体を薄く。いっぱいで押せない未追加の行は、行はそのままで＋だけ薄く */
+.dbrow:disabled{opacity:1}
+.dbrow.done:disabled{opacity:.5}
+.dbrow.done .st{color:var(--sub)}
+.dbrow:disabled:not(.done) .st{opacity:.4}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* おすすめリスト：区分の見出しと、項目の件数 */
+.areah{font-size:13px;color:var(--sub);font-weight:700;margin:20px 0 0}
+.dblist small.cnt{display:inline;margin-left:8px}
+.new-lead{margin:10px 0 0}
 .form{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .form label{display:flex;flex-direction:column;font-size:13px;color:var(--sub);gap:2px}
 .form .full{grid-column:1/-1}
@@ -211,9 +222,22 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
     <span id="win-custom" style="display:none;gap:4px;align-items:center"><select id="win-s" aria-label="開始"></select>〜<select id="win-e" aria-label="終了"></select></span>
     <span class="range" id="win-range"></span>
   </div>
-  <div class="banks" id="banks" role="tablist" aria-label="リスト"></div>
+  <div class="banks"><div class="tabs" id="banks" role="tablist" aria-label="リスト"></div><button class="banknew" id="bank-new">＋ 追加</button></div>
  </div>
   <div class="grid-wrap"><table class="grid" id="grid"></table></div>
+</div>
+
+<!-- おすすめリスト（初回の画面を兼ねる） -->
+<div id="v-new" hidden>
+  <button class="link" id="new-back">戻る</button>
+  <div class="top" id="new-brand">
+    <h1 class="ttl"><img src="icons/icon-192.png" alt="">ナギカル</h1>
+    <div class="icons"><button class="ic" id="new-help" aria-label="使い方" title="使い方"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.4a2.8 2.8 0 1 1 3.9 2.6c-.8.4-1.2.9-1.2 1.8v.6"/><circle cx="12" cy="17.6" r=".6" fill="currentColor"/></svg></button></div>
+  </div>
+  <h1 id="new-ttl"></h1>
+  <p class="sub new-lead" id="new-lead"></p>
+  <ul class="dblist" id="new-genre"></ul>
+  <div id="new-items"></div>
 </div>
 
 <dialog id="help" aria-labelledby="help-ttl">
@@ -251,7 +275,7 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
     <dt>マス</dt><dd>押すと、その日の詳細を開きます</dd>
     <dt>平日の列</dt><dd>細くたたんであります。日付かマスを押すと開きます</dd>
     <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg></dt><dd>最新の予報を取得します。前の取得から30分たつまでは押せません（薄い表示のとき）。ページを開き直したときも、30分たった予報だけを取り直します</dd>
-    <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--surface)"/><circle cx="15" cy="12" r="2.2" fill="var(--surface)"/><circle cx="8" cy="18" r="2.2" fill="var(--surface)"/></svg></dt><dd>アプリの設定を開きます。判定の風速の境目を変えられます。リストと釣り場の管理もここで行います（1つのリストに8か所まで、リストは10個まで。並べ替えもできます）</dd>
+    <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--surface)"/><circle cx="15" cy="12" r="2.2" fill="var(--surface)"/><circle cx="8" cy="18" r="2.2" fill="var(--surface)"/></svg></dt><dd>アプリの設定を開きます。判定の風速の境目を変えられます。リストと釣り場の管理もここで行います（1つのリストに8か所まで、リストは10個まで。並べ替えもできます）。［自分でリストを作る］は空のリストから釣り場を1つずつ足し、［おすすめリストから作る］は地域や魚種ごとにまとめたリストを選んで作ります。［すべて初期化］は、リスト・設定・保存した予報をすべて消して最初の画面に戻します</dd>
   </dl>
   <p class="note" style="margin-top:12px">予報はOpen-Meteoのモデルによるものです。6日目以降は精度が下がります。<br>予報：<a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>（<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>）／祝日：<a href="https://github.com/holidays-jp/api" target="_blank" rel="noopener">holidays-jp</a></p>
 </dialog>
@@ -316,7 +340,12 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
   <section>
     <div class="sec-head"><h2>リスト</h2></div>
     <ul class="rows" id="set-banks"></ul>
-    <button id="set-newbank" class="addbtn">リストを追加</button>
+    <button id="set-newbank" class="addbtn">自分でリストを作る</button>
+    <button id="set-preset" class="addbtn" style="margin-top:8px">おすすめリストから作る</button>
+  </section>
+
+  <section>
+    <button id="set-reset" class="addbtn">すべて初期化</button>
   </section>
 </div>
 
@@ -337,6 +366,7 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
     <div><h1>釣り場を追加</h1><p class="sub" id="add-count"></p></div>
     <button class="primary" id="add-done">完了</button>
   </div>
+  <label class="namefield" id="add-namebox" style="margin:0 0 12px" hidden><span>リストの名前<span class="saved" id="add-saved">保存しました</span></span><input id="add-name" maxlength="12" enterkeyhint="done"></label>
   <input type="search" id="db-q" placeholder="名前で探す（例：小樽）" aria-label="名前で探す">
   <div class="dbtools">
     <select id="db-region" aria-label="地域"></select>
@@ -365,13 +395,54 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
 
 <script>
 const $=id=>document.getElementById(id);
-// 北海道の釣り場（fishing_spots_hokkaido.json を元に、小樽運河を「小樽港」に改名、石狩湾新港・古潭漁港・苫小牧東港を追加、苫小牧港 西港区を苫小牧西港に改名。新規3か所と苫小牧西港の座標は気象庁潮位観測点などによる）
-const DB=[{"n":"網走湖","k":"ワカサギ湖","r":"オホーツク","m":"網走市・大空町","lat":43.95,"lon":144.15,"note":"呼人・女満別の2会場"},{"n":"能取湖","k":"ワカサギ湖","r":"オホーツク","m":"網走市","lat":44.07,"lon":144.12},{"n":"藻琴湖","k":"ワカサギ湖","r":"オホーツク","m":"網走市","lat":43.94,"lon":144.33},{"n":"濤沸湖","k":"ワカサギ湖","r":"オホーツク","m":"網走市・小清水町","lat":43.92,"lon":144.43},{"n":"サロマ湖","k":"ワカサギ湖","r":"オホーツク","m":"北見市・佐呂間町・湧別町","lat":44.13,"lon":143.95},{"n":"阿寒湖","k":"ワカサギ湖","r":"釧路","m":"釧路市","lat":43.46,"lon":144.1,"note":"阿寒湖温泉街側に釣り場"},{"n":"塘路湖","k":"ワカサギ湖","r":"釧路","m":"標茶町","lat":43.13,"lon":144.57},{"n":"風蓮湖","k":"ワカサギ湖","r":"根室","m":"根室市・別海町","lat":43.3,"lon":145.25},{"n":"糠平湖","k":"ワカサギ湖","r":"十勝","m":"上士幌町","lat":43.37,"lon":143.2},{"n":"朱鞠内湖","k":"ワカサギ湖","r":"上川","m":"幌加内町","lat":44.3,"lon":142.2},{"n":"しのつ湖","k":"ワカサギ湖","r":"石狩","m":"新篠津村","lat":43.2,"lon":141.7},{"n":"茨戸川","k":"ワカサギ湖","r":"石狩","m":"札幌市北区・石狩市","lat":43.18,"lon":141.37},{"n":"大沼","k":"ワカサギ湖","r":"渡島","m":"七飯町","lat":41.98,"lon":140.68},{"n":"洞爺湖","k":"ワカサギ湖","r":"胆振","m":"洞爺湖町","lat":42.6,"lon":140.85},{"n":"ポロト湖","k":"ワカサギ湖","r":"胆振","m":"白老町","lat":42.553,"lon":141.355},{"n":"桂沢湖","k":"ワカサギ湖","r":"空知","m":"三笠市","lat":43.22,"lon":141.99},{"n":"かなやま湖","k":"ワカサギ湖","r":"空知","m":"南富良野町","lat":43.15,"lon":142.53},{"n":"小樽港","k":"港湾","r":"後志","m":"小樽市","lat":43.199,"lon":141.001},{"n":"厚田漁港","k":"漁港","r":"石狩","m":"石狩市","lat":43.35,"lon":141.43},{"n":"余市港","k":"港湾","r":"後志","m":"余市町","lat":43.2,"lon":140.78},{"n":"岩内港","k":"港湾","r":"後志","m":"岩内町","lat":42.98,"lon":140.51},{"n":"寿都漁港","k":"漁港","r":"後志","m":"寿都町","lat":42.79,"lon":140.23},{"n":"増毛漁港","k":"漁港","r":"留萌","m":"増毛町","lat":43.85,"lon":141.52},{"n":"留萌港","k":"港湾","r":"留萌","m":"留萌市","lat":43.94,"lon":141.63},{"n":"羽幌漁港","k":"漁港","r":"留萌","m":"羽幌町","lat":44.36,"lon":141.7},{"n":"稚内港","k":"港湾","r":"宗谷","m":"稚内市","lat":45.42,"lon":141.68},{"n":"鴛泊港","k":"港湾","r":"宗谷","m":"利尻富士町","lat":45.24,"lon":141.24},{"n":"香深港","k":"港湾","r":"宗谷","m":"礼文町","lat":45.3,"lon":141.04},{"n":"枝幸漁港","k":"漁港","r":"宗谷","m":"枝幸町","lat":44.94,"lon":142.58},{"n":"雄武漁港","k":"漁港","r":"オホーツク","m":"雄武町","lat":44.58,"lon":142.96},{"n":"紋別港","k":"港湾","r":"オホーツク","m":"紋別市","lat":44.36,"lon":143.37},{"n":"湧別漁港","k":"漁港","r":"オホーツク","m":"湧別町","lat":44.22,"lon":143.63},{"n":"常呂漁港","k":"漁港","r":"オホーツク","m":"北見市","lat":44.13,"lon":143.65},{"n":"網走港","k":"港湾","r":"オホーツク","m":"網走市","lat":44.02,"lon":144.28},{"n":"ウトロ漁港","k":"漁港","r":"オホーツク","m":"斜里町","lat":44.07,"lon":145.0},{"n":"羅臼漁港","k":"漁港","r":"根室","m":"羅臼町","lat":44.02,"lon":145.19},{"n":"根室港","k":"港湾","r":"根室","m":"根室市","lat":43.33,"lon":145.58},{"n":"花咲港","k":"港湾","r":"根室","m":"根室市","lat":43.28,"lon":145.57},{"n":"霧多布（浜中）","k":"漁港","r":"釧路","m":"浜中町","lat":43.09,"lon":145.12},{"n":"厚岸漁港","k":"漁港","r":"釧路","m":"厚岸町","lat":43.04,"lon":144.85},{"n":"釧路港","k":"港湾","r":"釧路","m":"釧路市","lat":42.97,"lon":144.37},{"n":"十勝港","k":"港湾","r":"十勝","m":"豊頃町","lat":42.73,"lon":143.68},{"n":"広尾漁港","k":"漁港","r":"十勝","m":"広尾町","lat":42.28,"lon":143.33},{"n":"様似漁港","k":"漁港","r":"日高","m":"様似町","lat":42.13,"lon":142.93},{"n":"浦河港","k":"港湾","r":"日高","m":"浦河町","lat":42.16,"lon":142.77},{"n":"鵡川漁港","k":"漁港","r":"胆振","m":"むかわ町","lat":42.55,"lon":141.93},{"n":"苫小牧西港","k":"港湾","r":"胆振","m":"苫小牧市","lat":42.6333,"lon":141.6167},{"n":"苫小牧東港","k":"港湾","r":"胆振","m":"苫小牧市・厚真町","lat":42.6,"lon":141.8167},{"n":"苫小牧海釣り施設（弁天）","k":"海釣り施設","r":"胆振","m":"苫小牧市","lat":42.61,"lon":141.77,"note":"住所は苫小牧市弁天。4月〜11月初旬の土日祝営業"},{"n":"白老漁港","k":"漁港","r":"胆振","m":"白老町","lat":42.54,"lon":141.35},{"n":"室蘭港","k":"港湾","r":"胆振","m":"室蘭市","lat":42.33,"lon":140.97},{"n":"伊達漁港","k":"漁港","r":"胆振","m":"伊達市","lat":42.46,"lon":140.86},{"n":"八雲漁港","k":"漁港","r":"渡島","m":"八雲町","lat":42.25,"lon":140.27},{"n":"森漁港","k":"漁港","r":"渡島","m":"森町","lat":42.11,"lon":140.58},{"n":"函館港","k":"港湾","r":"渡島","m":"函館市","lat":41.77,"lon":140.72},{"n":"戸井漁港","k":"漁港","r":"渡島","m":"函館市","lat":41.79,"lon":140.98},{"n":"松前港","k":"港湾","r":"渡島","m":"松前町","lat":41.43,"lon":140.11},{"n":"江差港","k":"港湾","r":"檜山","m":"江差町","lat":41.87,"lon":140.12},{"n":"石狩湾新港","k":"港湾","r":"石狩","m":"石狩市・小樽市","lat":43.2167,"lon":141.3},{"n":"古潭漁港","k":"漁港","r":"石狩","m":"石狩市厚田区","lat":43.3575,"lon":141.4261}].map(e=>Object.assign(e,{type:e.k==="ワカサギ湖"?"fresh":"sea"}));
+// 釣り場のデータ（data/*.json と同じ内容。tools/embed_data.py で埋め込む）。id は全国で一意。type は sea（海）か fresh（淡水）で、種別 k から推測しない
+const DB=[{"id":"hokkaido-lake-001","n":"網走湖","k":"湖","type":"fresh","pref":"北海道","r":"オホーツク","a":"道東","m":"網走市・大空町","lat":43.95,"lon":144.15,"note":"呼人・女満別の2会場"},{"id":"hokkaido-lake-006","n":"阿寒湖","k":"湖","type":"fresh","pref":"北海道","r":"釧路","a":"道東","m":"釧路市","lat":43.46,"lon":144.1,"note":"阿寒湖温泉街側に釣り場"},{"id":"hokkaido-lake-007","n":"塘路湖","k":"湖","type":"fresh","pref":"北海道","r":"釧路","a":"道東","m":"標茶町","lat":43.13,"lon":144.57},{"id":"hokkaido-lake-009","n":"糠平湖","k":"湖","type":"fresh","pref":"北海道","r":"十勝","a":"道東","m":"上士幌町","lat":43.37,"lon":143.2},{"id":"hokkaido-lake-010","n":"朱鞠内湖","k":"湖","type":"fresh","pref":"北海道","r":"上川","a":"道北","m":"幌加内町","lat":44.3,"lon":142.2},{"id":"hokkaido-lake-011","n":"しのつ湖","k":"湖","type":"fresh","pref":"北海道","r":"石狩","a":"道央","m":"新篠津村","lat":43.2,"lon":141.7},{"id":"hokkaido-lake-012","n":"茨戸川","k":"川","type":"fresh","pref":"北海道","r":"石狩","a":"道央","m":"札幌市北区・石狩市","lat":43.18,"lon":141.37},{"id":"hokkaido-lake-013","n":"大沼","k":"湖","type":"fresh","pref":"北海道","r":"渡島","a":"道南","m":"七飯町","lat":41.98,"lon":140.68},{"id":"hokkaido-lake-014","n":"洞爺湖","k":"湖","type":"fresh","pref":"北海道","r":"胆振","a":"道央","m":"洞爺湖町","lat":42.6,"lon":140.85,"note":"冬も全面は凍らないことが多い"},{"id":"hokkaido-lake-015","n":"ポロト湖","k":"湖","type":"fresh","pref":"北海道","r":"胆振","a":"道央","m":"白老町","lat":42.553,"lon":141.355},{"id":"hokkaido-lake-016","n":"桂沢湖","k":"湖","type":"fresh","pref":"北海道","r":"空知","a":"道央","m":"三笠市","lat":43.22,"lon":141.99},{"id":"hokkaido-lake-017","n":"かなやま湖","k":"湖","type":"fresh","pref":"北海道","r":"上川","a":"道北","m":"南富良野町","lat":43.15,"lon":142.53},{"id":"hokkaido-lake-018","n":"支笏湖","k":"湖","type":"fresh","pref":"北海道","r":"石狩","a":"道央","m":"千歳市","lat":42.754,"lon":141.328},{"id":"hokkaido-lake-019","n":"屈斜路湖","k":"湖","type":"fresh","pref":"北海道","r":"釧路","a":"道東","m":"弟子屈町","lat":43.617,"lon":144.311},{"id":"hokkaido-lake-020","n":"然別湖","k":"湖","type":"fresh","pref":"北海道","r":"十勝","a":"道東","m":"鹿追町","lat":43.282,"lon":143.117,"note":"釣りは期間限定・人数制限あり"},{"id":"hokkaido-lake-021","n":"チミケップ湖","k":"湖","type":"fresh","pref":"北海道","r":"オホーツク","a":"道東","m":"津別町","lat":43.637,"lon":143.875},{"id":"hokkaido-lake-022","n":"岩尾内湖","k":"湖","type":"fresh","pref":"北海道","r":"上川","a":"道北","m":"士別市","lat":44.108,"lon":142.716},{"id":"hokkaido-lake-002","n":"能取湖","k":"汽水湖","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"網走市","lat":44.07,"lon":144.12,"note":"海とつながった汽水湖。冬は氷上でチカ・コマイ"},{"id":"hokkaido-lake-005","n":"サロマ湖","k":"汽水湖","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"北見市・佐呂間町・湧別町","lat":44.13,"lon":143.95,"note":"海とつながった汽水湖。冬は氷上でチカ・コマイ"},{"id":"hokkaido-lake-008","n":"風蓮湖","k":"汽水湖","type":"sea","pref":"北海道","r":"根室","a":"根室","m":"根室市・別海町","lat":43.31,"lon":145.34,"note":"海とつながった汽水湖"},{"id":"hokkaido-port-001","n":"小樽港","k":"港湾","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"小樽市","lat":43.199,"lon":141.001},{"id":"hokkaido-port-002","n":"厚田漁港","k":"漁港","type":"sea","pref":"北海道","r":"石狩","a":"石狩","m":"石狩市","lat":43.398,"lon":141.432},{"id":"hokkaido-port-003","n":"余市港","k":"港湾","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"余市町","lat":43.2,"lon":140.78},{"id":"hokkaido-port-004","n":"岩内港","k":"港湾","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"岩内町","lat":42.98,"lon":140.51},{"id":"hokkaido-port-005","n":"寿都漁港","k":"漁港","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"寿都町","lat":42.79,"lon":140.23},{"id":"hokkaido-port-006","n":"増毛港","k":"港湾","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"増毛町","lat":43.857,"lon":141.526},{"id":"hokkaido-port-007","n":"留萌港","k":"港湾","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"留萌市","lat":43.94,"lon":141.63},{"id":"hokkaido-port-008","n":"羽幌港","k":"港湾","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"羽幌町","lat":44.36,"lon":141.7},{"id":"hokkaido-port-009","n":"稚内港","k":"港湾","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"稚内市","lat":45.42,"lon":141.68},{"id":"hokkaido-port-010","n":"鴛泊港","k":"港湾","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"利尻富士町","lat":45.24,"lon":141.24},{"id":"hokkaido-port-011","n":"香深港","k":"港湾","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"礼文町","lat":45.3,"lon":141.04},{"id":"hokkaido-port-012","n":"枝幸港","k":"港湾","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"枝幸町","lat":44.933,"lon":142.592},{"id":"hokkaido-port-013","n":"雄武漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"雄武町","lat":44.58,"lon":142.96},{"id":"hokkaido-port-014","n":"紋別港","k":"港湾","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"紋別市","lat":44.36,"lon":143.37},{"id":"hokkaido-port-015","n":"湧別漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"湧別町","lat":44.22,"lon":143.63},{"id":"hokkaido-port-016","n":"常呂漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"北見市","lat":44.126,"lon":144.102},{"id":"hokkaido-port-017","n":"網走港","k":"港湾","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"網走市","lat":44.02,"lon":144.28},{"id":"hokkaido-port-018","n":"ウトロ漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"斜里町","lat":44.07,"lon":145.0},{"id":"hokkaido-port-019","n":"羅臼漁港","k":"漁港","type":"sea","pref":"北海道","r":"根室","a":"根室","m":"羅臼町","lat":44.02,"lon":145.19},{"id":"hokkaido-port-020","n":"根室港","k":"港湾","type":"sea","pref":"北海道","r":"根室","a":"根室","m":"根室市","lat":43.33,"lon":145.58},{"id":"hokkaido-port-021","n":"花咲港","k":"港湾","type":"sea","pref":"北海道","r":"根室","a":"根室","m":"根室市","lat":43.28,"lon":145.57},{"id":"hokkaido-port-022","n":"霧多布港","k":"港湾","type":"sea","pref":"北海道","r":"釧路","a":"釧路","m":"浜中町","lat":43.09,"lon":145.12},{"id":"hokkaido-port-023","n":"厚岸漁港","k":"漁港","type":"sea","pref":"北海道","r":"釧路","a":"釧路","m":"厚岸町","lat":43.04,"lon":144.85},{"id":"hokkaido-port-024","n":"釧路港","k":"港湾","type":"sea","pref":"北海道","r":"釧路","a":"釧路","m":"釧路市","lat":42.97,"lon":144.37},{"id":"hokkaido-port-025","n":"大津漁港","k":"漁港","type":"sea","pref":"北海道","r":"十勝","a":"十勝","m":"豊頃町","lat":42.674,"lon":143.639},{"id":"hokkaido-port-026","n":"十勝港","k":"港湾","type":"sea","pref":"北海道","r":"十勝","a":"十勝","m":"広尾町","lat":42.285,"lon":143.325},{"id":"hokkaido-port-027","n":"様似漁港","k":"漁港","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"様似町","lat":42.13,"lon":142.93},{"id":"hokkaido-port-028","n":"浦河港","k":"港湾","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"浦河町","lat":42.16,"lon":142.77},{"id":"hokkaido-port-029","n":"鵡川漁港","k":"漁港","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"むかわ町","lat":42.55,"lon":141.93},{"id":"hokkaido-port-030","n":"苫小牧西港","k":"港湾","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"苫小牧市","lat":42.6333,"lon":141.6167},{"id":"hokkaido-port-032","n":"白老港","k":"港湾","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"白老町","lat":42.523,"lon":141.318,"status":"banned"},{"id":"hokkaido-port-033","n":"室蘭港","k":"港湾","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"室蘭市","lat":42.33,"lon":140.97},{"id":"hokkaido-port-034","n":"伊達漁港","k":"漁港","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"伊達市","lat":42.46,"lon":140.86},{"id":"hokkaido-port-035","n":"八雲漁港","k":"漁港","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"八雲町","lat":42.25,"lon":140.27},{"id":"hokkaido-port-036","n":"森港","k":"港湾","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"森町","lat":42.113,"lon":140.592},{"id":"hokkaido-port-037","n":"函館港","k":"港湾","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"函館市","lat":41.77,"lon":140.72},{"id":"hokkaido-port-038","n":"戸井漁港","k":"漁港","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"函館市","lat":41.72,"lon":140.99},{"id":"hokkaido-port-039","n":"松前港","k":"港湾","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"松前町","lat":41.43,"lon":140.11},{"id":"hokkaido-port-040","n":"江差港","k":"港湾","type":"sea","pref":"北海道","r":"檜山","a":"檜山","m":"江差町","lat":41.87,"lon":140.12},{"id":"hokkaido-port-041","n":"苫小牧東港","k":"港湾","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"苫小牧市・厚真町","lat":42.6,"lon":141.8167},{"id":"hokkaido-port-042","n":"石狩湾新港","k":"港湾","type":"sea","pref":"北海道","r":"石狩","a":"石狩","m":"石狩市・小樽市","lat":43.2167,"lon":141.3},{"id":"hokkaido-port-043","n":"古潭漁港","k":"漁港","type":"sea","pref":"北海道","r":"石狩","a":"石狩","m":"石狩市","lat":43.3575,"lon":141.4261},{"id":"hokkaido-port-044","n":"美国漁港","k":"漁港","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"積丹町","lat":43.297,"lon":140.606},{"id":"hokkaido-port-045","n":"瀬棚港","k":"港湾","type":"sea","pref":"北海道","r":"檜山","a":"檜山","m":"せたな町","lat":42.453,"lon":139.851},{"id":"hokkaido-port-046","n":"乙部漁港","k":"漁港","type":"sea","pref":"北海道","r":"檜山","a":"檜山","m":"乙部町","lat":41.969,"lon":140.134},{"id":"hokkaido-port-047","n":"奥尻港","k":"港湾","type":"sea","pref":"北海道","r":"檜山","a":"檜山","m":"奥尻町","lat":42.176,"lon":139.517},{"id":"hokkaido-port-048","n":"木古内漁港（札苅）","k":"漁港","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"木古内町","lat":41.699,"lon":140.483},{"id":"hokkaido-port-049","n":"門別漁港","k":"漁港","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"日高町","lat":42.473,"lon":142.073},{"id":"hokkaido-port-050","n":"静内漁港","k":"漁港","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"新ひだか町","lat":42.324,"lon":142.372},{"id":"hokkaido-port-051","n":"えりも港","k":"港湾","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"えりも町","lat":42.016,"lon":143.145},{"id":"hokkaido-port-052","n":"苫前漁港","k":"漁港","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"苫前町","lat":44.313,"lon":141.651},{"id":"hokkaido-port-053","n":"天塩港","k":"港湾","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"天塩町","lat":44.874,"lon":141.737},{"id":"hokkaido-port-054","n":"浜鬼志別漁港","k":"漁港","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"猿払村","lat":45.342,"lon":142.168},{"id":"hokkaido-port-055","n":"頓別漁港","k":"漁港","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"浜頓別町","lat":45.135,"lon":142.394},{"id":"hokkaido-port-056","n":"興部漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"興部町","lat":44.478,"lon":143.142},{"id":"hokkaido-port-057","n":"斜里漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"斜里町","lat":43.921,"lon":144.668},{"id":"hokkaido-port-058","n":"白糠漁港","k":"漁港","type":"sea","pref":"北海道","r":"釧路","a":"釧路","m":"白糠町","lat":42.952,"lon":144.085}];
+// 県ごとの地域の並び・見出しの区分・プリセット（JSON の prefs と同じ内容）
+const PREFDEF=[{"name":"北海道","regions":["空知","石狩","後志","胆振","日高","渡島","檜山","上川","留萌","宗谷","オホーツク","十勝","釧路","根室"],"sections":[["道央",["空知","石狩","後志","胆振","日高"]],["道南",["渡島","檜山"]],["道北",["上川","留萌","宗谷"]],["道東",["オホーツク","十勝","釧路","根室"]]],"presets":[{"section":"道央","name":"道央・海","spots":["hokkaido-port-001","hokkaido-port-003","hokkaido-port-042","hokkaido-port-043","hokkaido-port-002","hokkaido-port-030","hokkaido-port-041"]},{"section":"道南","name":"道南・海","spots":["hokkaido-port-045","hokkaido-port-046","hokkaido-port-040","hokkaido-port-039","hokkaido-port-037","hokkaido-port-038","hokkaido-port-036","hokkaido-port-035"]},{"section":"道北","name":"道北・海","spots":["hokkaido-port-006","hokkaido-port-007","hokkaido-port-052","hokkaido-port-008","hokkaido-port-053","hokkaido-port-009","hokkaido-port-055","hokkaido-port-012"]},{"section":"道東","name":"道東・海","spots":["hokkaido-port-014","hokkaido-port-017","hokkaido-port-018","hokkaido-port-019","hokkaido-port-020","hokkaido-port-023","hokkaido-port-024","hokkaido-port-026"]},{"section":"道東","name":"道東・氷上のチカ","spots":["hokkaido-lake-005","hokkaido-lake-002","hokkaido-lake-008"]},{"section":"道央","name":"道央・ワカサギ","spots":["hokkaido-lake-012","hokkaido-lake-011","hokkaido-lake-015","hokkaido-lake-016"]},{"section":"道央","name":"道央・ヒメマス","spots":["hokkaido-lake-018","hokkaido-lake-014"]},{"section":"道東","name":"道東・ワカサギ","spots":["hokkaido-lake-001","hokkaido-lake-006","hokkaido-lake-007","hokkaido-lake-009","hokkaido-lake-021"]},{"section":"道東","name":"道東・湖のトラウト","spots":["hokkaido-lake-006","hokkaido-lake-019","hokkaido-lake-020"]}]}];
 const MAX_SPOTS=8, MAX_BANKS=10;
-const fromDB=n=>{const e=DB.find(x=>x.n===n);return {name:e.n,lat:e.lat,lon:e.lon,type:e.type,...(e.note?{note:e.note}:{})}};
-const DEF_STATE=()=>({cur:0,banks:[
-  {name:"海釣り",spots:["小樽港","石狩湾新港","古潭漁港","苫小牧西港"].map(fromDB)},
-  {name:"ワカサギ",spots:["茨戸川","ポロト湖","桂沢湖","かなやま湖"].map(fromDB)}]});
+// 釣り場は id で引く（名前は全国で重なる）。保存するリストには id も入れ、データを直したときに写しを更新できるようにする
+const byId=new Map(DB.map(e=>[e.id,e]));
+const fromDB=id=>{const e=byId.get(id);return {id:e.id,name:e.n,lat:e.lat,lon:e.lon,type:e.type,...(e.note?{note:e.note}:{})}};
+const PREFS=[...new Set(DB.map(e=>e.pref))];  // 釣り場のある都道府県（データに出てくる順）
+const prefDef=pref=>PREFDEF.find(x=>x.name===pref)||{name:pref,regions:[],sections:[],presets:[]};
+// 見出しの区分。定義にない地域は、県名の見出しにまとめる（北海道以外を足しても止まらない）
+const sectionOf=(def,area)=>{const s=def.sections.find(([n,rs])=>n===area||rs.includes(area));return s?s[0]:def.name};
+const isBanned=e=>e.status==="banned";  // 釣り禁止の釣り場は、おすすめリストに入れない（自分で足すのは止めない）
+const SHOW_MAX=60;  // 釣り場の追加画面に一度に出す件数の上限
+const SPLIT=6;  // 8か所を超える地域は、この数ずつのリストに分ける（真ん中は重なってよい）
+const byLon=(a,b)=>a.lon-b.lon;
+// 自動の地域のリスト。釣り場の area（海は地域名、淡水は区分名）ごとに1つ。8か所を超えたら、長く広がる向き（東西か南北）に並べて端から SPLIT か所ずつ取る
+function autoLists(type,pref){
+  const def=prefDef(pref), out=[];
+  const push=(a,base,es)=>{
+    const tag=type==="fresh"?"淡水":"海";
+    if(es.length<=MAX_SPOTS){out.push({a,n:`${base}・${tag}`,s:es.sort(byLon)});return}
+    const la=es.map(e=>e.lat), lo=es.map(e=>e.lon), c=Math.cos((Math.min(...la)+Math.max(...la))/2*Math.PI/180);
+    const ew=(Math.max(...lo)-Math.min(...lo))*c>=Math.max(...la)-Math.min(...la);
+    es.sort(ew?byLon:(x,y)=>y.lat-x.lat);
+    const n=es.length, k=Math.ceil((n-1)/(SPLIT-1));  // 隣どうしが必ず1か所以上重なる数
+    const ends=ew?["西部","東部"]:["北部","南部"];
+    for(let i=0;i<k;i++){
+      const st=Math.round(i*(n-SPLIT)/(k-1));
+      const part=i===0?ends[0]:i===k-1?ends[1]:k===3?"中部":`中部${i}`;
+      out.push({a,n:`${base}${part}・${tag}`,s:es.slice(st,st+SPLIT).sort(byLon)});
+    }
+  };
+  const all=DB.filter(e=>e.type===type&&e.pref===pref&&!isBanned(e)), areas=[];
+  all.forEach(e=>{const a=e.a||e.r;if(!areas.includes(a))areas.push(a)});
+  const rank=a=>{const i=def.regions.indexOf(a);return i<0?999:i};
+  areas.sort((x,y)=>rank(x)-rank(y));  // 地域は公式の順。定義にないものはデータの順
+  areas.forEach(a=>push(sectionOf(def,a),a,all.filter(e=>(e.a||e.r)===a)));
+  return out;
+}
+// 2画面目の項目：区分ごとに、プリセットを先に、自動の地域のリストを後に
+function newItems(type,pref){
+  const def=prefDef(pref);
+  const ps=def.presets.map(p=>({a:p.section,n:p.name,s:p.spots.map(id=>byId.get(id)).filter(Boolean).sort(byLon)})).filter(p=>p.s.length&&p.s[0].type===type);
+  const au=autoLists(type,pref);
+  const secs=[...def.sections.map(s=>s[0]),def.name];
+  return secs.map(a=>[a,[...ps.filter(p=>p.a===a),...au.filter(p=>p.a===a)]]).filter(x=>x[1].length);
+}
 const WX={0:"快晴",1:"晴",2:"薄曇",3:"曇",45:"霧",48:"霧",51:"霧雨",53:"霧雨",55:"霧雨",56:"雨",57:"雨",61:"雨",63:"雨",65:"大雨",66:"雨",67:"雨",71:"雪",73:"雪",75:"大雪",77:"雪",80:"にわか雨",81:"にわか雨",82:"強いにわか雨",85:"にわか雪",86:"にわか雪",95:"雷雨",96:"雷雨",99:"雷雨"};
 const DIR=["北","北北東","北東","東北東","東","東南東","南東","南南東","南","南南西","南西","西南西","西","西北西","北西","北北西"];
 const WEEK="日月火水木金土";
@@ -392,10 +463,19 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 // 北風（0度）で下向き。風が吹いていく方向を指す
 const arrow=(deg,color="currentColor")=>deg==null?"":`<svg class="arr" viewBox="0 0 20 20" style="transform:rotate(${deg}deg)" aria-label="${dirName(deg)}の風"><path d="M10 2v14M4.5 10.5 10 17l5.5-6.5" fill="none" stroke="${color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
-function loadState(){try{const s=JSON.parse(localStorage.getItem("nagical-banks"));if(s&&Array.isArray(s.banks)&&s.banks.length)return s}catch(e){}return DEF_STATE()}
+// 保存がない（初回・初期化の直後）ときはリスト0個で始め、おすすめリストの画面（#/new）でリストを作ってもらう
+function loadState(){try{const s=JSON.parse(localStorage.getItem("nagical-banks"));if(s&&Array.isArray(s.banks)&&s.banks.length)return s}catch(e){}return {cur:0,banks:[]}}
 let state=loadState(); if(!(state.cur>=0&&state.cur<state.banks.length))state.cur=0;
-let spots=state.banks[state.cur].spots;
-function saveSpots(){try{localStorage.setItem("nagical-banks",JSON.stringify(state))}catch(e){}}
+let spots=state.banks.length?state.banks[state.cur].spots:[];
+const firstRun=()=>!state.banks.length;
+// リストを作るまでは保存しない（選ばずに閉じたら、次に開いたときも初回の画面を出す）
+function saveSpots(){if(firstRun())return;try{localStorage.setItem("nagical-banks",JSON.stringify(state))}catch(e){}}
+// 保存したリストの釣り場に id を補い、データ側の名前・座標の修正を写す（手で足した釣り場や、昔の座標のままで一致しないものはそのまま）
+(function(){let ch=false;state.banks.forEach(b=>b.spots.forEach((s,i)=>{
+  const e=s.id?byId.get(s.id):DB.find(x=>x.n===s.name&&x.lat===s.lat&&x.lon===s.lon);
+  if(!e)return;
+  const n=fromDB(e.id); if(JSON.stringify(n)!==JSON.stringify(s)){b.spots[i]=n;ch=true}
+}));if(ch)saveSpots()})();
 function setBank(i){state.cur=i;spots=state.banks[i].spots;saveSpots()}
 // 取得した予報はブラウザに保存し、再読み込みしても使い回す
 // ・取り直しは［最新の予報を取得］かページの再読み込みのときだけで、取得から30分たったものに限る
@@ -558,6 +638,7 @@ function renderList(){
   updateReload(); renderWin();
   $("banks").innerHTML=state.banks.map((b,i)=>`<button role="tab" aria-selected="${i===state.cur}" data-b="${i}">${esc(b.name)}</button>`).join("");
   $("banks").querySelectorAll("button").forEach(b=>b.onclick=()=>{setBank(+b.dataset.b);renderList();loadAll(false)});
+  $("bank-new").hidden=state.banks.length>=MAX_BANKS;
   const isOpen=d=>isOff(d)||opened.has(d);
   // 表の左上のマスに、予報の取得時刻（いちばん古いもの）を出す
   let h=`<tr><th class="spot fetched">${ats.length?`${hm(Math.min(...ats))}<br>取得`:""}</th>${days.map((d,i)=>{
@@ -766,11 +847,14 @@ $("th-ng").onchange=()=>setTh({ok:state.th.ok,ng:+$("th-ng").value});
 $("th-reset").onclick=()=>setTh({...DEF_TH});
 
 const dist=(a,b)=>{const r=Math.PI/180,x=(b.lon-a.lon)*r*Math.cos((a.lat+b.lat)/2*r),y=(b.lat-a.lat)*r;return Math.sqrt(x*x+y*y)*6371};
-const sameSpot=(a,b)=>a.name===b.name&&a.lat===b.lat&&a.lon===b.lon;
+const sameSpot=(a,b)=>a.id&&b.id?a.id===b.id:a.name===b.name&&a.lat===b.lat&&a.lon===b.lon;  // どちらも id があれば id で、なければ（手で足した釣り場）名前と座標で比べる
 const ICON_X=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>`;
+const ICON_PLUS=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`;
+const ICON_CHECK=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
+const ICON_NEXT=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>`;
 const ICON_EDIT=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>`;
 const ICON_GRIP=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14M5 12h14M5 16h14"/></svg>`;
-let nearPos=null, focusName=false;
+let nearPos=null;
 
 // 配列の要素を from から to へ動かす
 const moveItem=(a,from,to)=>{a.splice(to,0,a.splice(from,1)[0])};
@@ -820,7 +904,7 @@ function toast(text,undo){
 function renderSet(){
   renderThForm();
   const one=state.banks.length<=1;
-  $("set-newbank").disabled=state.banks.length>=MAX_BANKS;
+  $("set-newbank").disabled=$("set-preset").disabled=state.banks.length>=MAX_BANKS;
   // 名前か鉛筆を押すとリストの画面を開く。右端の［×］とつまみは常に出す
   $("set-banks").innerHTML=state.banks.map((b,i)=>`<li><button class="rowbtn" data-open="${i}" aria-label="${esc(b.name)}（${b.spots.length}/${MAX_SPOTS}か所）を編集"><span class="rowtxt"><b>${esc(b.name)}</b><small>${b.spots.length}/${MAX_SPOTS}か所</small></span><span class="edit">${ICON_EDIT}</span></button>${editBtns(i,b.name,!one)}</li>`).join("");
   $("set-banks").querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{location.hash=`#/settings/${b.dataset.open}`});
@@ -839,9 +923,67 @@ function delBank(i){
 }
 $("set-newbank").onclick=()=>{
   if(state.banks.length>=MAX_BANKS)return;
-  state.banks.push({name:`リスト${state.banks.length+1}`,spots:[]}); saveSpots();
-  focusName=true; location.hash=`#/settings/${state.banks.length-1}`;
+  const i=state.banks.length;
+  state.banks.push({name:`リスト${i+1}`,spots:[]}); setBank(i);
+  location.hash=`#/settings/${i}/add?from=new`;
 };
+$("set-preset").onclick=()=>{if(state.banks.length<MAX_BANKS)location.hash="#/new"};
+// すべて初期化：nagical- で始まる保存を全部消し、最初の画面から読み込み直す（画面のファイルの保存は残す）
+$("set-reset").onclick=()=>{
+  if(!confirm("リスト・設定・保存した予報をすべて消して、最初の画面に戻ります。よろしいですか？"))return;
+  try{Object.keys(localStorage).filter(k=>k.startsWith("nagical-")).forEach(k=>localStorage.removeItem(k))}catch(e){}
+  history.replaceState(null,"","#/new"); location.reload();
+};
+
+/* おすすめリスト（#/new：海か淡水かを選ぶ ／ #/new/sea・#/new/fresh：リストを選ぶ） */
+function renderNew(type,pi,fromList){
+  const first=firstRun(), q=fromList?"?from=list":"";  // ?from=list は一覧のタブの「＋ 追加」から来た印
+  // 初回はアプリの見出し、それ以外は戻るボタンと画面名。「自分で作る」は初回と一覧から来たときだけ出す（アプリの設定には専用のボタンがある）
+  $("new-brand").hidden=!first; $("new-ttl").hidden=first;
+  $("new-back").hidden=first&&!type;
+  $("new-ttl").textContent=fromList?"リストを作る":"おすすめリストから作る";
+  // 県が2つ以上あるときは、ジャンルのあとに都道府県を選ぶ段が入る（#/new/sea → #/new/sea/0）
+  const askPref=type&&PREFS.length>1&&pi==null, pref=PREFS[pi||0];
+  $("new-lead").textContent=askPref?"都道府県を選んでください":type?`${type==="sea"?"海釣り":"淡水釣り"}のリスト。押すとリストを作って一覧を開きます`:first?"最初のリストを作ります":"";
+  $("new-lead").hidden=!$("new-lead").textContent;
+  $("new-genre").hidden=!!type; $("new-items").hidden=!type;
+  const row=(attr,name,sub,icon,label)=>`<li><button class="dbrow" ${attr}><span><b>${esc(name)}</b>${sub}</span><span class="st">${icon}<span class="vh">${label}</span></span></button></li>`;
+  if(!type){
+    $("new-genre").innerHTML=[["sea","海釣り","漁港・港湾・汽水湖"],["fresh","淡水釣り","湖・川"]].map(([t,n,d])=>row(`data-t="${t}"`,n,`<small>${d}</small>`,ICON_NEXT,"選ぶ")).join("")
+      +(first||fromList?row(`data-t="self"`,"自分で作る","<small>空のリストに、釣り場を1つずつ足します</small>",ICON_NEXT,"選ぶ"):"");
+    $("new-genre").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{
+      const t=b.dataset.t;
+      if(t!=="self"){location.hash=`#/new/${t}${q}`;return}
+      const i=state.banks.length;
+      state.banks.push({name:first?"マイリスト":`リスト${i+1}`,spots:[]}); setBank(i);
+      location.replace(`#/settings/${i}/add?from=new`);
+    });
+    return;
+  }
+  if(askPref){
+    $("new-items").innerHTML=`<ul class="dblist">`+PREFS.filter(pf=>DB.some(e=>e.pref===pf&&e.type===type)).map(pf=>{
+      const i=PREFS.indexOf(pf);
+      return row(`data-p="${i}"`,pf,`<small class="cnt">${DB.filter(e=>e.pref===pf&&e.type===type).length}か所</small>`,ICON_NEXT,"選ぶ");
+    }).join("")+`</ul>`;
+    $("new-items").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{location.hash=`#/new/${type}/${b.dataset.p}${q}`});
+    return;
+  }
+  const groups=newItems(type,pref);
+  $("new-items").innerHTML=groups.map(([a,items])=>`<h2 class="areah">${a}</h2><ul class="dblist">`
+    +items.map((p,i)=>row(`data-a="${a}" data-i="${i}"`,p.n,`<small class="cnt">${p.s.length}か所</small><small>${p.s.map(e=>esc(e.n)).join("・")}</small>`,ICON_PLUS,"このリストを作る")).join("")+`</ul>`).join("");
+  $("new-items").querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{
+    if(state.banks.length>=MAX_BANKS)return;
+    const p=groups.find(g=>g[0]===b.dataset.a)[1][+b.dataset.i];
+    state.banks.push({name:p.n,spots:p.s.map(e=>fromDB(e.id))}); setBank(state.banks.length-1);
+    location.replace("#/");  // 戻るボタンでこの画面に戻らないよう、履歴を置き換える
+  });
+}
+$("new-back").onclick=()=>{
+  const [path,qs=""]=location.hash.split("?"), seg=path.split("/").length-2;  // #/new → 0、#/new/sea → 1、#/new/sea/0 → 2
+  location.hash=seg>0?path.replace(/\/[^/]+$/,"")+(qs?"?"+qs:""):qs==="from=list"?"#/":"#/settings";
+};
+$("bank-new").onclick=()=>{if(state.banks.length<MAX_BANKS)location.hash="#/new?from=list"};
+$("new-help").onclick=()=>$("help-btn").onclick();
 
 /* リストの画面 */
 function renderBank(bi){
@@ -860,18 +1002,21 @@ function renderBank(bi){
     toast(`${sp.name}を削除しました`,()=>{if(B.spots.length<MAX_SPOTS){B.spots.splice(Math.min(i,B.spots.length),0,sp);saveSpots()}route()});
   });
   sortable($("bank-spots"),(from,to)=>{moveItem(B.spots,from,to);saveSpots();renderBank(bi)});
-  if(focusName){focusName=false;$("bank-name").focus();$("bank-name").select()}
 }
 const bankIdx=()=>{const m=location.hash.match(/^#\/settings\/(\d+)/);return m?+m[1]:-1};
-// 名前は入力欄から離れるか改行キーで保存する。空なら元に戻す
-$("bank-name").onchange=()=>{
-  const B=state.banks[bankIdx()]; if(!B)return;
-  const n=$("bank-name").value.trim();
-  if(!n){$("bank-name").value=B.name;return}
-  B.name=n; saveSpots();
-  const s=$("bank-saved"); s.classList.add("on"); clearTimeout(s.t); s.t=setTimeout(()=>s.classList.remove("on"),1500);
-};
-$("bank-name").onkeydown=e=>{if(e.key==="Enter")$("bank-name").blur()};
+// 名前は入力欄から離れるか改行キーで保存する。空なら元に戻す（リストの画面と、新しく作ったリストの追加画面で使う）
+function nameInput(inp,saved,after){
+  inp.onchange=()=>{
+    const B=state.banks[bankIdx()]; if(!B)return;
+    const n=inp.value.trim();
+    if(!n){inp.value=B.name;return}
+    B.name=n; saveSpots(); if(after)after();
+    saved.classList.add("on"); clearTimeout(saved.t); saved.t=setTimeout(()=>saved.classList.remove("on"),1500);
+  };
+  inp.onkeydown=e=>{if(e.key==="Enter")inp.blur()};
+}
+nameInput($("bank-name"),$("bank-saved"));
+nameInput($("add-name"),$("add-saved"),()=>renderAdd(bankIdx()));
 $("bank-add").onclick=()=>{location.hash=`#/settings/${bankIdx()}/add`};
 $("bank-back").onclick=()=>{location.hash="#/settings"};
 
@@ -884,19 +1029,34 @@ function addSpot(B,sp){
 }
 function renderAdd(bi){
   const B=state.banks[bi], full=B.spots.length>=MAX_SPOTS;
+  // 「自分で作る」で作ったばかりのリスト（?from=new）は、ここで名前を付けられるようにする
+  const isNew=location.hash.endsWith("?from=new");
+  $("add-namebox").hidden=!isNew;
+  if(isNew&&document.activeElement!==$("add-name"))$("add-name").value=B.name;
   $("add-count").textContent=`「${B.name}」${B.spots.length}/${MAX_SPOTS}か所`+(full?"（いっぱいです）":"");
-  const q=$("db-q").value.trim(), reg=$("db-region").value, kind=$("db-kind").value;
-  // 名前・市町村・地域のどれかに含まれていれば出す
-  let list=DB.filter(e=>(!q||(e.n+e.m+e.r).includes(q))&&(!reg||e.r===reg)&&(!kind||e.type===kind));
+  const q=$("db-q").value.trim(), reg=$("db-region").value, kind=$("db-kind").value;  // reg は「県/地域」
+  // 名前・市町村・地域・県のどれかに含まれていれば出す
+  let list=DB.filter(e=>(!q||(e.n+e.m+e.r+e.pref).includes(q))&&(!reg||`${e.pref}/${e.r}`===reg)&&(!kind||e.type===kind));
   if(nearPos)list=list.map(e=>({...e,d:dist(nearPos,e)})).sort((a,b)=>a.d-b.d);
+  // 件数が多いときは先頭だけ描く（全国のデータでも入力のたびに固まらないように）
+  const total=list.length; list=list.slice(0,SHOW_MAX);
   $("dblist").innerHTML=list.length?list.map(e=>{
-    const done=B.spots.some(x=>sameSpot(x,{name:e.n,lat:e.lat,lon:e.lon}));
-    return `<li><button class="dbrow${done?" done":""}" data-n="${esc(e.n)}" ${done||full?"disabled":""}><span><b>${esc(e.n)}</b><small>${e.r}　${esc(e.m)}　${e.type==="fresh"?"淡水":"海"}${e.d!=null?`　約${Math.round(e.d)}km`:""}</small>${e.note?`<small>${esc(e.note)}</small>`:""}</span><span class="st">${done?"追加済み":"追加"}</span></button></li>`}).join(""):`<li class="empty">条件に合う釣り場がありません。</li>`;
-  $("dblist").querySelectorAll("button[data-n]").forEach(b=>b.onclick=()=>{addMsg("");if(addSpot(B,fromDB(b.dataset.n)))renderAdd(bi)});
+    const done=B.spots.some(x=>sameSpot(x,{id:e.id,name:e.n,lat:e.lat,lon:e.lon}));
+    return `<li><button class="dbrow${done?" done":""}" data-id="${esc(e.id)}" ${done||full?"disabled":""}><span><b>${esc(e.n)}</b><small>${PREFS.length>1?esc(e.pref)+"　":""}${e.r}　${esc(e.m)}　${e.type==="fresh"?"淡水":"海"}${e.d!=null?`　約${Math.round(e.d)}km`:""}</small>${e.note?`<small>${esc(e.note)}</small>`:""}</span><span class="st">${done?ICON_CHECK:ICON_PLUS}<span class="vh">${done?"追加済み":"追加"}</span></span></button></li>`}).join(""):`<li class="empty">条件に合う釣り場がありません。</li>`;
+  $("dblist").querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>{addMsg("");if(addSpot(B,fromDB(b.dataset.id)))renderAdd(bi)});
+  if(total>SHOW_MAX)$("dblist").insertAdjacentHTML("beforeend",`<li class="empty">${total}件のうち${nearPos?"近い順に":"先頭の"}${SHOW_MAX}件を表示しています。名前や地域で絞り込んでください。</li>`);
 }
-(function(){const regs=[...new Set(DB.map(e=>e.r))];$("db-region").innerHTML=`<option value="">すべての地域</option>`+regs.map(r=>`<option>${r}</option>`).join("")})();
+// 地域の絞り込み：県ごとに、定義の順（なければデータの順）。県が1つなら見出しは付けない
+(function(){
+  const opt=(pref,r)=>`<option value="${esc(pref+"/"+r)}">${esc(r)}</option>`;
+  const groups=PREFS.map(pref=>{
+    const have=[...new Set(DB.filter(e=>e.pref===pref).map(e=>e.r))], order=prefDef(pref).regions;
+    return [pref,have.sort((a,b)=>(order.indexOf(a)<0?999:order.indexOf(a))-(order.indexOf(b)<0?999:order.indexOf(b)))];
+  });
+  $("db-region").innerHTML=`<option value="">すべての地域</option>`+groups.map(([pref,rs])=>PREFS.length>1?`<optgroup label="${esc(pref)}">${rs.map(r=>opt(pref,r)).join("")}</optgroup>`:rs.map(r=>opt(pref,r)).join("")).join("");
+})();
 $("db-q").oninput=$("db-region").onchange=$("db-kind").onchange=()=>renderAdd(bankIdx());
-$("add-done").onclick=()=>{location.hash=location.hash.endsWith("?from=list")?"#/":`#/settings/${bankIdx()}`};
+$("add-done").onclick=()=>{location.hash=/\?from=(list|new)$/.test(location.hash)?"#/":`#/settings/${bankIdx()}`};
 function getPos(btn,ok,ng){
   if(!navigator.geolocation){addMsg("この端末では位置情報を使えません");return}
   if(btn.disabled)return; btn.disabled=true;  // 取得中は押せない
@@ -919,14 +1079,19 @@ function route(){
   const h=location.hash||"#/";
   if(h==="#/spots"){location.replace("#/settings");return}  // 古いURL
   const m=h.match(/^#\/d\/(\d+)\/(\d{4}-\d{2}-\d{2})$/);
-  const s=h.match(/^#\/settings(?:\/(\d+)(\/add(?:\?from=list)?)?)?$/);  // ?from=list は一覧から来た印（［完了］で一覧に戻る）
+  const s=h.match(/^#\/settings(?:\/(\d+)(\/add(?:\?from=(?:list|new))?)?)?$/);  // ?from=list は一覧から来た印、?from=new は「自分で作る」で作った印（どちらも［完了］で一覧に戻る）
+  const nw=h.match(/^#\/new(?:\/(sea|fresh)(?:\/(\d+))?)?(\?from=list)?$/);
+  // リストがないうちは、おすすめリストの画面だけを出す。リストが10個あるときは開かない
+  if(firstRun()&&!nw){location.replace("#/new");return}
+  if(nw&&state.banks.length>=MAX_BANKS){location.replace("#/settings");return}
   if(s&&s[1]!=null&&!state.banks[+s[1]]){location.replace("#/settings");return}  // ないリスト
-  const view=m?"day":!s?"list":s[2]?"add":s[1]!=null?"bank":"set";
+  const view=nw?"new":m?"day":!s?"list":s[2]?"add":s[1]!=null?"bank":"set";
   // 画面を移ったら「元に戻す」は閉じる
   if(view!==lastView){hideToast();if(view==="add"){$("db-q").value="";addMsg("")}}
   lastView=view;
-  ["list","day","set","bank","add"].forEach(v=>$("v-"+v).hidden=v!==view);
-  if(view==="day")renderDay(+m[1],m[2]);
+  ["list","new","day","set","bank","add"].forEach(v=>$("v-"+v).hidden=v!==view);
+  if(view==="new")renderNew(nw[1],nw[2]==null?null:+nw[2],!!nw[3]);
+  else if(view==="day")renderDay(+m[1],m[2]);
   else if(view==="set")renderSet();
   else if(view==="bank")renderBank(+s[1]);
   else if(view==="add")renderAdd(+s[1]);

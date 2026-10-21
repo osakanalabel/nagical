@@ -2,7 +2,7 @@
 // 予報（Open-Meteo）と祝日APIはここでは扱わない（アプリ側の localStorage で30分キャッシュしているため）。
 // 画面（index.html）は通信を優先し、つながらないときだけ保存分を出す。アイコンなどはキャッシュを優先する。
 // 公開のたびに VERSION を上げる（アイコンなどを取り込み直し、古い版のキャッシュを消すため）。
-const VERSION = "v7";
+const VERSION = "v8";
 const CACHE = `nagical-${VERSION}`;
 const SHELL = [
   "./",

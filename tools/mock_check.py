@@ -86,7 +86,10 @@ def on_forecast(route):
 
 SHOTS.mkdir(exist_ok=True)
 with sync_playwright() as p:
-    browser = p.chromium.launch()
+    try:
+        browser = p.chromium.launch()
+    except Exception:
+        browser = p.chromium.launch(channel="msedge")  # Playwright のブラウザを入れていないときは、端末の Edge を使う
     page = browser.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2)
     page.route("**/fonts.googleapis.com/**", lambda r: r.abort())
     page.route("**/holidays-jp.github.io/**", lambda r: r.abort())
@@ -96,6 +99,10 @@ with sync_playwright() as p:
     page.on("pageerror", lambda e: errors.append(str(e)))
 
     page.goto(HTML)
+    # 保存が空なので初回の画面（おすすめリスト）が出る。海釣りの先頭のリストを作る
+    page.screenshot(path=str(SHOTS / "0-new.png"))
+    page.click("#new-genre [data-t=sea]")
+    page.click("#new-items .dbrow >> nth=0")
     page.wait_for_timeout(800)
     page.screenshot(path=str(SHOTS / "1-list.png"), full_page=True)
     print("初回表示の取得回数:", count["forecast"])
