@@ -201,6 +201,10 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
 .banks{display:flex;gap:6px;overflow-x:auto;margin:14px -16px 0;padding:0 16px;border-bottom:2px solid var(--accent)}
 .banks button{flex:none;border:0;border-radius:6px 6px 0 0;background:rgba(255,255,255,.06);color:var(--sub);min-height:40px;padding:8px 14px}
 .banks button[aria-selected="true"]{background:var(--accent);color:var(--ink);font-weight:700}
+.offdays{display:flex;gap:4px;margin-top:12px}
+.offdays button{flex:1;min-width:0;padding:8px 0;background:transparent;color:var(--sub)}
+.offdays button[aria-pressed="true"]{background:var(--water-line);border-color:var(--water-line);color:var(--head);font-weight:700}
+.offdays button[data-k="h"]{margin-left:12px}  /* 祝日は曜日と別の選択なので少し離す */
 .banks .tabs{display:flex;gap:6px;flex:none}
 .banks button.banknew{background:none;color:var(--water-line);font-weight:700}
 .bankbar{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:12px}
@@ -305,10 +309,10 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
   <h3>操作</h3>
   <dl class="help-dl">
     <dt>マス</dt><dd>押すと、その日の詳細を開きます</dd>
-    <dt>平日の列</dt><dd>細くたたんであります。日付かマスを押すと開きます</dd>
+    <dt>釣りに行く曜日以外の列</dt><dd>細くたたんであります。日付かマスを押すと開き、開いた日は覚えておきます。釣りに行く曜日と祝日（初期値は土日祝）はアプリの設定で選べます</dd>
     <dt>並べ替え</dt><dd>リストのタブか釣り場名を約0.5秒押し続けると持ち上がります。そのまま引っぱって離すと、その位置に並べ替えます</dd>
     <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg></dt><dd>最新の予報を取得します。前の取得から30分たつまでは押せません（薄い表示のとき）。ページを開き直したときも、30分たった予報だけを取り直します</dd>
-    <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--surface)"/><circle cx="15" cy="12" r="2.2" fill="var(--surface)"/><circle cx="8" cy="18" r="2.2" fill="var(--surface)"/></svg></dt><dd>アプリの設定を開きます。判定の風速の境目を変えられます。リストと釣り場の管理もここで行います（1つのリストに8か所まで、リストは10個まで。並べ替えもできます）。［自分でリストを作る］は空のリストから釣り場を1つずつ足し、［おすすめリストから作る］は地域ごとにまとめたリストを選んで作ります。［書き出す］は、リストと設定を1行の文字列にしてコピーします。LINEやメモに貼り付けて残しておき、別の端末やブラウザの［読み込む］に貼り付けると、同じリストと設定になります（読み込んだ側の今のリストと設定は置き換わります）。［すべて初期化］は、リスト・設定・保存した予報をすべて消して最初の画面に戻します</dd>
+    <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--surface)"/><circle cx="15" cy="12" r="2.2" fill="var(--surface)"/><circle cx="8" cy="18" r="2.2" fill="var(--surface)"/></svg></dt><dd>アプリの設定を開きます。判定の風速の境目と、釣りに行く曜日と祝日（一覧で列を開く日）を変えられます。リストと釣り場の管理もここで行います（1つのリストに8か所まで、リストは10個まで。並べ替えもできます）。［自分でリストを作る］は空のリストから釣り場を1つずつ足し、［おすすめリストから作る］は地域ごとにまとめたリストを選んで作ります。［書き出す］は、リストと設定を1行の文字列にしてコピーします。LINEやメモに貼り付けて残しておき、別の端末やブラウザの［読み込む］に貼り付けると、同じリストと設定になります（読み込んだ側の今のリストと設定は置き換わります）。［すべて初期化］は、リスト・設定・保存した予報をすべて消して最初の画面に戻します</dd>
   </dl>
   <p class="note" style="margin-top:12px">予報はOpen-Meteoのモデルによるものです。6日目以降は精度が下がります。<br>潮位は、近くの気象庁の地点の潮位表（月と太陽による潮の予測）です。見出しのかっこ内が地点名で、釣り場から離れているほど時刻や高さがずれます。気圧や風による潮位の変化は含みません。潮位表を取得できないときは、予報モデルの推定値を「目安」として出します。<br>予報：<a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>（<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>）／潮位：<a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/index.php" target="_blank" rel="noopener">気象庁 潮位表</a>（出典：気象庁ホームページ）／祝日：<a href="https://github.com/holidays-jp/api" target="_blank" rel="noopener">holidays-jp</a></p>
 </dialog>
@@ -370,6 +374,11 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
       <span><i style="background:var(--mid-bg);outline:1px solid var(--mid-bar)"></i><span><span class="th-ok">3</span>〜<span class="th-ng">5</span>m/s 微妙</span></span>
       <span><i style="background:var(--ng-bg);outline:1px solid var(--ng-bar)"></i><span><span class="th-ng">5</span>m/s以上 厳しい</span></span>
     </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>釣りに行く曜日</h2><button id="off-reset">リセット</button></div>
+    <div class="offdays" role="group" aria-label="釣りに行く曜日と祝日。選んだ日の列を一覧で開きます" id="off-days"></div>
   </section>
 
   <section>
@@ -505,6 +514,7 @@ const WX={0:"快晴",1:"晴",2:"薄曇",3:"曇",45:"霧",48:"霧",51:"霧雨",53
 const DIR=["北","北北東","北東","東北東","東","東南東","南東","南南東","南","南南西","南西","西南西","西","西北西","北西","北北西"];
 const WEEK="日月火水木金土";
 const DAYS=11, DEF_TH={ok:3,ng:5};  // 判定の境目の初期値（m/s）。実際の値は state.th
+const DEF_OFF={d:[0,6],h:true};      // 釣りに行く曜日の初期値（d＝曜日 0:日〜6:土、h＝祝日も）。実際の値は state.off
 const dirName=d=>d==null?"":DIR[Math.round(d/22.5)%16];
 const f1=v=>v==null?"-":(Math.round(v*10)/10).toFixed(1);
 const md=s=>`${+s.slice(5,7)}/${+s.slice(8,10)}`;
@@ -675,8 +685,13 @@ async function loadAll(force){
 // 祝日：内閣府データを元にした公開API（holidays-jp）から取得。取得できないときは内蔵の一覧を使う
 const HOL=new Set(["2026-01-01","2026-01-12","2026-02-11","2026-02-23","2026-03-20","2026-04-29","2026-05-03","2026-05-04","2026-05-05","2026-05-06","2026-07-20","2026-08-11","2026-09-21","2026-09-22","2026-09-23","2026-10-12","2026-11-03","2026-11-23","2027-01-01","2027-01-11","2027-02-11","2027-02-23","2027-03-21","2027-03-22","2027-04-29","2027-05-03","2027-05-04","2027-05-05","2027-07-19","2027-08-11","2027-09-20","2027-09-23","2027-10-11","2027-11-03","2027-11-23"]);
 fetch("https://holidays-jp.github.io/api/v1/date.json").then(r=>r.ok?r.json():null).then(j=>{if(j){Object.keys(j).forEach(d=>HOL.add(d));if(!$("v-list").hidden)renderList()}}).catch(()=>{});
-const isOff=d=>[0,6].includes(wdi(d))||HOL.has(d);
-const opened=new Set();
+// 釣りに行く曜日と祝日（一覧で列を開く日）。保存がないか値がおかしいときは初期値（土日祝）。何も選んでいなければ全部たたむ
+const okOff=o=>o&&Array.isArray(o.d)&&o.d.every(v=>Number.isInteger(v)&&v>=0&&v<=6)&&new Set(o.d).size===o.d.length&&typeof o.h==="boolean";
+if(!okOff(state.off))state.off={d:[...DEF_OFF.d],h:DEF_OFF.h};
+const isOff=d=>state.off.d.includes(wdi(d))||(state.off.h&&HOL.has(d));
+// 手で開いた日付（nagical-open）。日をまたいで覚えておき、過ぎた日付は捨てる。書き出しには入れない
+const opened=new Set((()=>{try{const a=JSON.parse(localStorage.getItem("nagical-open"));return Array.isArray(a)?a.filter(d=>typeof d==="string"&&d>=today()):[]}catch(e){return []}})());
+function saveOpened(){const t=today();[...opened].forEach(d=>{if(d<t)opened.delete(d)});try{localStorage.setItem("nagical-open",JSON.stringify([...opened].sort()))}catch(e){}}
 
 // 判定する時間帯（アプリ全体で1つ）
 const WIN_NAME={morning:"朝マヅメ",day:"日中",evening:"夕マヅメ〜夜",custom:"指定の時間帯"};
@@ -751,7 +766,7 @@ function renderList(){
   // 表の左上のマスに、予報の取得時刻（いちばん古いもの）を出す
   let h=`<tr><th class="spot fetched">${ats.length?`${hm(Math.min(...ats))}<br>取得`:""}</th>${days.map((d,i)=>{
     const o=isOpen(d), lab=i===0?"今日":i===1?"明日":md(d);
-    const cls=["col",o?"":"slim",i>=5?"far":"",isOff(d)?"wk":"",HOL.has(d)?"hol":""].join(" ");
+    const cls=["col",o?"":"slim",i>=5?"far":"",isOff(d)?"wk":"",state.off.h&&HOL.has(d)?"hol":""].join(" ");
     const txt=o?`${lab}<br>${HOL.has(d)?"祝":wd(d)}`:`${+d.slice(8,10)}<br>${wd(d)}`;
     return `<th class="${cls}"><button class="hd" data-t="${d}" aria-expanded="${o}" aria-label="${md(d)}（${wd(d)}）の列を${o?"閉じる":"開く"}">${txt}</button></th>`}).join("")}</tr>`;
   if(!spots.length)h+=`<tr><td class="spot" colspan="${DAYS+1}">このリストには釣り場がありません。下の［＋ 追加］から足してください。</td></tr>`;
@@ -779,7 +794,7 @@ function renderList(){
   $("grid").querySelectorAll("button.cell[data-d]").forEach(b=>b.onclick=()=>{location.hash=`#/d/${b.dataset.s}/${b.dataset.d}`});
   $("grid").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{
     const d=b.dataset.t; if(isOff(d))return;
-    opened.has(d)?opened.delete(d):opened.add(d); renderList();
+    opened.has(d)?opened.delete(d):opened.add(d); saveOpened(); renderList();
   });
 }
 
@@ -1021,6 +1036,21 @@ function setTh(th){state.th=th;saveSpots();renderTh();renderThForm()}
 $("th-ok").onchange=()=>setTh({ok:+$("th-ok").value,ng:state.th.ng});
 $("th-ng").onchange=()=>setTh({ok:state.th.ok,ng:+$("th-ng").value});
 $("th-reset").onclick=()=>setTh({...DEF_TH});
+// 釣りに行く曜日：月〜日と祝日の8つのボタンを押して切り替える
+const OFF_KEYS=[1,2,3,4,5,6,0,"h"];
+const sameOff=(a,b)=>a.h===b.h&&a.d.length===b.d.length&&a.d.every(v=>b.d.includes(v));
+function renderOffForm(){
+  $("off-days").innerHTML=OFF_KEYS.map(k=>{const on=k==="h"?state.off.h:state.off.d.includes(k),n=k==="h"?"祝":WEEK[k];
+    return `<button data-k="${k}" aria-pressed="${on}" aria-label="${k==="h"?"祝日も":n+"曜日"}">${n}</button>`}).join("");
+  $("off-days").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    const k=b.dataset.k, o={d:[...state.off.d],h:state.off.h};
+    if(k==="h")o.h=!o.h; else{const v=+k;o.d=o.d.includes(v)?o.d.filter(x=>x!==v):[...o.d,v].sort()}
+    setOff(o);
+  });
+  $("off-reset").disabled=sameOff(state.off,DEF_OFF);
+}
+function setOff(o){state.off=o;saveSpots();renderOffForm()}
+$("off-reset").onclick=()=>setOff({d:[...DEF_OFF.d],h:DEF_OFF.h});
 
 const dist=(a,b)=>{const r=Math.PI/180,x=(b.lon-a.lon)*r*Math.cos((a.lat+b.lat)/2*r),y=(b.lat-a.lat)*r;return Math.sqrt(x*x+y*y)*6371};
 const sameSpot=(a,b)=>a.id&&b.id?a.id===b.id:a.name===b.name&&a.lat===b.lat&&a.lon===b.lon;  // どちらも id があれば id で、なければ（手で足した釣り場）名前と座標で比べる
@@ -1152,7 +1182,7 @@ function toast(text,undo){
 
 /* アプリの設定：リストの一覧 */
 function renderSet(){
-  renderThForm();
+  renderThForm(); renderOffForm();
   const one=state.banks.length<=1;
   $("set-newbank").disabled=$("set-preset").disabled=state.banks.length>=MAX_BANKS;
   // 名前か鉛筆を押すとリストの画面を開く。右端の［×］とつまみは常に出す
@@ -1185,14 +1215,14 @@ $("set-reset").onclick=()=>{
   history.replaceState(null,"","#/new"); location.reload();
 };
 
-/* 設定の引き継ぎ：リスト・時間帯・判定の境目を1行の文字列にする（IO_HEAD ＋ 詰めたJSONを deflate-raw で圧縮した base64url）
+/* 設定の引き継ぎ：リスト・時間帯・判定の境目・釣りに行く曜日を1行の文字列にする（IO_HEAD ＋ 詰めたJSONを deflate-raw で圧縮した base64url）
    データにある釣り場は id だけ、ほかは [名前, 緯度, 経度, 海1/淡水0]。読み込むときは今の設定とまるごと置き換える */
 const IO_HEAD="nagical1:";
 const IO_BROKEN="文字列が途中で切れているか、形が違います。書き出した文字列を最初から最後まで貼り付けてください。";
 const canZip=typeof CompressionStream==="function"&&typeof DecompressionStream==="function";
 const pipeZip=(data,t)=>new Response(new Blob([data]).stream().pipeThrough(t));
 async function encodeState(){
-  const o={c:state.cur,w:[state.win.k,state.win.s,state.win.e],t:[state.th.ok,state.th.ng],
+  const o={c:state.cur,w:[state.win.k,state.win.s,state.win.e],t:[state.th.ok,state.th.ng],o:[state.off.d,state.off.h?1:0],
     b:state.banks.map(b=>[b.name,b.spots.map(s=>s.id&&byId.has(s.id)?s.id:[s.name,s.lat,s.lon,s.type==="sea"?1:0])])};
   const u=new Uint8Array(await pipeZip(JSON.stringify(o),new CompressionStream("deflate-raw")).arrayBuffer());
   let bin=""; u.forEach(c=>bin+=String.fromCharCode(c));
@@ -1227,8 +1257,10 @@ async function decodeState(text){
   const win=WIN_NAME[w[0]]?(hr(w[1])&&hr(w[2])?{k:w[0],s:w[1],e:w[2]}:{k:w[0],s:5,e:9}):{k:"morning",s:5,e:9};
   const tt=Array.isArray(o.t)?o.t:[];
   const th=TH_STEPS.includes(tt[0])&&TH_STEPS.includes(tt[1])&&tt[0]<tt[1]?{ok:tt[0],ng:tt[1]}:{...DEF_TH};
+  const oo=Array.isArray(o.o)?{d:o.o[0],h:o.o[1]===1}:null;  // 釣りに行く曜日がない古い文字列は初期値
+  const off=okOff(oo)&&(o.o[1]===0||o.o[1]===1)?oo:{d:[...DEF_OFF.d],h:DEF_OFF.h};
   const cur=Number.isInteger(o.c)&&o.c>=0&&o.c<banks.length?o.c:0;
-  return {st:{cur,banks,win,th},miss};
+  return {st:{cur,banks,win,th,off},miss};
 }
 function ioOpen(out,text){
   $("io-ttl").textContent=out?"設定を書き出す":"設定を読み込む";
