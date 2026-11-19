@@ -96,8 +96,11 @@ h1.ttl img{width:34px;height:34px;border-radius:8px;flex:none}
 .spin svg{width:22px;height:22px;fill:none;stroke-width:2.5;stroke-linecap:round;animation:spin 1s linear infinite}
 .spin circle{stroke:var(--line)}
 .spin path{stroke:var(--ink)}
-dialog#help{border:0;border-radius:10px;padding:16px 18px 18px;max-width:min(520px,calc(100vw - 32px));max-height:85vh;color:var(--ink);background:var(--surface);font-size:15px;line-height:1.7}
-dialog#help::backdrop{background:rgba(0,0,0,.55)}
+dialog#help,dialog#io{border:0;border-radius:10px;padding:16px 18px 18px;max-width:min(520px,calc(100vw - 32px));max-height:85vh;color:var(--ink);background:var(--surface);font-size:15px;line-height:1.7}
+dialog#io{width:min(520px,calc(100vw - 32px));box-sizing:border-box}
+#io-lead{margin:8px 0;font-size:14px;color:var(--sub)}
+#io-text{display:block;box-sizing:border-box;width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:8px 10px;resize:vertical;word-break:break-all}
+dialog#help::backdrop,dialog#io::backdrop{background:rgba(0,0,0,.55)}
 .help-head{display:flex;justify-content:space-between;align-items:center}
 .help-head h2{font-size:18px;margin:0}
 #help h3{font-size:15px;margin:14px 0 4px}
@@ -169,12 +172,15 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
 .rows li.drag{position:relative;z-index:3;background:var(--surface);box-shadow:0 6px 16px rgba(0,0,0,.45)}
 .rows li.empty{color:var(--sub);font-size:14px;padding:10px 0}
 .addbtn{width:100%;margin-top:12px}
+.io-btns{display:flex;gap:8px;margin-top:12px}
+.io-btns button{flex:1}
 .namefield{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--sub);margin-top:8px}
 .namefield input{font-size:22px;font-weight:700;padding:6px 10px}
 .saved{margin-left:10px;color:var(--ok-text);opacity:0;transition:opacity .3s}
 .saved.on{opacity:1}
 /* 削除したときの「元に戻す」 */
 .toast{position:fixed;left:16px;right:16px;bottom:16px;max-width:608px;margin:0 auto;display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 6px 6px 14px;z-index:10;font-size:14px;box-shadow:0 6px 16px rgba(0,0,0,.45)}
+.toast.plain{padding:12px 14px}
 .toast span{flex:1}
 .toast button{flex:none;background:var(--accent);border-color:var(--accent);font-weight:700}
 /* 釣り場の追加：上部は完了ボタンと件数を固定して出す */
@@ -216,6 +222,7 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* おすすめリスト：区分の見出しと、項目の件数 */
 .areah{font-size:13px;color:var(--sub);font-weight:700;margin:20px 0 0}
+#new-import{margin-top:32px}  /* 初回だけ。リストを作る3つとは別の操作なので間を空ける */
 .dblist small.cnt{display:inline;margin-left:8px}
 .new-lead{margin:10px 0 0}
 .form{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
@@ -260,6 +267,7 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
   <h1 id="new-ttl"></h1>
   <p class="sub new-lead" id="new-lead"></p>
   <ul class="dblist" id="new-genre"></ul>
+  <ul class="dblist" id="new-import"></ul>
   <div id="new-items"></div>
 </div>
 
@@ -299,7 +307,7 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
     <dt>平日の列</dt><dd>細くたたんであります。日付かマスを押すと開きます</dd>
     <dt>並べ替え</dt><dd>リストのタブか釣り場名を約0.5秒押し続けると持ち上がります。そのまま引っぱって離すと、その位置に並べ替えます</dd>
     <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg></dt><dd>最新の予報を取得します。前の取得から30分たつまでは押せません（薄い表示のとき）。ページを開き直したときも、30分たった予報だけを取り直します</dd>
-    <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--surface)"/><circle cx="15" cy="12" r="2.2" fill="var(--surface)"/><circle cx="8" cy="18" r="2.2" fill="var(--surface)"/></svg></dt><dd>アプリの設定を開きます。判定の風速の境目を変えられます。リストと釣り場の管理もここで行います（1つのリストに8か所まで、リストは10個まで。並べ替えもできます）。［自分でリストを作る］は空のリストから釣り場を1つずつ足し、［おすすめリストから作る］は地域ごとにまとめたリストを選んで作ります。［すべて初期化］は、リスト・設定・保存した予報をすべて消して最初の画面に戻します</dd>
+    <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--surface)"/><circle cx="15" cy="12" r="2.2" fill="var(--surface)"/><circle cx="8" cy="18" r="2.2" fill="var(--surface)"/></svg></dt><dd>アプリの設定を開きます。判定の風速の境目を変えられます。リストと釣り場の管理もここで行います（1つのリストに8か所まで、リストは10個まで。並べ替えもできます）。［自分でリストを作る］は空のリストから釣り場を1つずつ足し、［おすすめリストから作る］は地域ごとにまとめたリストを選んで作ります。［書き出す］は、リストと設定を1行の文字列にしてコピーします。LINEやメモに貼り付けて残しておき、別の端末やブラウザの［読み込む］に貼り付けると、同じリストと設定になります（読み込んだ側の今のリストと設定は置き換わります）。［すべて初期化］は、リスト・設定・保存した予報をすべて消して最初の画面に戻します</dd>
   </dl>
   <p class="note" style="margin-top:12px">予報はOpen-Meteoのモデルによるものです。6日目以降は精度が下がります。<br>潮位は、近くの気象庁の地点の潮位表（月と太陽による潮の予測）です。見出しのかっこ内が地点名で、釣り場から離れているほど時刻や高さがずれます。気圧や風による潮位の変化は含みません。潮位表を取得できないときは、予報モデルの推定値を「目安」として出します。<br>予報：<a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>（<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>）／潮位：<a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/index.php" target="_blank" rel="noopener">気象庁 潮位表</a>（出典：気象庁ホームページ）／祝日：<a href="https://github.com/holidays-jp/api" target="_blank" rel="noopener">holidays-jp</a></p>
 </dialog>
@@ -371,6 +379,11 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
   </section>
 
   <section>
+    <div class="sec-head"><h2>設定の引き継ぎ</h2></div>
+    <div class="io-btns"><button id="io-out">書き出す</button><button id="io-in">読み込む</button></div>
+  </section>
+
+  <section>
     <button id="set-reset" class="addbtn">すべて初期化</button>
   </section>
 </div>
@@ -419,6 +432,14 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
 </div>
 
 <!-- 削除したときの「元に戻す」 -->
+<!-- 設定の読み込み（コピーできなかったときは、書き出した文字列もここに出す） -->
+<dialog id="io" aria-labelledby="io-ttl">
+  <div class="help-head"><h2 id="io-ttl"></h2><button class="ic" id="io-close" aria-label="閉じる"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <p id="io-lead"></p>
+  <textarea id="io-text" rows="5" spellcheck="false" autocapitalize="off" autocomplete="off" aria-labelledby="io-lead"></textarea>
+  <p class="msg" id="io-msg"></p>
+  <button id="io-go" class="primary addbtn">読み込む</button>
+</dialog>
 <div class="toast" id="toast" role="status" hidden><span id="toast-t"></span><button id="toast-undo">元に戻す</button></div>
 
 <script>
@@ -1118,12 +1139,13 @@ longDrag($("grid"),{item:"tr[data-si]",handle:".sp-card",axis:"y",
 
 const editBtns=(i,name,canDel=true)=>`<button class="x" data-del="${i}" aria-label="${esc(name)}を削除" ${canDel?"":"disabled"}>${ICON_X}</button><button class="grip" data-i="${i}" aria-label="${esc(name)}を並べ替え（上下の矢印キーで移動）">${ICON_GRIP}</button>`;
 
-// 削除したときの「元に戻す」（約5秒）
+// 削除したときの「元に戻す」（約5秒）。undo がなければお知らせだけ出す
 let toastT=0;
 function hideToast(){clearTimeout(toastT);$("toast").hidden=true}
 function toast(text,undo){
   $("toast-t").textContent=text; $("toast").hidden=false;
-  $("toast-undo").onclick=()=>{hideToast();undo()};
+  $("toast-undo").hidden=!undo; $("toast").classList.toggle("plain",!undo);
+  $("toast-undo").onclick=()=>{hideToast();undo&&undo()};
   clearTimeout(toastT); toastT=setTimeout(hideToast,5000);
 }
 
@@ -1162,6 +1184,83 @@ $("set-reset").onclick=()=>{
   history.replaceState(null,"","#/new"); location.reload();
 };
 
+/* 設定の引き継ぎ：リスト・時間帯・判定の境目を1行の文字列にする（IO_HEAD ＋ 詰めたJSONを deflate-raw で圧縮した base64url）
+   データにある釣り場は id だけ、ほかは [名前, 緯度, 経度, 海1/淡水0]。読み込むときは今の設定とまるごと置き換える */
+const IO_HEAD="nagical1:";
+const IO_BROKEN="文字列が途中で切れているか、形が違います。書き出した文字列を最初から最後まで貼り付けてください。";
+const canZip=typeof CompressionStream==="function"&&typeof DecompressionStream==="function";
+const pipeZip=(data,t)=>new Response(new Blob([data]).stream().pipeThrough(t));
+async function encodeState(){
+  const o={c:state.cur,w:[state.win.k,state.win.s,state.win.e],t:[state.th.ok,state.th.ng],
+    b:state.banks.map(b=>[b.name,b.spots.map(s=>s.id&&byId.has(s.id)?s.id:[s.name,s.lat,s.lon,s.type==="sea"?1:0])])};
+  const u=new Uint8Array(await pipeZip(JSON.stringify(o),new CompressionStream("deflate-raw")).arrayBuffer());
+  let bin=""; u.forEach(c=>bin+=String.fromCharCode(c));
+  return IO_HEAD+btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+// 戻り値：{st: 保存する形, miss: データから外れて読めなかった釣り場の数}。おかしければ文言を throw する
+async function decodeState(text){
+  const t=text.replace(/\s+/g,"");  // LINE などで途中に入った改行・空白は取り除く
+  if(!t.startsWith(IO_HEAD))throw IO_BROKEN;
+  let o;
+  try{
+    const bin=atob(t.slice(IO_HEAD.length).replace(/-/g,"+").replace(/_/g,"/"));
+    o=JSON.parse(await pipeZip(Uint8Array.from(bin,c=>c.charCodeAt(0)),new DecompressionStream("deflate-raw")).text());
+  }catch(e){throw IO_BROKEN}
+  if(!o||!Array.isArray(o.b)||!o.b.length||o.b.length>MAX_BANKS)throw IO_BROKEN;
+  let miss=0;
+  const banks=o.b.map((b,i)=>{
+    if(!Array.isArray(b)||!Array.isArray(b[1])||b[1].length>MAX_SPOTS)throw IO_BROKEN;
+    const spots=[];
+    for(const x of b[1]){
+      let p;
+      if(typeof x==="string"){if(!byId.has(x)){miss++;continue}p=fromDB(x)}
+      else if(Array.isArray(x)&&typeof x[0]==="string"&&x[0].trim()&&Number.isFinite(x[1])&&Number.isFinite(x[2])&&Math.abs(x[1])<=90&&Math.abs(x[2])<=180)
+        p={name:x[0].trim(),lat:x[1],lon:x[2],type:x[3]===1?"sea":"fresh"};
+      else throw IO_BROKEN;
+      if(!spots.some(q=>key(q)===key(p)))spots.push(p);  // 同じリストの中の重なりは1つに
+    }
+    return {name:typeof b[0]==="string"&&b[0].trim()?b[0].trim():`リスト${i+1}`,spots};
+  });
+  // 時間帯・境目・今のリストは、おかしければ初期値にする（起動時と同じ扱い）
+  const w=Array.isArray(o.w)?o.w:[], hr=v=>Number.isInteger(v)&&v>=0&&v<=23;
+  const win=WIN_NAME[w[0]]?(hr(w[1])&&hr(w[2])?{k:w[0],s:w[1],e:w[2]}:{k:w[0],s:5,e:9}):{k:"morning",s:5,e:9};
+  const tt=Array.isArray(o.t)?o.t:[];
+  const th=TH_STEPS.includes(tt[0])&&TH_STEPS.includes(tt[1])&&tt[0]<tt[1]?{ok:tt[0],ng:tt[1]}:{...DEF_TH};
+  const cur=Number.isInteger(o.c)&&o.c>=0&&o.c<banks.length?o.c:0;
+  return {st:{cur,banks,win,th},miss};
+}
+function ioOpen(out,text){
+  $("io-ttl").textContent=out?"設定を書き出す":"設定を読み込む";
+  $("io-lead").textContent=out?"コピーできませんでした。下の文字列を全部選んでコピーし、LINEやメモに貼り付けて残してください。"
+    :firstRun()?"別の端末で書き出した文字列を貼り付けてください。":"書き出した文字列を貼り付けてください。今のリストと設定は、読み込んだ内容に置き換わります。";
+  $("io-text").hidden=false; $("io-text").value=text||""; $("io-text").readOnly=!!out; $("io-go").hidden=!!out; $("io-msg").textContent="";
+  const d=$("io"); if(d.showModal)d.showModal();else d.setAttribute("open","");
+  if(out)$("io-text").select();
+}
+// 圧縮の機能がない古いブラウザ（Safari 16.3 以前など）
+function ioNoZip(ttl){ioOpen(false);$("io-ttl").textContent=ttl;$("io-lead").textContent="";$("io-text").hidden=$("io-go").hidden=true;$("io-msg").textContent="このブラウザでは使えません。ブラウザを新しくしてから開いてください。"}
+// ［書き出す］：押したらすぐクリップボードへ。Safari は押してから書き込むまでに待ちが入ると断るので、中身は Promise のまま渡す
+$("io-out").onclick=()=>{
+  if(!canZip){ioNoZip("設定を書き出す");return}
+  const p=encodeState();
+  const tryWrite=()=>navigator.clipboard.write([new ClipboardItem({"text/plain":p.then(s=>new Blob([s],{type:"text/plain"}))})]);
+  Promise.resolve().then(tryWrite).catch(()=>p.then(s=>navigator.clipboard.writeText(s)))
+    .then(()=>toast("設定をコピーしました。LINEやメモに貼り付けて残してください"),()=>p.then(s=>ioOpen(true,s)));
+};
+function ioImport(){canZip?ioOpen(false):ioNoZip("設定を読み込む")}
+$("io-in").onclick=ioImport;
+$("io-close").onclick=()=>$("io").close?$("io").close():$("io").removeAttribute("open");
+$("io").addEventListener("click",e=>{if(e.target===$("io"))$("io").close()});
+$("io-go").onclick=async()=>{
+  $("io-msg").textContent="";
+  let r; try{r=await decodeState($("io-text").value)}catch(e){$("io-msg").textContent=typeof e==="string"?e:IO_BROKEN;return}
+  const n=r.st.banks.reduce((a,b)=>a+b.spots.length,0);
+  if(!confirm(`リスト${r.st.banks.length}個・釣り場${n}か所を読み込み`+(firstRun()?"ます。":`、今のリスト${state.banks.length}個と設定を置き換えます。`)+"よろしいですか？"
+    +(r.miss?`\n（${r.miss}か所は釣り場のデータから外れたため、読み込めません）`:"")))return;
+  try{localStorage.setItem("nagical-banks",JSON.stringify(r.st));sessionStorage.setItem("nagical-imported","1")}catch(e){$("io-msg").textContent="保存できませんでした。ブラウザの設定で、サイトのデータの保存が止められていないか確かめてください。";return}
+  history.replaceState(null,"","#/"); location.reload();
+};
+
 /* おすすめリスト（#/new：海か淡水かを選ぶ ／ #/new/sea・#/new/fresh：リストを選ぶ） */
 function renderNew(type,pi,fromList){
   const first=firstRun(), q=fromList?"?from=list":"";  // ?from=list は一覧のタブの「＋ 追加」から来た印
@@ -1174,10 +1273,14 @@ function renderNew(type,pi,fromList){
   $("new-lead").textContent=askPref?"都道府県を選んでください":type?`${type==="sea"?"海釣り":"淡水釣り"}のリスト。押すとリストを作って一覧を開きます`:first?"最初のリストを作ります":"";
   $("new-lead").hidden=!$("new-lead").textContent;
   $("new-genre").hidden=!!type; $("new-items").hidden=!type;
+  // 初回だけ、別の端末で書き出した設定を読み込む入り口を出す（リストがあるときはアプリの設定の［読み込む］を使う）
+  $("new-import").hidden=!(first&&!type);
   const row=(attr,name,sub,icon,label)=>`<li><button class="dbrow" ${attr}><span><b>${esc(name)}</b>${sub}</span><span class="st">${icon}<span class="vh">${label}</span></span></button></li>`;
   if(!type){
     $("new-genre").innerHTML=[["sea","海釣り","漁港・港湾・汽水湖"],["fresh","淡水釣り","湖・川"]].map(([t,n,d])=>row(`data-t="${t}"`,n,`<small>${d}</small>`,ICON_NEXT,"選ぶ")).join("")
       +(first||fromList?row(`data-t="self"`,"自分で作る","<small>空のリストに、釣り場を1つずつ足します</small>",ICON_NEXT,"選ぶ"):"");
+    $("new-import").innerHTML=row(`id="new-io"`,"設定を読み込む","<small>別の端末で書き出したリストと設定を引き継ぎます</small>",ICON_NEXT,"開く");
+    $("new-io").onclick=ioImport;
     $("new-genre").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{
       const t=b.dataset.t;
       if(t!=="self"){location.hash=`#/new/${t}${q}`;return}
@@ -1339,7 +1442,9 @@ $("help-btn").onclick=()=>{const d=$("help");if(d.showModal)d.showModal();else d
 $("help-close").onclick=()=>$("help").close?$("help").close():$("help").removeAttribute("open");
 $("help").addEventListener("click",e=>{if(e.target===$("help"))$("help").close()});
 $("reload").onclick=()=>{if(!$("reload").disabled)loadAll(true)};
-route(); loadAll(true);  // ページを開いた（再読み込みした）ときは、30分たったものを取り直す
+route();
+try{if(sessionStorage.getItem("nagical-imported")){sessionStorage.removeItem("nagical-imported");toast("設定を読み込みました")}}catch(e){}
+loadAll(true);  // ページを開いた（再読み込みした）ときは、30分たったものを取り直す
 
 // サービスワーカー：https か localhost のときだけ登録する（ファイルを直接開いたときはエラーにしない）
 if("serviceWorker" in navigator&&(location.protocol==="https:"||["localhost","127.0.0.1"].includes(location.hostname))){
