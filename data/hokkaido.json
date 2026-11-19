@@ -12,7 +12,7 @@
       "漁港",
       "港湾"
     ],
-    "updated": "2026-10-22",
+    "updated": "2026-11-19",
     "kind_type": "湖・川は淡水、汽水湖・漁港・港湾は海（潮位・水温を出す）",
     "format": {
       "id": "全国で一意（例：hokkaido-port-016）。アプリ内の参照・保存はすべてこれ",
@@ -185,7 +185,8 @@
             "hokkaido-lake-012",
             "hokkaido-lake-011",
             "hokkaido-lake-015",
-            "hokkaido-lake-016"
+            "hokkaido-lake-016",
+            "hokkaido-lake-023"
           ]
         },
         {
@@ -237,6 +238,7 @@
     {"id": "hokkaido-lake-020", "name": "然別湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "十勝", "area": "道東", "municipality": "鹿追町", "lat": 43.282, "lon": 143.117, "accuracy_km": 2, "notes": "釣りは期間限定・人数制限あり"},
     {"id": "hokkaido-lake-021", "name": "チミケップ湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "オホーツク", "area": "道東", "municipality": "津別町", "lat": 43.637, "lon": 143.875, "accuracy_km": 2},
     {"id": "hokkaido-lake-022", "name": "岩尾内湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "上川", "area": "道北", "municipality": "士別市", "lat": 44.108, "lon": 142.716, "accuracy_km": 4},
+    {"id": "hokkaido-lake-023", "name": "砂川遊水地", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "空知", "area": "道央", "municipality": "砂川市", "lat": 43.485, "lon": 141.893, "accuracy_km": 1, "notes": "ワカサギは結氷期（1月〜2月末）の氷上、解禁は氷の状態しだい。遊漁料無料。ほかにヘラブナ"},
     {"id": "hokkaido-lake-002", "name": "能取湖", "kind": "汽水湖", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "網走市", "lat": 44.07, "lon": 144.12, "accuracy_km": 5, "notes": "海とつながった汽水湖。冬は氷上でチカ・コマイ"},
     {"id": "hokkaido-lake-005", "name": "サロマ湖", "kind": "汽水湖", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "北見市・佐呂間町・湧別町", "lat": 44.13, "lon": 143.95, "accuracy_km": 10, "notes": "海とつながった汽水湖。冬は氷上でチカ・コマイ"},
     {"id": "hokkaido-lake-008", "name": "風蓮湖", "kind": "汽水湖", "type": "sea", "pref": "北海道", "region": "根室", "area": "根室", "municipality": "根室市・別海町", "lat": 43.31, "lon": 145.34, "accuracy_km": 10, "notes": "海とつながった汽水湖"},
