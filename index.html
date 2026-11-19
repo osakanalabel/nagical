@@ -111,7 +111,8 @@ dialog#help::backdrop,dialog#io::backdrop{background:rgba(0,0,0,.55)}
 .ico-s{width:20px;height:20px;fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
 .winbar{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:18px}
 .winbar label{display:flex;flex-direction:column;font-size:13px;color:var(--sub);gap:2px}
-.winbar .range{font-size:13px;color:var(--sub)}
+.winbar .range{flex:1 1 10em;font-size:13px;color:var(--sub)}  /* 時間帯の選択の横に置いたまま、長いときは釣り場名の前で折り返す */
+.winbar .range span{white-space:nowrap}
 .cell.rain{background-image:linear-gradient(to top left,var(--rain) 50%,transparent 50%)}
 .cell.snow{background-image:linear-gradient(to top left,var(--snow) 50%,transparent 50%)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;margin-top:10px}
@@ -725,12 +726,12 @@ function renderWin(){
   $("win").value=w.k; $("win-custom").style.display=w.k==="custom"?"flex":"none";
   const opts=[...Array(24)].map((_,h)=>`<option value="${h}">${h}時</option>`).join("");
   $("win-s").innerHTML=opts; $("win-e").innerHTML=opts; $("win-s").value=w.s; $("win-e").value=w.e;
-  // 今日の目安の時刻（最初の釣り場の日の出・日の入りで計算）
-  const d=spots.map(getD).find(x=>x), t=today();
-  let txt="";
-  if(w.k==="custom")txt=`${Math.min(w.s,w.e)}:00〜${Math.max(w.s,w.e)}:59`;
-  else if(d){const di=d.w.daily.time.indexOf(t);const r=di>=0&&winRange(d.w.daily.sunrise[di],d.w.daily.sunset[di]);if(r)txt=`今日は${fmtMin(r[0])}〜${fmtMin(Math.min(r[1],23*60+59))}`}
-  $("win-range").textContent=txt;
+  // 今日の目安の時刻。日の出・日の入りは場所で20〜30分違うので、予報が取れている先頭の釣り場で計算し、その名前を添える
+  const p=spots.find(x=>getD(x)), d=p&&getD(p), t=today();
+  let html="";
+  if(w.k==="custom")html=`${Math.min(w.s,w.e)}:00〜${Math.max(w.s,w.e)}:59`;
+  else if(d){const di=d.w.daily.time.indexOf(t);const r=di>=0&&winRange(d.w.daily.sunrise[di],d.w.daily.sunset[di]);if(r)html=`<span>今日は${fmtMin(r[0])}〜${fmtMin(Math.min(r[1],23*60+59))}</span><span>（${esc(p.name)}）</span>`}
+  $("win-range").innerHTML=html;
 }
 $("win").onchange=()=>{state.win.k=$("win").value;saveSpots();renderList()};
 $("win-s").onchange=$("win-e").onchange=()=>{state.win.s=+$("win-s").value;state.win.e=+$("win-e").value;saveSpots();renderList()};
