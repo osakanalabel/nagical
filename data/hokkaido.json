@@ -168,54 +168,6 @@
             "hokkaido-port-024",
             "hokkaido-port-026"
           ]
-        },
-        {
-          "section": "道東",
-          "name": "道東・氷上のチカ",
-          "spots": [
-            "hokkaido-lake-005",
-            "hokkaido-lake-002",
-            "hokkaido-lake-008"
-          ]
-        },
-        {
-          "section": "道央",
-          "name": "道央・ワカサギ",
-          "spots": [
-            "hokkaido-lake-012",
-            "hokkaido-lake-011",
-            "hokkaido-lake-015",
-            "hokkaido-lake-016",
-            "hokkaido-lake-023"
-          ]
-        },
-        {
-          "section": "道央",
-          "name": "道央・ヒメマス",
-          "spots": [
-            "hokkaido-lake-018",
-            "hokkaido-lake-014"
-          ]
-        },
-        {
-          "section": "道東",
-          "name": "道東・ワカサギ",
-          "spots": [
-            "hokkaido-lake-001",
-            "hokkaido-lake-006",
-            "hokkaido-lake-007",
-            "hokkaido-lake-009",
-            "hokkaido-lake-021"
-          ]
-        },
-        {
-          "section": "道東",
-          "name": "道東・湖のトラウト",
-          "spots": [
-            "hokkaido-lake-006",
-            "hokkaido-lake-019",
-            "hokkaido-lake-020"
-          ]
         }
       ]
     }
@@ -239,6 +191,13 @@
     {"id": "hokkaido-lake-021", "name": "チミケップ湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "オホーツク", "area": "道東", "municipality": "津別町", "lat": 43.637, "lon": 143.875, "accuracy_km": 2},
     {"id": "hokkaido-lake-022", "name": "岩尾内湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "上川", "area": "道北", "municipality": "士別市", "lat": 44.108, "lon": 142.716, "accuracy_km": 4},
     {"id": "hokkaido-lake-023", "name": "砂川遊水地", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "空知", "area": "道央", "municipality": "砂川市", "lat": 43.485, "lon": 141.893, "accuracy_km": 1, "notes": "ワカサギは結氷期（1月〜2月末）の氷上、解禁は氷の状態しだい。遊漁料無料。ほかにヘラブナ"},
+    {"id": "hokkaido-lake-024", "name": "錦大沼", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "胆振", "area": "道央", "municipality": "苫小牧市", "lat": 42.615, "lon": 141.449, "accuracy_km": 1, "notes": "錦大沼公園。冬は氷上ワカサギ（無料）"},
+    {"id": "hokkaido-lake-025", "name": "蓴菜沼", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "渡島", "area": "道南", "municipality": "七飯町", "lat": 41.985, "lon": 140.633, "accuracy_km": 1, "notes": "冬は氷上ワカサギ（管理釣り場）"},
+    {"id": "hokkaido-lake-026", "name": "おけと湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "オホーツク", "area": "道東", "municipality": "置戸町", "lat": 43.611, "lon": 143.38, "accuracy_km": 2, "notes": "鹿ノ子ダムの湖。冬は氷上ワカサギ"},
+    {"id": "hokkaido-lake-027", "name": "サホロ湖", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "十勝", "area": "道東", "municipality": "新得町", "lat": 43.175, "lon": 142.838, "accuracy_km": 1, "notes": "佐幌ダムの湖。冬は氷上ワカサギ（無料）"},
+    {"id": "hokkaido-lake-028", "name": "ホロカヤントー", "kind": "汽水湖", "type": "fresh", "pref": "北海道", "region": "十勝", "area": "道東", "municipality": "大樹町", "lat": 42.529, "lon": 143.469, "accuracy_km": 1, "notes": "汽水湖だがふだんは砂浜で海と隔てられるため淡水の扱い（潮位は出さない）。冬は氷上ワカサギ"},
+    {"id": "hokkaido-lake-029", "name": "なんぽろ親水公園", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "空知", "area": "道央", "municipality": "南幌町", "lat": 43.07, "lon": 141.602, "accuracy_km": 1, "notes": "公園の遊水池。夏はヘラブナ、冬は氷上ワカサギ（無料）"},
+    {"id": "hokkaido-lake-030", "name": "勇払ハート沼", "kind": "湖", "type": "fresh", "pref": "北海道", "region": "胆振", "area": "道央", "municipality": "苫小牧市", "lat": 42.645, "lon": 141.715, "accuracy_km": 2, "status": "paid", "notes": "民有地の有料ワカサギ釣り場（冬のみ営業）。座標は所在地（勇払363・明野川沿い）からの推定"},
     {"id": "hokkaido-lake-002", "name": "能取湖", "kind": "汽水湖", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "網走市", "lat": 44.07, "lon": 144.12, "accuracy_km": 5, "notes": "海とつながった汽水湖。冬は氷上でチカ・コマイ"},
     {"id": "hokkaido-lake-005", "name": "サロマ湖", "kind": "汽水湖", "type": "sea", "pref": "北海道", "region": "オホーツク", "area": "オホーツク", "municipality": "北見市・佐呂間町・湧別町", "lat": 44.13, "lon": 143.95, "accuracy_km": 10, "notes": "海とつながった汽水湖。冬は氷上でチカ・コマイ"},
     {"id": "hokkaido-lake-008", "name": "風蓮湖", "kind": "汽水湖", "type": "sea", "pref": "北海道", "region": "根室", "area": "根室", "municipality": "根室市・別海町", "lat": 43.31, "lon": 145.34, "accuracy_km": 10, "notes": "海とつながった汽水湖"},
