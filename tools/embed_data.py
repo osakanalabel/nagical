@@ -27,8 +27,13 @@ def load():
                 e["status"] = s["status"]
             if s.get("notes"):
                 e["note"] = s["notes"]
+            if s.get("tide_station"):
+                e["ts"] = s["tide_station"]
             spots.append(e)
         prefs += d.get("prefs", [])
+    codes = {t["code"] for p in prefs for t in p.get("tideStations", [])}
+    for e in spots:  # 潮位の基準に指定した地点が実在するか
+        assert "ts" not in e or e["ts"] in codes, f"{e['n']} の tide_station が見つからない: {e.get('ts')}"
     for p in prefs:  # プリセットの id が実在するか
         for pr in p["presets"]:
             for i in pr["spots"]:

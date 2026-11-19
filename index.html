@@ -17,6 +17,8 @@
   --paper:#0B3A6F; --ink:#D6E4F2; --sub:#A2BDD7; --faint:#7694B2; --rule:#255388;
   --surface:#154B89; --accent:#25659D; --line:#3C6A9F; --na-bg:#13447C; --day:#0C417D;
   --water:#0E488B; --water-line:#86C8F0; --magenta:#EE8DB6; --night:#08294F;
+  /* 画面の上に貼り付く上部（詳細・釣り場の追加）は暗く塗り、スクロールする本文と分ける */
+  --head:#08294F;
   /* 判定のタイル（明るい地に濃い文字。元の配色から明度を一段落とした） */
   --ok-bg:#C0E2CD; --ok:#1E5B3A; --mid-bg:#F8E4A2; --mid:#6B4E00; --ng-bg:#ECB2CB; --ng:#8E1550;
   --rain:#6CB4D5; --snow:#8592A0;
@@ -108,15 +110,22 @@ dialog#help::backdrop{background:rgba(0,0,0,.55)}
 
 /* 詳細 */
 .daynav{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-top:12px}
+/* 詳細の上部（一覧に戻る〜日付の行）は常に出す。海・淡水と緯度経度は名前の右（収まらなければ下）。スマホ幅では緯度経度を出さない */
+.dayhead{position:sticky;top:0;z-index:5;margin:-14px -16px 0;padding:4px 16px 10px}
+.dayhead .daynav{margin-top:6px}
+.dname{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:12px}
+.dname h1{margin:0}
+#d-note{margin-top:8px}
+@media (max-width:480px){.dname .coord{display:none}}
 .daynav b{text-align:center;font-size:18px}
 .cell,.verdict{--ink:#13233A;--water-line:#2F6E8E}
 .verdict{margin-top:14px;padding:10px 12px;border-radius:6px;font-size:15px}
 .verdict b{font-size:22px}
-.suns{display:flex;flex-wrap:wrap;gap:4px 20px;margin-top:10px;font-size:14px;color:var(--sub)}
-.suns b{color:var(--ink);font-size:18px;margin-left:4px}
+/* 日の出・日の入り・水温・潮回りを1行に収めるため、狭い画面では幅に合わせて縮める */
+.suns{display:flex;flex-wrap:wrap;gap:4px min(12px,2.6vw);margin-top:10px;font-size:min(14px,3.4vw);color:var(--sub)}
+.suns b{color:var(--ink);font-size:min(18px,4.1vw);margin-left:3px}
+.suns .shio b{margin-left:0}
 svg.chart{width:100%;height:auto;display:block}
-.tide{background:var(--water);margin:24px -16px 0;padding:14px 16px 12px}
-.tide h2{color:var(--water-line)}
 .tide-now{font-size:17px;font-weight:700;margin-bottom:6px}
 .tide-ev{font-size:14px;display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin-top:6px}
 .tide-ev b{color:var(--water-line)}
@@ -162,7 +171,12 @@ table.hr{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
 .toast span{flex:1}
 .toast button{flex:none;background:var(--accent);border-color:var(--accent);font-weight:700}
 /* 釣り場の追加：上部は完了ボタンと件数を固定して出す */
-.addbar{position:sticky;top:0;z-index:5;background:var(--paper);display:flex;justify-content:space-between;align-items:center;gap:8px;margin:-14px -16px 10px;padding:12px 16px 8px;border-bottom:1px solid var(--rule)}
+/* 追加画面は、上部（件数と［完了］）・リストの名前・検索欄・絞り込みをまとめて画面の上に常に出す */
+.addhead{position:sticky;top:0;z-index:5;margin:-14px -16px 10px;padding:12px 16px 12px}
+.addbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+/* 貼り付く上部は、広い画面でも色の帯と下の罫線を画面の左右の端まで伸ばす（中身は本文の幅のまま。border-image の外側の塗りは横スクロールを生まない） */
+/* 貼り付く上部の暗い帯と下の罫線。広い画面では本文の幅の外へ最大80pxはみ出し、外側に向けて地の色になじませる（狭い画面でははみ出さない） */
+.dayhead::before,.addhead::before{content:"";position:absolute;z-index:-1;top:0;bottom:0;--ext:min(80px,max(0px,(100vw - 660px)/2));left:calc(-1*var(--ext));right:calc(-1*var(--ext));background:linear-gradient(to right,var(--paper),transparent var(--ext),transparent calc(100% - var(--ext)),var(--paper)),linear-gradient(to top,var(--rule) 1px,var(--head) 1px)}
 .addbar h1{font-size:20px;margin:0}
 .addbar button{flex:none;min-width:5em}
 input[type=search]{width:100%}
@@ -268,7 +282,7 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
   <h3>詳細画面の水温のグラフ（海のみ）</h3>
   <dl class="help-dl">
     <dt>青い線</dt><dd>今年の日ごとの平均水温。表示している日を真ん中に前後1週間を描きます。予報は9日先ごろまでで、その先は線が切れます</dd>
-    <dt>点線</dt><dd>前年の同じ日の水温</dd>
+    <dt>点線と帯</dt><dd>過去の同じ日の水温（最大5年。データは2022年11月下旬からなので、それより前の年は使いません）。点線が平均、薄い帯が最低〜最高の幅です。今年の線が帯より上なら例年より暖かく、下なら冷たい目安です</dd>
   </dl>
   <h3>操作</h3>
   <dl class="help-dl">
@@ -277,20 +291,22 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
     <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg></dt><dd>最新の予報を取得します。前の取得から30分たつまでは押せません（薄い表示のとき）。ページを開き直したときも、30分たった予報だけを取り直します</dd>
     <dt><svg class="ico-s" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2.2" fill="var(--surface)"/><circle cx="15" cy="12" r="2.2" fill="var(--surface)"/><circle cx="8" cy="18" r="2.2" fill="var(--surface)"/></svg></dt><dd>アプリの設定を開きます。判定の風速の境目を変えられます。リストと釣り場の管理もここで行います（1つのリストに8か所まで、リストは10個まで。並べ替えもできます）。［自分でリストを作る］は空のリストから釣り場を1つずつ足し、［おすすめリストから作る］は地域や魚種ごとにまとめたリストを選んで作ります。［すべて初期化］は、リスト・設定・保存した予報をすべて消して最初の画面に戻します</dd>
   </dl>
-  <p class="note" style="margin-top:12px">予報はOpen-Meteoのモデルによるものです。6日目以降は精度が下がります。<br>予報：<a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>（<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>）／祝日：<a href="https://github.com/holidays-jp/api" target="_blank" rel="noopener">holidays-jp</a></p>
+  <p class="note" style="margin-top:12px">予報はOpen-Meteoのモデルによるものです。6日目以降は精度が下がります。<br>潮位は、近くの気象庁の地点の潮位表（月と太陽による潮の予測）です。見出しのかっこ内が地点名で、釣り場から離れているほど時刻や高さがずれます。気圧や風による潮位の変化は含みません。潮位表を取得できないときは、予報モデルの推定値を「目安」として出します。<br>予報：<a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>（<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>）／潮位：<a href="https://www.data.jma.go.jp/kaiyou/db/tide/suisan/index.php" target="_blank" rel="noopener">気象庁 潮位表</a>（出典：気象庁ホームページ）／祝日：<a href="https://github.com/holidays-jp/api" target="_blank" rel="noopener">holidays-jp</a></p>
 </dialog>
 
 <!-- 詳細 -->
 <div id="v-day" hidden>
-  <button class="link" id="back1">一覧に戻る</button>
-  <h1 id="d-name"></h1>
-  <p class="sub" id="d-sub"></p>
-  <p class="sub" id="d-note"></p>
-  <div class="daynav">
-    <button id="prev">前の日</button>
-    <b id="d-date"></b>
-    <button id="next">次の日</button>
+  <!-- 「一覧に戻る」から日付の行までは画面の上に常に出す -->
+  <div class="dayhead">
+    <button class="link" id="back1">一覧に戻る</button>
+    <div class="dname"><h1 id="d-name"></h1><p class="sub"><span id="d-kind"></span><span class="coord" id="d-coord"></span></p></div>
+    <div class="daynav">
+      <button id="prev">前の日</button>
+      <b id="d-date"></b>
+      <button id="next">次の日</button>
+    </div>
   </div>
+  <p class="sub" id="d-note"></p>
   <div class="verdict" id="d-verdict"></div>
   <div class="suns" id="d-sun"></div>
 
@@ -300,7 +316,7 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
   </section>
 
   <section class="tide" id="d-tidebox" hidden>
-    <h2>潮位（目安）</h2>
+    <h2 id="d-tideh">潮位（目安）</h2>
     <div class="tide-now" id="d-tidenow"></div>
     <div id="d-tide"></div>
     <div class="tide-ev" id="d-tideev"></div>
@@ -315,7 +331,7 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
     <h2>1時間ごとの予報</h2>
     <div class="tbl"><table class="hr" id="d-table"></table></div>
   </section>
-  <p class="note">データはOpen-Meteoの予報モデルです。水温・潮位は広域の推定値のため、港や湾の中では実際と差があります。釣行前に気象庁の潮汐表や現地の情報も確認してください。</p>
+  <p class="note">風・天気・水温はOpen-Meteoの予報モデル、潮位は気象庁の潮位表（近くの地点の予測）です。水温は広域の推定値のため、港や湾の中では実際と差があります。釣行前に現地の情報も確認してください。</p>
 </div>
 
 <!-- アプリの設定 -->
@@ -362,16 +378,18 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
 
 <!-- 釣り場の追加 -->
 <div id="v-add" hidden>
-  <div class="addbar">
-    <div><h1>釣り場を追加</h1><p class="sub" id="add-count"></p></div>
-    <button class="primary" id="add-done">完了</button>
-  </div>
-  <label class="namefield" id="add-namebox" style="margin:0 0 12px" hidden><span>リストの名前<span class="saved" id="add-saved">保存しました</span></span><input id="add-name" maxlength="12" enterkeyhint="done"></label>
-  <input type="search" id="db-q" placeholder="名前で探す（例：小樽）" aria-label="名前で探す">
-  <div class="dbtools">
-    <select id="db-region" aria-label="地域"></select>
-    <select id="db-kind" aria-label="種別"><option value="">すべての種別</option><option value="fresh">淡水</option><option value="sea">海</option></select>
-    <button id="db-near">近い順</button>
+  <div class="addhead">
+    <div class="addbar">
+      <div><h1>釣り場を追加</h1><p class="sub" id="add-count"></p></div>
+      <button class="primary" id="add-done">完了</button>
+    </div>
+    <label class="namefield" id="add-namebox" style="margin:0 0 12px" hidden><span>リストの名前<span class="saved" id="add-saved">保存しました</span></span><input id="add-name" maxlength="12" enterkeyhint="done"></label>
+    <input type="search" id="db-q" placeholder="名前で探す（例：小樽）" aria-label="名前で探す">
+    <div class="dbtools">
+      <select id="db-region" aria-label="地域"></select>
+      <select id="db-kind" aria-label="種別"><option value="">すべての種別</option><option value="fresh">淡水</option><option value="sea">海</option></select>
+      <button id="db-near">近い順</button>
+    </div>
   </div>
   <div class="msg" id="add-msg"></div>
   <ul class="dblist" id="dblist"></ul>
@@ -396,12 +414,20 @@ details.manual summary{cursor:pointer;font-weight:700;font-size:15px;padding:12p
 <script>
 const $=id=>document.getElementById(id);
 // 釣り場のデータ（data/*.json と同じ内容。tools/embed_data.py で埋め込む）。id は全国で一意。type は sea（海）か fresh（淡水）で、種別 k から推測しない
-const DB=[{"id":"hokkaido-lake-001","n":"網走湖","k":"湖","type":"fresh","pref":"北海道","r":"オホーツク","a":"道東","m":"網走市・大空町","lat":43.95,"lon":144.15,"note":"呼人・女満別の2会場"},{"id":"hokkaido-lake-006","n":"阿寒湖","k":"湖","type":"fresh","pref":"北海道","r":"釧路","a":"道東","m":"釧路市","lat":43.46,"lon":144.1,"note":"阿寒湖温泉街側に釣り場"},{"id":"hokkaido-lake-007","n":"塘路湖","k":"湖","type":"fresh","pref":"北海道","r":"釧路","a":"道東","m":"標茶町","lat":43.13,"lon":144.57},{"id":"hokkaido-lake-009","n":"糠平湖","k":"湖","type":"fresh","pref":"北海道","r":"十勝","a":"道東","m":"上士幌町","lat":43.37,"lon":143.2},{"id":"hokkaido-lake-010","n":"朱鞠内湖","k":"湖","type":"fresh","pref":"北海道","r":"上川","a":"道北","m":"幌加内町","lat":44.3,"lon":142.2},{"id":"hokkaido-lake-011","n":"しのつ湖","k":"湖","type":"fresh","pref":"北海道","r":"石狩","a":"道央","m":"新篠津村","lat":43.2,"lon":141.7},{"id":"hokkaido-lake-012","n":"茨戸川","k":"川","type":"fresh","pref":"北海道","r":"石狩","a":"道央","m":"札幌市北区・石狩市","lat":43.18,"lon":141.37},{"id":"hokkaido-lake-013","n":"大沼","k":"湖","type":"fresh","pref":"北海道","r":"渡島","a":"道南","m":"七飯町","lat":41.98,"lon":140.68},{"id":"hokkaido-lake-014","n":"洞爺湖","k":"湖","type":"fresh","pref":"北海道","r":"胆振","a":"道央","m":"洞爺湖町","lat":42.6,"lon":140.85,"note":"冬も全面は凍らないことが多い"},{"id":"hokkaido-lake-015","n":"ポロト湖","k":"湖","type":"fresh","pref":"北海道","r":"胆振","a":"道央","m":"白老町","lat":42.553,"lon":141.355},{"id":"hokkaido-lake-016","n":"桂沢湖","k":"湖","type":"fresh","pref":"北海道","r":"空知","a":"道央","m":"三笠市","lat":43.22,"lon":141.99},{"id":"hokkaido-lake-017","n":"かなやま湖","k":"湖","type":"fresh","pref":"北海道","r":"上川","a":"道北","m":"南富良野町","lat":43.15,"lon":142.53},{"id":"hokkaido-lake-018","n":"支笏湖","k":"湖","type":"fresh","pref":"北海道","r":"石狩","a":"道央","m":"千歳市","lat":42.754,"lon":141.328},{"id":"hokkaido-lake-019","n":"屈斜路湖","k":"湖","type":"fresh","pref":"北海道","r":"釧路","a":"道東","m":"弟子屈町","lat":43.617,"lon":144.311},{"id":"hokkaido-lake-020","n":"然別湖","k":"湖","type":"fresh","pref":"北海道","r":"十勝","a":"道東","m":"鹿追町","lat":43.282,"lon":143.117,"note":"釣りは期間限定・人数制限あり"},{"id":"hokkaido-lake-021","n":"チミケップ湖","k":"湖","type":"fresh","pref":"北海道","r":"オホーツク","a":"道東","m":"津別町","lat":43.637,"lon":143.875},{"id":"hokkaido-lake-022","n":"岩尾内湖","k":"湖","type":"fresh","pref":"北海道","r":"上川","a":"道北","m":"士別市","lat":44.108,"lon":142.716},{"id":"hokkaido-lake-002","n":"能取湖","k":"汽水湖","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"網走市","lat":44.07,"lon":144.12,"note":"海とつながった汽水湖。冬は氷上でチカ・コマイ"},{"id":"hokkaido-lake-005","n":"サロマ湖","k":"汽水湖","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"北見市・佐呂間町・湧別町","lat":44.13,"lon":143.95,"note":"海とつながった汽水湖。冬は氷上でチカ・コマイ"},{"id":"hokkaido-lake-008","n":"風蓮湖","k":"汽水湖","type":"sea","pref":"北海道","r":"根室","a":"根室","m":"根室市・別海町","lat":43.31,"lon":145.34,"note":"海とつながった汽水湖"},{"id":"hokkaido-port-001","n":"小樽港","k":"港湾","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"小樽市","lat":43.199,"lon":141.001},{"id":"hokkaido-port-002","n":"厚田漁港","k":"漁港","type":"sea","pref":"北海道","r":"石狩","a":"石狩","m":"石狩市","lat":43.398,"lon":141.432},{"id":"hokkaido-port-003","n":"余市港","k":"港湾","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"余市町","lat":43.2,"lon":140.78},{"id":"hokkaido-port-004","n":"岩内港","k":"港湾","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"岩内町","lat":42.98,"lon":140.51},{"id":"hokkaido-port-005","n":"寿都漁港","k":"漁港","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"寿都町","lat":42.79,"lon":140.23},{"id":"hokkaido-port-006","n":"増毛港","k":"港湾","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"増毛町","lat":43.857,"lon":141.526},{"id":"hokkaido-port-007","n":"留萌港","k":"港湾","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"留萌市","lat":43.94,"lon":141.63},{"id":"hokkaido-port-008","n":"羽幌港","k":"港湾","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"羽幌町","lat":44.36,"lon":141.7},{"id":"hokkaido-port-009","n":"稚内港","k":"港湾","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"稚内市","lat":45.42,"lon":141.68},{"id":"hokkaido-port-010","n":"鴛泊港","k":"港湾","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"利尻富士町","lat":45.24,"lon":141.24},{"id":"hokkaido-port-011","n":"香深港","k":"港湾","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"礼文町","lat":45.3,"lon":141.04},{"id":"hokkaido-port-012","n":"枝幸港","k":"港湾","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"枝幸町","lat":44.933,"lon":142.592},{"id":"hokkaido-port-013","n":"雄武漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"雄武町","lat":44.58,"lon":142.96},{"id":"hokkaido-port-014","n":"紋別港","k":"港湾","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"紋別市","lat":44.36,"lon":143.37},{"id":"hokkaido-port-015","n":"湧別漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"湧別町","lat":44.22,"lon":143.63},{"id":"hokkaido-port-016","n":"常呂漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"北見市","lat":44.126,"lon":144.102},{"id":"hokkaido-port-017","n":"網走港","k":"港湾","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"網走市","lat":44.02,"lon":144.28},{"id":"hokkaido-port-018","n":"ウトロ漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"斜里町","lat":44.07,"lon":145.0},{"id":"hokkaido-port-019","n":"羅臼漁港","k":"漁港","type":"sea","pref":"北海道","r":"根室","a":"根室","m":"羅臼町","lat":44.02,"lon":145.19},{"id":"hokkaido-port-020","n":"根室港","k":"港湾","type":"sea","pref":"北海道","r":"根室","a":"根室","m":"根室市","lat":43.33,"lon":145.58},{"id":"hokkaido-port-021","n":"花咲港","k":"港湾","type":"sea","pref":"北海道","r":"根室","a":"根室","m":"根室市","lat":43.28,"lon":145.57},{"id":"hokkaido-port-022","n":"霧多布港","k":"港湾","type":"sea","pref":"北海道","r":"釧路","a":"釧路","m":"浜中町","lat":43.09,"lon":145.12},{"id":"hokkaido-port-023","n":"厚岸漁港","k":"漁港","type":"sea","pref":"北海道","r":"釧路","a":"釧路","m":"厚岸町","lat":43.04,"lon":144.85},{"id":"hokkaido-port-024","n":"釧路港","k":"港湾","type":"sea","pref":"北海道","r":"釧路","a":"釧路","m":"釧路市","lat":42.97,"lon":144.37},{"id":"hokkaido-port-025","n":"大津漁港","k":"漁港","type":"sea","pref":"北海道","r":"十勝","a":"十勝","m":"豊頃町","lat":42.674,"lon":143.639},{"id":"hokkaido-port-026","n":"十勝港","k":"港湾","type":"sea","pref":"北海道","r":"十勝","a":"十勝","m":"広尾町","lat":42.285,"lon":143.325},{"id":"hokkaido-port-027","n":"様似漁港","k":"漁港","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"様似町","lat":42.13,"lon":142.93},{"id":"hokkaido-port-028","n":"浦河港","k":"港湾","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"浦河町","lat":42.16,"lon":142.77},{"id":"hokkaido-port-029","n":"鵡川漁港","k":"漁港","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"むかわ町","lat":42.55,"lon":141.93},{"id":"hokkaido-port-030","n":"苫小牧西港","k":"港湾","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"苫小牧市","lat":42.6333,"lon":141.6167},{"id":"hokkaido-port-032","n":"白老港","k":"港湾","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"白老町","lat":42.523,"lon":141.318,"status":"banned"},{"id":"hokkaido-port-033","n":"室蘭港","k":"港湾","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"室蘭市","lat":42.33,"lon":140.97},{"id":"hokkaido-port-034","n":"伊達漁港","k":"漁港","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"伊達市","lat":42.46,"lon":140.86},{"id":"hokkaido-port-035","n":"八雲漁港","k":"漁港","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"八雲町","lat":42.25,"lon":140.27},{"id":"hokkaido-port-036","n":"森港","k":"港湾","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"森町","lat":42.113,"lon":140.592},{"id":"hokkaido-port-037","n":"函館港","k":"港湾","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"函館市","lat":41.77,"lon":140.72},{"id":"hokkaido-port-038","n":"戸井漁港","k":"漁港","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"函館市","lat":41.72,"lon":140.99},{"id":"hokkaido-port-039","n":"松前港","k":"港湾","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"松前町","lat":41.43,"lon":140.11},{"id":"hokkaido-port-040","n":"江差港","k":"港湾","type":"sea","pref":"北海道","r":"檜山","a":"檜山","m":"江差町","lat":41.87,"lon":140.12},{"id":"hokkaido-port-041","n":"苫小牧東港","k":"港湾","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"苫小牧市・厚真町","lat":42.6,"lon":141.8167},{"id":"hokkaido-port-042","n":"石狩湾新港","k":"港湾","type":"sea","pref":"北海道","r":"石狩","a":"石狩","m":"石狩市・小樽市","lat":43.2167,"lon":141.3},{"id":"hokkaido-port-043","n":"古潭漁港","k":"漁港","type":"sea","pref":"北海道","r":"石狩","a":"石狩","m":"石狩市","lat":43.3575,"lon":141.4261},{"id":"hokkaido-port-044","n":"美国漁港","k":"漁港","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"積丹町","lat":43.297,"lon":140.606},{"id":"hokkaido-port-045","n":"瀬棚港","k":"港湾","type":"sea","pref":"北海道","r":"檜山","a":"檜山","m":"せたな町","lat":42.453,"lon":139.851},{"id":"hokkaido-port-046","n":"乙部漁港","k":"漁港","type":"sea","pref":"北海道","r":"檜山","a":"檜山","m":"乙部町","lat":41.969,"lon":140.134},{"id":"hokkaido-port-047","n":"奥尻港","k":"港湾","type":"sea","pref":"北海道","r":"檜山","a":"檜山","m":"奥尻町","lat":42.176,"lon":139.517},{"id":"hokkaido-port-048","n":"木古内漁港（札苅）","k":"漁港","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"木古内町","lat":41.699,"lon":140.483},{"id":"hokkaido-port-049","n":"門別漁港","k":"漁港","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"日高町","lat":42.473,"lon":142.073},{"id":"hokkaido-port-050","n":"静内漁港","k":"漁港","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"新ひだか町","lat":42.324,"lon":142.372},{"id":"hokkaido-port-051","n":"えりも港","k":"港湾","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"えりも町","lat":42.016,"lon":143.145},{"id":"hokkaido-port-052","n":"苫前漁港","k":"漁港","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"苫前町","lat":44.313,"lon":141.651},{"id":"hokkaido-port-053","n":"天塩港","k":"港湾","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"天塩町","lat":44.874,"lon":141.737},{"id":"hokkaido-port-054","n":"浜鬼志別漁港","k":"漁港","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"猿払村","lat":45.342,"lon":142.168},{"id":"hokkaido-port-055","n":"頓別漁港","k":"漁港","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"浜頓別町","lat":45.135,"lon":142.394},{"id":"hokkaido-port-056","n":"興部漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"興部町","lat":44.478,"lon":143.142},{"id":"hokkaido-port-057","n":"斜里漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"斜里町","lat":43.921,"lon":144.668},{"id":"hokkaido-port-058","n":"白糠漁港","k":"漁港","type":"sea","pref":"北海道","r":"釧路","a":"釧路","m":"白糠町","lat":42.952,"lon":144.085}];
+const DB=[{"id":"hokkaido-lake-001","n":"網走湖","k":"湖","type":"fresh","pref":"北海道","r":"オホーツク","a":"道東","m":"網走市・大空町","lat":43.95,"lon":144.15,"note":"呼人・女満別の2会場"},{"id":"hokkaido-lake-006","n":"阿寒湖","k":"湖","type":"fresh","pref":"北海道","r":"釧路","a":"道東","m":"釧路市","lat":43.46,"lon":144.1,"note":"阿寒湖温泉街側に釣り場"},{"id":"hokkaido-lake-007","n":"塘路湖","k":"湖","type":"fresh","pref":"北海道","r":"釧路","a":"道東","m":"標茶町","lat":43.13,"lon":144.57},{"id":"hokkaido-lake-009","n":"糠平湖","k":"湖","type":"fresh","pref":"北海道","r":"十勝","a":"道東","m":"上士幌町","lat":43.37,"lon":143.2},{"id":"hokkaido-lake-010","n":"朱鞠内湖","k":"湖","type":"fresh","pref":"北海道","r":"上川","a":"道北","m":"幌加内町","lat":44.3,"lon":142.2},{"id":"hokkaido-lake-011","n":"しのつ湖","k":"湖","type":"fresh","pref":"北海道","r":"石狩","a":"道央","m":"新篠津村","lat":43.2,"lon":141.7},{"id":"hokkaido-lake-012","n":"茨戸川","k":"川","type":"fresh","pref":"北海道","r":"石狩","a":"道央","m":"札幌市北区・石狩市","lat":43.18,"lon":141.37},{"id":"hokkaido-lake-013","n":"大沼","k":"湖","type":"fresh","pref":"北海道","r":"渡島","a":"道南","m":"七飯町","lat":41.98,"lon":140.68},{"id":"hokkaido-lake-014","n":"洞爺湖","k":"湖","type":"fresh","pref":"北海道","r":"胆振","a":"道央","m":"洞爺湖町","lat":42.6,"lon":140.85,"note":"冬も全面は凍らないことが多い"},{"id":"hokkaido-lake-015","n":"ポロト湖","k":"湖","type":"fresh","pref":"北海道","r":"胆振","a":"道央","m":"白老町","lat":42.553,"lon":141.355},{"id":"hokkaido-lake-016","n":"桂沢湖","k":"湖","type":"fresh","pref":"北海道","r":"空知","a":"道央","m":"三笠市","lat":43.22,"lon":141.99},{"id":"hokkaido-lake-017","n":"かなやま湖","k":"湖","type":"fresh","pref":"北海道","r":"上川","a":"道北","m":"南富良野町","lat":43.15,"lon":142.53},{"id":"hokkaido-lake-018","n":"支笏湖","k":"湖","type":"fresh","pref":"北海道","r":"石狩","a":"道央","m":"千歳市","lat":42.754,"lon":141.328},{"id":"hokkaido-lake-019","n":"屈斜路湖","k":"湖","type":"fresh","pref":"北海道","r":"釧路","a":"道東","m":"弟子屈町","lat":43.617,"lon":144.311},{"id":"hokkaido-lake-020","n":"然別湖","k":"湖","type":"fresh","pref":"北海道","r":"十勝","a":"道東","m":"鹿追町","lat":43.282,"lon":143.117,"note":"釣りは期間限定・人数制限あり"},{"id":"hokkaido-lake-021","n":"チミケップ湖","k":"湖","type":"fresh","pref":"北海道","r":"オホーツク","a":"道東","m":"津別町","lat":43.637,"lon":143.875},{"id":"hokkaido-lake-022","n":"岩尾内湖","k":"湖","type":"fresh","pref":"北海道","r":"上川","a":"道北","m":"士別市","lat":44.108,"lon":142.716},{"id":"hokkaido-lake-002","n":"能取湖","k":"汽水湖","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"網走市","lat":44.07,"lon":144.12,"note":"海とつながった汽水湖。冬は氷上でチカ・コマイ"},{"id":"hokkaido-lake-005","n":"サロマ湖","k":"汽水湖","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"北見市・佐呂間町・湧別町","lat":44.13,"lon":143.95,"note":"海とつながった汽水湖。冬は氷上でチカ・コマイ"},{"id":"hokkaido-lake-008","n":"風蓮湖","k":"汽水湖","type":"sea","pref":"北海道","r":"根室","a":"根室","m":"根室市・別海町","lat":43.31,"lon":145.34,"note":"海とつながった汽水湖"},{"id":"hokkaido-port-001","n":"小樽港","k":"港湾","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"小樽市","lat":43.199,"lon":141.001},{"id":"hokkaido-port-002","n":"厚田漁港","k":"漁港","type":"sea","pref":"北海道","r":"石狩","a":"石狩","m":"石狩市","lat":43.398,"lon":141.432},{"id":"hokkaido-port-003","n":"余市港","k":"港湾","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"余市町","lat":43.2,"lon":140.78},{"id":"hokkaido-port-004","n":"岩内港","k":"港湾","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"岩内町","lat":42.98,"lon":140.51},{"id":"hokkaido-port-005","n":"寿都漁港","k":"漁港","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"寿都町","lat":42.79,"lon":140.23},{"id":"hokkaido-port-006","n":"増毛港","k":"港湾","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"増毛町","lat":43.857,"lon":141.526},{"id":"hokkaido-port-007","n":"留萌港","k":"港湾","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"留萌市","lat":43.94,"lon":141.63},{"id":"hokkaido-port-008","n":"羽幌港","k":"港湾","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"羽幌町","lat":44.36,"lon":141.7},{"id":"hokkaido-port-009","n":"稚内港","k":"港湾","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"稚内市","lat":45.42,"lon":141.68},{"id":"hokkaido-port-010","n":"鴛泊港","k":"港湾","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"利尻富士町","lat":45.24,"lon":141.24},{"id":"hokkaido-port-011","n":"香深港","k":"港湾","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"礼文町","lat":45.3,"lon":141.04},{"id":"hokkaido-port-012","n":"枝幸港","k":"港湾","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"枝幸町","lat":44.933,"lon":142.592},{"id":"hokkaido-port-013","n":"雄武漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"雄武町","lat":44.58,"lon":142.96},{"id":"hokkaido-port-014","n":"紋別港","k":"港湾","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"紋別市","lat":44.36,"lon":143.37},{"id":"hokkaido-port-015","n":"湧別漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"湧別町","lat":44.22,"lon":143.63},{"id":"hokkaido-port-016","n":"常呂漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"北見市","lat":44.126,"lon":144.102},{"id":"hokkaido-port-017","n":"網走港","k":"港湾","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"網走市","lat":44.02,"lon":144.28},{"id":"hokkaido-port-018","n":"ウトロ漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"斜里町","lat":44.07,"lon":145.0},{"id":"hokkaido-port-019","n":"羅臼漁港","k":"漁港","type":"sea","pref":"北海道","r":"根室","a":"根室","m":"羅臼町","lat":44.02,"lon":145.19},{"id":"hokkaido-port-020","n":"根室港","k":"港湾","type":"sea","pref":"北海道","r":"根室","a":"根室","m":"根室市","lat":43.33,"lon":145.58},{"id":"hokkaido-port-021","n":"花咲港","k":"港湾","type":"sea","pref":"北海道","r":"根室","a":"根室","m":"根室市","lat":43.28,"lon":145.57},{"id":"hokkaido-port-022","n":"霧多布港","k":"港湾","type":"sea","pref":"北海道","r":"釧路","a":"釧路","m":"浜中町","lat":43.09,"lon":145.12},{"id":"hokkaido-port-023","n":"厚岸漁港","k":"漁港","type":"sea","pref":"北海道","r":"釧路","a":"釧路","m":"厚岸町","lat":43.04,"lon":144.85},{"id":"hokkaido-port-024","n":"釧路港","k":"港湾","type":"sea","pref":"北海道","r":"釧路","a":"釧路","m":"釧路市","lat":42.97,"lon":144.37},{"id":"hokkaido-port-025","n":"大津漁港","k":"漁港","type":"sea","pref":"北海道","r":"十勝","a":"十勝","m":"豊頃町","lat":42.674,"lon":143.639},{"id":"hokkaido-port-026","n":"十勝港","k":"港湾","type":"sea","pref":"北海道","r":"十勝","a":"十勝","m":"広尾町","lat":42.285,"lon":143.325},{"id":"hokkaido-port-027","n":"様似漁港","k":"漁港","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"様似町","lat":42.13,"lon":142.93},{"id":"hokkaido-port-028","n":"浦河港","k":"港湾","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"浦河町","lat":42.16,"lon":142.77},{"id":"hokkaido-port-029","n":"鵡川漁港","k":"漁港","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"むかわ町","lat":42.55,"lon":141.93},{"id":"hokkaido-port-030","n":"苫小牧西港","k":"港湾","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"苫小牧市","lat":42.6333,"lon":141.6167},{"id":"hokkaido-port-032","n":"白老港","k":"港湾","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"白老町","lat":42.523,"lon":141.318,"status":"banned"},{"id":"hokkaido-port-033","n":"室蘭港","k":"港湾","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"室蘭市","lat":42.33,"lon":140.97},{"id":"hokkaido-port-034","n":"伊達漁港","k":"漁港","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"伊達市","lat":42.46,"lon":140.86},{"id":"hokkaido-port-035","n":"八雲漁港","k":"漁港","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"八雲町","lat":42.25,"lon":140.27},{"id":"hokkaido-port-036","n":"森港","k":"港湾","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"森町","lat":42.113,"lon":140.592},{"id":"hokkaido-port-037","n":"函館港","k":"港湾","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"函館市","lat":41.77,"lon":140.72},{"id":"hokkaido-port-038","n":"戸井漁港","k":"漁港","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"函館市","lat":41.72,"lon":140.99},{"id":"hokkaido-port-039","n":"松前港","k":"港湾","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"松前町","lat":41.43,"lon":140.11},{"id":"hokkaido-port-040","n":"江差港","k":"港湾","type":"sea","pref":"北海道","r":"檜山","a":"檜山","m":"江差町","lat":41.87,"lon":140.12},{"id":"hokkaido-port-041","n":"苫小牧東港","k":"港湾","type":"sea","pref":"北海道","r":"胆振","a":"胆振","m":"苫小牧市・厚真町","lat":42.6,"lon":141.8167},{"id":"hokkaido-port-042","n":"石狩湾新港","k":"港湾","type":"sea","pref":"北海道","r":"石狩","a":"石狩","m":"石狩市・小樽市","lat":43.2167,"lon":141.3},{"id":"hokkaido-port-043","n":"古潭漁港","k":"漁港","type":"sea","pref":"北海道","r":"石狩","a":"石狩","m":"石狩市","lat":43.3575,"lon":141.4261},{"id":"hokkaido-port-044","n":"美国漁港","k":"漁港","type":"sea","pref":"北海道","r":"後志","a":"後志","m":"積丹町","lat":43.297,"lon":140.606},{"id":"hokkaido-port-045","n":"瀬棚港","k":"港湾","type":"sea","pref":"北海道","r":"檜山","a":"檜山","m":"せたな町","lat":42.453,"lon":139.851},{"id":"hokkaido-port-046","n":"乙部漁港","k":"漁港","type":"sea","pref":"北海道","r":"檜山","a":"檜山","m":"乙部町","lat":41.969,"lon":140.134},{"id":"hokkaido-port-047","n":"奥尻港","k":"港湾","type":"sea","pref":"北海道","r":"檜山","a":"檜山","m":"奥尻町","lat":42.176,"lon":139.517},{"id":"hokkaido-port-048","n":"木古内漁港（札苅）","k":"漁港","type":"sea","pref":"北海道","r":"渡島","a":"渡島","m":"木古内町","lat":41.699,"lon":140.483},{"id":"hokkaido-port-049","n":"門別漁港","k":"漁港","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"日高町","lat":42.473,"lon":142.073},{"id":"hokkaido-port-050","n":"静内漁港","k":"漁港","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"新ひだか町","lat":42.324,"lon":142.372},{"id":"hokkaido-port-051","n":"えりも港","k":"港湾","type":"sea","pref":"北海道","r":"日高","a":"日高","m":"えりも町","lat":42.016,"lon":143.145},{"id":"hokkaido-port-052","n":"苫前漁港","k":"漁港","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"苫前町","lat":44.313,"lon":141.651},{"id":"hokkaido-port-053","n":"天塩港","k":"港湾","type":"sea","pref":"北海道","r":"留萌","a":"留萌","m":"天塩町","lat":44.874,"lon":141.737},{"id":"hokkaido-port-054","n":"浜鬼志別漁港","k":"漁港","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"猿払村","lat":45.342,"lon":142.168,"ts":"KE"},{"id":"hokkaido-port-055","n":"頓別漁港","k":"漁港","type":"sea","pref":"北海道","r":"宗谷","a":"宗谷","m":"浜頓別町","lat":45.135,"lon":142.394},{"id":"hokkaido-port-056","n":"興部漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"興部町","lat":44.478,"lon":143.142},{"id":"hokkaido-port-057","n":"斜里漁港","k":"漁港","type":"sea","pref":"北海道","r":"オホーツク","a":"オホーツク","m":"斜里町","lat":43.921,"lon":144.668},{"id":"hokkaido-port-058","n":"白糠漁港","k":"漁港","type":"sea","pref":"北海道","r":"釧路","a":"釧路","m":"白糠町","lat":42.952,"lon":144.085}];
 // 県ごとの地域の並び・見出しの区分・プリセット（JSON の prefs と同じ内容）
-const PREFDEF=[{"name":"北海道","regions":["空知","石狩","後志","胆振","日高","渡島","檜山","上川","留萌","宗谷","オホーツク","十勝","釧路","根室"],"sections":[["道央",["空知","石狩","後志","胆振","日高"]],["道南",["渡島","檜山"]],["道北",["上川","留萌","宗谷"]],["道東",["オホーツク","十勝","釧路","根室"]]],"presets":[{"section":"道央","name":"道央・海","spots":["hokkaido-port-001","hokkaido-port-003","hokkaido-port-042","hokkaido-port-043","hokkaido-port-002","hokkaido-port-030","hokkaido-port-041"]},{"section":"道南","name":"道南・海","spots":["hokkaido-port-045","hokkaido-port-046","hokkaido-port-040","hokkaido-port-039","hokkaido-port-037","hokkaido-port-038","hokkaido-port-036","hokkaido-port-035"]},{"section":"道北","name":"道北・海","spots":["hokkaido-port-006","hokkaido-port-007","hokkaido-port-052","hokkaido-port-008","hokkaido-port-053","hokkaido-port-009","hokkaido-port-055","hokkaido-port-012"]},{"section":"道東","name":"道東・海","spots":["hokkaido-port-014","hokkaido-port-017","hokkaido-port-018","hokkaido-port-019","hokkaido-port-020","hokkaido-port-023","hokkaido-port-024","hokkaido-port-026"]},{"section":"道東","name":"道東・氷上のチカ","spots":["hokkaido-lake-005","hokkaido-lake-002","hokkaido-lake-008"]},{"section":"道央","name":"道央・ワカサギ","spots":["hokkaido-lake-012","hokkaido-lake-011","hokkaido-lake-015","hokkaido-lake-016"]},{"section":"道央","name":"道央・ヒメマス","spots":["hokkaido-lake-018","hokkaido-lake-014"]},{"section":"道東","name":"道東・ワカサギ","spots":["hokkaido-lake-001","hokkaido-lake-006","hokkaido-lake-007","hokkaido-lake-009","hokkaido-lake-021"]},{"section":"道東","name":"道東・湖のトラウト","spots":["hokkaido-lake-006","hokkaido-lake-019","hokkaido-lake-020"]}]}];
+const PREFDEF=[{"name":"北海道","tideStations":[{"code":"WN","name":"稚内","lat":45.4,"lon":141.6833,"z0":18},{"code":"KE","name":"枝幸","lat":44.9333,"lon":142.5833,"z0":57},{"code":"A0","name":"紋別","lat":44.35,"lon":143.3667,"z0":71},{"code":"AS","name":"網走","lat":44.0167,"lon":144.2833,"z0":68},{"code":"A6","name":"羅臼","lat":44.0167,"lon":145.2,"z0":64},{"code":"NM","name":"根室","label":"根室港","lat":43.35,"lon":145.5833,"z0":87},{"code":"HN","name":"花咲","lat":43.2833,"lon":145.5667,"z0":86},{"code":"KP","name":"霧多布","lat":43.0833,"lon":145.1167,"z0":81},{"code":"KR","name":"釧路","label":"釧路港","lat":42.9833,"lon":144.3667,"z0":87},{"code":"B1","name":"十勝","label":"十勝港","lat":42.3,"lon":143.3167,"z0":85},{"code":"A9","name":"浦河","lat":42.1667,"lon":142.7667,"z0":93},{"code":"C8","name":"苫小牧東","label":"苫小牧東港","lat":42.6,"lon":141.8167,"z0":88},{"code":"TM","name":"苫小牧西","label":"苫小牧西港","lat":42.6333,"lon":141.6167,"z0":88},{"code":"SO","name":"白老","lat":42.5167,"lon":141.3167,"z0":88},{"code":"A8","name":"室蘭","lat":42.35,"lon":140.95,"z0":95},{"code":"A3","name":"森","label":"森港","lat":42.1167,"lon":140.6,"z0":92},{"code":"HK","name":"函館","lat":41.7833,"lon":140.7167,"z0":57},{"code":"Q0","name":"吉岡","lat":41.45,"lon":140.2333,"z0":45},{"code":"A5","name":"松前","lat":41.4167,"lon":140.1,"z0":23},{"code":"ES","name":"江差","lat":41.8667,"lon":140.1333,"z0":24},{"code":"ZP","name":"奥尻","lat":42.0833,"lon":139.4833,"z0":19},{"code":"OR","name":"奥尻港","lat":42.1667,"lon":139.5167,"z0":20},{"code":"SE","name":"瀬棚","lat":42.45,"lon":139.85,"z0":20},{"code":"B6","name":"寿都","lat":42.8,"lon":140.2333,"z0":17},{"code":"B5","name":"岩内","lat":42.9833,"lon":140.5,"z0":18},{"code":"Z8","name":"忍路","lat":43.2167,"lon":140.8667,"z0":17},{"code":"B3","name":"小樽","lat":43.2,"lon":141.0,"z0":16},{"code":"IK","name":"石狩新港","lat":43.2167,"lon":141.3,"z0":18},{"code":"B2","name":"留萌","label":"留萌港","lat":43.95,"lon":141.6333,"z0":16},{"code":"F3","name":"沓形","lat":45.1833,"lon":141.1333,"z0":18}],"regions":["空知","石狩","後志","胆振","日高","渡島","檜山","上川","留萌","宗谷","オホーツク","十勝","釧路","根室"],"sections":[["道央",["空知","石狩","後志","胆振","日高"]],["道南",["渡島","檜山"]],["道北",["上川","留萌","宗谷"]],["道東",["オホーツク","十勝","釧路","根室"]]],"presets":[{"section":"道央","name":"道央・海","spots":["hokkaido-port-001","hokkaido-port-003","hokkaido-port-042","hokkaido-port-043","hokkaido-port-002","hokkaido-port-030","hokkaido-port-041"]},{"section":"道南","name":"道南・海","spots":["hokkaido-port-045","hokkaido-port-046","hokkaido-port-040","hokkaido-port-039","hokkaido-port-037","hokkaido-port-038","hokkaido-port-036","hokkaido-port-035"]},{"section":"道北","name":"道北・海","spots":["hokkaido-port-006","hokkaido-port-007","hokkaido-port-052","hokkaido-port-008","hokkaido-port-053","hokkaido-port-009","hokkaido-port-055","hokkaido-port-012"]},{"section":"道東","name":"道東・海","spots":["hokkaido-port-014","hokkaido-port-017","hokkaido-port-018","hokkaido-port-019","hokkaido-port-020","hokkaido-port-023","hokkaido-port-024","hokkaido-port-026"]},{"section":"道東","name":"道東・氷上のチカ","spots":["hokkaido-lake-005","hokkaido-lake-002","hokkaido-lake-008"]},{"section":"道央","name":"道央・ワカサギ","spots":["hokkaido-lake-012","hokkaido-lake-011","hokkaido-lake-015","hokkaido-lake-016"]},{"section":"道央","name":"道央・ヒメマス","spots":["hokkaido-lake-018","hokkaido-lake-014"]},{"section":"道東","name":"道東・ワカサギ","spots":["hokkaido-lake-001","hokkaido-lake-006","hokkaido-lake-007","hokkaido-lake-009","hokkaido-lake-021"]},{"section":"道東","name":"道東・湖のトラウト","spots":["hokkaido-lake-006","hokkaido-lake-019","hokkaido-lake-020"]}]}];
 const MAX_SPOTS=8, MAX_BANKS=10;
 // 釣り場は id で引く（名前は全国で重なる）。保存するリストには id も入れ、データを直したときに写しを更新できるようにする
 const byId=new Map(DB.map(e=>[e.id,e]));
+// 潮位は気象庁の潮位表の地点（tideStations）の値を使う。地点はデータで指定（ts）があればそれ、なければいちばん近い地点。地点の表がない県では null
+const TIDE_ST=PREFDEF.flatMap(p=>p.tideStations||[]);
+function tideStation(p){
+  const e=p.id&&byId.get(p.id);
+  let st=e&&e.ts&&TIDE_ST.find(t=>t.code===e.ts);
+  if(!st){const k=Math.cos(p.lat*Math.PI/180);let best=Infinity;for(const t of TIDE_ST){const d=(t.lat-p.lat)**2+((t.lon-p.lon)*k)**2;if(d<best){best=d;st=t}}}
+  return st||null;
+}
 const fromDB=id=>{const e=byId.get(id);return {id:e.id,name:e.n,lat:e.lat,lon:e.lon,type:e.type,...(e.note?{note:e.note}:{})}};
 const PREFS=[...new Set(DB.map(e=>e.pref))];  // 釣り場のある都道府県（データに出てくる順）
 const prefDef=pref=>PREFDEF.find(x=>x.name===pref)||{name:pref,regions:[],sections:[],presets:[]};
@@ -519,19 +545,27 @@ async function fetchSpot(p){
   ]);
   return {w,m:m&&m.hourly?m.hourly:null,sst:m&&m.daily?m.daily:null};
 }
-// 前年の水温（日ごとの平均）。過去の値は変わらないので予報のキャッシュとは分けて保存し、釣り場ごとに1日1回だけ取る
-// 去年の「今日の7日前〜17日後」をまとめて取り、詳細で開ける日（今日〜10日先）の前後1週間すべてに使う
-const lyDate=s=>`${+s.slice(0,4)-1}-${s.slice(5)==="02-29"?"02-28":s.slice(5)}`;
+// 過去の水温（日ごとの平均、最大5年）。過去の値は変わらないので予報のキャッシュとは分けて保存し、釣り場ごとに1日1回だけ取る
+// 1〜5年前それぞれの「今日の7日前〜17日後」を取り、詳細で開ける日（今日〜10日先）の前後1週間すべてに使う。
+// 年をまたいで続けて取らないのは、Open-Meteo が1地点で2週間を超える期間を複数回分に数えるため（25日×5回なら約9回分）
+// 値は2022-11-24から（それより前は null）。取りたい期間がまるごとそれより前の年は通信しない。年が進めば使える年が増え、5年でそろう
+const LY_YEARS=5, SST_FROM="2022-11-24";
+const agoDate=(s,n)=>`${+s.slice(0,4)-n}-${s.slice(5)==="02-29"?"02-28":s.slice(5)}`;  // n年前の同じ日（2/29は2/28）
 const lyCache=(()=>{try{return JSON.parse(localStorage.getItem("nagical-sst-ly"))||{}}catch(e){return {}}})();
 const lyPending={}, lyFailed={};
-const getLy=p=>{const c=lyCache[key(p)];return c&&c.for===today()?c:null};
+const getLy=p=>{const c=lyCache[key(p)];return c&&c.for===today()&&c.ys&&c.ys.length===LY_YEARS?c:null};  // 年数の違う古い形は取り直す
 function fetchLy(p){
   const k=key(p), t=today();
   if(lyPending[k]||lyFailed[k]===t)return;  // 失敗したらその日は取り直さない（開くたびに通信しない）
-  lyPending[k]=fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${p.lat}&longitude=${p.lon}&timezone=Asia%2FTokyo&daily=sea_surface_temperature_mean&start_date=${lyDate(addDays(t,-7))}&end_date=${lyDate(addDays(t,DAYS+6))}`)
-    .then(r=>{if(!r.ok)throw 0;return r.json()})
-    .then(j=>{
-      lyCache[k]={for:t,time:j.daily.time,v:j.daily.sea_surface_temperature_mean};
+  lyPending[k]=Promise.all([...Array(LY_YEARS)].map((_,i)=>{
+    const a=agoDate(addDays(t,-7),i+1), b=agoDate(addDays(t,DAYS+6),i+1);
+    if(b<SST_FROM)return null;
+    return fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${p.lat}&longitude=${p.lon}&timezone=Asia%2FTokyo&daily=sea_surface_temperature_mean&start_date=${a}&end_date=${b}`)
+      .then(r=>{if(!r.ok)throw 0;return r.json()})
+      .then(j=>({time:j.daily.time,v:j.daily.sea_surface_temperature_mean}));
+  }))
+    .then(ys=>{
+      lyCache[k]={for:t,ys};  // ys[0] が1年前、ys[1] が2年前…（取らなかった年は null）
       // どのリストにもない釣り場の分は消す
       const all=new Set(state.banks.flatMap(b=>b.spots.map(key)));for(const x in lyCache)if(!all.has(x))delete lyCache[x];
       try{localStorage.setItem("nagical-sst-ly",JSON.stringify(lyCache))}catch(e){}
@@ -539,6 +573,46 @@ function fetchLy(p){
     },()=>{lyFailed[k]=t})
     .finally(()=>{delete lyPending[k]});
 }
+// 潮位：気象庁の潮位表（月と太陽による潮の予測）。1地点1年分のテキスト（約50KB、1日1行）で、中身は年ごとに決まっている。
+// 地点ごとに今日から40日分を切り出して保存し、詳細で開ける日（今日〜10日先と、その翌日の0時）がはみ出したときだけ取り直す。
+// 保存は {地点記号: {ver: 形式の番号, d: {日付: {h: 1時間ごとの潮位cm[24], x: [[満潮1/干潮0, 0時からの分, 潮位cm], …]}}}}。失敗した地点は、ページを開き直すまで取り直さない
+// 読み取り方を変えたら TIDE_VER を上げる（古い読み取り方で保存した分を使わずに取り直すため）
+const TIDE_DAYS=40, TIDE_VER=2;
+const tdCache=(()=>{try{return JSON.parse(localStorage.getItem("nagical-tide"))||{}}catch(e){return {}}})();
+const tdPending={}, tdFailed={};
+const getTide=st=>{const c=tdCache[st.code],t=today();return c&&c.ver===TIDE_VER&&c.d&&c.d[t]&&c.d[addDays(t,DAYS)]?c.d:null};
+function fetchTide(st){
+  const c=st.code, t=today(), last=addDays(t,TIDE_DAYS-1);
+  if(tdPending[c]||tdFailed[c]===t)return;
+  // 年末は翌年のファイルも取る（翌年の分が取れなくても、今年の分で足りれば使う）
+  const ys=[...new Set([t.slice(0,4),last.slice(0,4)])];
+  tdPending[c]=Promise.all(ys.map((y,i)=>fetch(`https://www.data.jma.go.jp/kaiyou/data/db/tide/suisan/txt/${y}/${c}.txt`).then(r=>{if(!r.ok)throw 0;return r.text()}).catch(e=>{if(!i)throw e;return ""})))
+    .then(txts=>{
+      // 1行136文字：1時間ごとの潮位（3桁×24）、年月日（2桁×3、空白埋め）、地点記号、満潮4回・干潮4回（時2桁・分2桁・潮位3桁。ないときは9999）
+      const days={};
+      txts.join("\n").split(/\r?\n/).forEach(l=>{
+        if(l.length<136||l.slice(78,80)!==c)return;
+        const p2=i=>String(+l.slice(i,i+2)).padStart(2,"0"), dd=`20${p2(72)}-${p2(74)}-${p2(76)}`;  // 月・日は1桁なら空白で埋めてある if(dd<t||dd>last)return;
+        const h=[...Array(24)].map((_,i)=>+l.slice(i*3,i*3+3)), x=[];
+        for(let j=0;j<8;j++){
+          const s=l.slice(80+7*j,87+7*j), m=+s.slice(0,2)*60+ +s.slice(2,4), v=+s.slice(4);
+          if(s.slice(0,4)!=="9999"&&Number.isFinite(m)&&Number.isFinite(v))x.push([j<4?1:0,m,v]);  // 読めない値は捨てる
+        }
+        days[dd]={h,x};
+      });
+      if(!days[t])throw 0;
+      tdCache[c]={ver:TIDE_VER,d:days};
+      // どのリストの釣り場にも使っていない地点の分は消す
+      const used=new Set(state.banks.flatMap(b=>b.spots.filter(p=>p.type!=="fresh").map(p=>(tideStation(p)||{}).code)));
+      for(const x in tdCache)if(!used.has(x))delete tdCache[x];
+      try{localStorage.setItem("nagical-tide",JSON.stringify(tdCache))}catch(e){}
+      if(!$("v-day").hidden)route();
+    })
+    .catch(()=>{tdFailed[c]=t})
+    .finally(()=>{delete tdPending[c]});
+}
+// 今のリストの海の釣り場で、潮位がまだない地点を取っておく（詳細を開いたときに待たずに出せるように）
+const prefetchTide=()=>spots.forEach(p=>{if(p.type==="fresh")return;const st=tideStation(p);if(st&&!getTide(st))fetchTide(st)});
 // 取得に失敗したときの文。原因（圏外かサーバー側か）は決めつけず、前の予報を出している場合はその古さを書く
 function failMsg(nNone,nOld,allOld,t){
   const again="しばらくしてから［最新の予報を取得］を押してください";
@@ -549,6 +623,7 @@ function failMsg(nNone,nOld,allOld,t){
 }
 async function loadAll(force){
   const now=Date.now();
+  prefetchTide();
   // 水温の推移を足す前に保存した海の予報（sst がない）は、未取得として取り直す
   const need=spots.filter(p=>{const c=cache[key(p)];if(!c||(p.type!=="fresh"&&c.d.m&&!c.d.sst))return true;return force&&now-c.at>=COOLDOWN});
   if(!need.length){route();updateReload();return}
@@ -681,7 +756,7 @@ function renderDay(si,date){
   const t=today(); if(date<t||date>addDays(t,DAYS-1))date=t;
   const sea=p.type!=="fresh", d=getD(p);
   $("d-name").textContent=p.name;
-  $("d-sub").textContent=`${sea?"海":"淡水"}　北緯${p.lat}　東経${p.lon}`;
+  $("d-kind").textContent=sea?"海":"淡水"; $("d-coord").textContent=`　北緯${p.lat}　東経${p.lon}`;
   $("d-note").textContent=p.note||""; $("d-note").hidden=!p.note;
   const di=Math.round((new Date(date)-new Date(t))/864e5);
   $("d-date").textContent=`${di===0?"今日 ":di===1?"明日 ":""}${md(date)}（${wd(date)}）`;
@@ -699,60 +774,57 @@ function renderDay(si,date){
   $("d-verdict").innerHTML=pk?`<span style="font-size:13px">${WIN_NAME[state.win.k]}（${fmtMin(pk.r[0])}〜${fmtMin(Math.min(pk.r[1],23*60+59))}）</span><br>最大 <b>${f1(pk.v)}</b> m/s　${arrow(pk.dir)} ${dirName(pk.dir)}の風　<b style="font-size:16px">${LVTXT[L]}</b>${wxTxt(pk)?`<br><b style="font-size:15px;color:${pk.snow?"var(--ink)":"var(--water-line)"}">${wxTxt(pk)}</b>`:""}${di>=5?`<br><span style="font-size:13px">6日目以降は予報の精度が下がります</span>`:""}`:"風の予報がありません";
   let sstTxt="";
   if(sea&&d.m&&d.m.sea_surface_temperature){const tgt=date===t?nowHour():date+"T06:00";const j=d.m.time.indexOf(tgt);if(j>=0&&d.m.sea_surface_temperature[j]!=null)sstTxt=`<span>水温<b>${f1(d.m.sea_surface_temperature[j])}℃</b></span>`}
-  $("d-sun").innerHTML=`<span>日の出<b>${sr.slice(11)}</b></span><span>日の入り<b>${ss.slice(11)}</b></span>${sstTxt}`;
+  const sh=sea?shio(date):"";
+  $("d-sun").innerHTML=`<span>日の出<b>${sr.slice(11)}</b></span><span>日の入り<b>${ss.slice(11)}</b></span>${sstTxt}${sh?`<span class="shio"><b>${sh}</b></span>`:""}`;
 
   const idx=[]; H.time.forEach((x,i)=>{if(x.slice(0,10)===date)idx.push(i)});
   const nh=nowHour();
   $("d-wind").innerHTML=windChart(H,idx,sr,ss,date===t?nh:null,pk&&pk.r);
 
   // 潮位
-  const M=d.m, lvArr=M&&M.sea_level_height_msl, hasTide=sea&&lvArr&&lvArr.some(v=>v!=null);
-  let ext={};
+  const ts=sea?tideSrc(p,d):null;
   if(sea){
     $("d-tidebox").hidden=false;
-    if(!hasTide){$("d-tidenow").textContent="";$("d-tide").innerHTML="";$("d-tideev").textContent="この地点では潮位を取得できません。海岸に近い緯度・経度で登録してください。"}
+    $("d-tideh").textContent=ts&&ts.label?`潮位（${ts.label}）`:"潮位（目安）";
+    $("d-tidenow").textContent=$("d-tideev").textContent=""; $("d-tide").innerHTML="";
+    const svg=ts&&tideChart(ts,date,date===t?nowMin():null);
+    if(!ts)$("d-tideev").textContent="この地点では潮位を取得できません。海岸に近い緯度・経度で登録してください。";
+    else if(!svg)$("d-tideev").textContent="この日の潮位はまだ予報がありません。";
     else{
-      const MT=M.time;
-      for(let i=1;i<lvArr.length-1;i++){const a=lvArr[i-1],b=lvArr[i],c=lvArr[i+1];if(a==null||b==null||c==null)continue;if(b>a&&b>=c)ext[MT[i]]="満潮";else if(b<a&&b<=c)ext[MT[i]]="干潮"}
-      let s,e,nowI=-1;
-      if(date===t){nowI=MT.indexOf(nh);s=Math.max(0,nowI-6);e=Math.min(MT.length-1,s+24)}
-      else{s=MT.indexOf(date+"T00:00");e=Math.min(MT.length-1,s+24)}
-      if(s<0){$("d-tide").innerHTML="";$("d-tidenow").textContent="";$("d-tideev").textContent="この日の潮位はまだ予報がありません。"}
-      else{
-        if(nowI>=0&&lvArr[nowI+1]!=null){
-          const up=lvArr[nowI+1]>lvArr[nowI];
-          const nx=MT.slice(nowI+1).find(x=>ext[x]);
-          $("d-tidenow").textContent=`いま：${up?"上げ潮":"下げ潮"}${nx?`（次の${ext[nx]} ${md(nx)} ${hh(nx)}時ごろ）`:""}`;
-        }else $("d-tidenow").textContent="";
-        $("d-tide").innerHTML=tideChart(MT,lvArr,s,e,nowI);
-        const ev=MT.slice(s,e+1).filter(x=>ext[x]);
-        $("d-tideev").innerHTML=ev.map(x=>`<div><b>${ext[x]}</b> ${md(x)} ${hh(x)}時ごろ</div>`).join("");
+      $("d-tide").innerHTML=svg;
+      if(date===t){
+        // 次の満潮・干潮で、いま上げ潮か下げ潮かを決める
+        const nm=nowMin(), o=ts.ext.find(o=>o.d>t||o.d===t&&o.min>nm);
+        if(o)$("d-tidenow").textContent=`いま：${o.k==="満潮"?"上げ潮":"下げ潮"}（次の${o.k} ${o.d===t?"":md(o.d)+" "}${fmtMin(o.min)}ごろ）`;
       }
     }
   }else $("d-tidebox").hidden=true;
 
-  // 水温の推移：表示中の日の前後1週間（日ごとの平均）に、前年の同じ日を重ねる
+  // 水温の推移：表示中の日の前後1週間（日ごとの平均）に、過去（最大5年）の同じ日の平均と幅を重ねる
   const S=sea&&d.sst, sv=S&&S.sea_surface_temperature_mean;
   let sstSvg="";
   if(sv){
     const ly=getLy(p); if(!ly)fetchLy(p);
     const days=[...Array(15)].map((_,i)=>addDays(date,i-7));
     const cur=days.map(x=>{const j=S.time.indexOf(x);return j>=0?sv[j]:null});
-    const prev=ly&&days.map(x=>{const j=ly.time.indexOf(lyDate(x));return j>=0?ly.v[j]:null});
-    sstSvg=sstChart(days,cur,prev,t);
+    // 過去の同じ日の平均・最低・最高。描く15日すべてに値がある年だけを使う（途中で年数が変わって線や帯に段差が出ないように）
+    const yv=ly?ly.ys.map((y,i)=>y&&days.map(x=>{const j=y.time.indexOf(agoDate(x,i+1));return j>=0?y.v[j]:null})).filter(a=>a&&a.every(v=>v!=null)):[];
+    const prev=yv.length?days.map((_,d)=>{const v=yv.map(a=>a[d]);return {avg:v.reduce((a,b)=>a+b)/v.length,lo:Math.min(...v),hi:Math.max(...v)}}):null;
+    sstSvg=sstChart(days,cur,prev,t,yv.length);
   }
   $("d-sst").innerHTML=sstSvg; $("d-sstbox").hidden=!sstSvg;
 
   // 時間ごとの表
-  const MT=M?M.time:[];
   let h=`<tr><th>時刻</th><th>風（平均）</th><th>瞬間</th><th>天気</th><th>気温℃</th><th>降水</th>${sea?"<th>潮</th>":""}</tr>`;
   idx.forEach(i=>{
     const x=H.time[i], night=!(x.slice(0,13)>=sr.slice(0,13)&&x<=ss);
     const v=H.wind_speed_10m[i], c=`var(--${lv(v)==="na"?"sub":lv(v)+"-text"})`;
     let tide="";
-    if(sea){
-      const j=MT.indexOf(x);
-      if(j>=0&&lvArr&&lvArr[j]!=null&&lvArr[j+1]!=null){tide=ext[x]?`<span class="${ext[x]==="満潮"?"up":"dn"}">${ext[x]}</span>`:lvArr[j+1]>lvArr[j]?`<span class="up">上げ</span>`:`<span class="dn">下げ</span>`}
+    if(ts){
+      // 満潮・干潮はいちばん近い時刻の行に書く。ほかの行は次の1時間で上がるか下がるか
+      const hr=hh(x), a=ts.at(date,hr), b=ts.at(date,hr+1), o=ts.ext.find(o=>o.d===date&&Math.round(o.min/60)===hr||hr===0&&o.d===addDays(date,-1)&&o.min>=1410);
+      if(o)tide=`<span class="${o.k==="満潮"?"up":"dn"}">${o.k}</span>`;
+      else if(a!=null&&b!=null)tide=b>a?`<span class="up">上げ</span>`:`<span class="dn">下げ</span>`;
     }
     h+=`<tr class="${night?"night":""} ${x===nh?"now":""} ${pk&&inWin(x,pk.r)?"win":""}"><td>${x===nh?"<b>いま</b>":hh(x)+"時"}</td><td class="wind" style="color:${c}"><span class="windcell">${arrow(H.wind_direction_10m[i])}<span style="color:var(--ink);font-weight:400;font-size:13px">${dirName(H.wind_direction_10m[i])}</span> ${f1(v)}</span></td><td class="gust">${f1(H.wind_gusts_10m[i])}</td><td class="w">${WX[H.weather_code[i]]||"-"}</td><td>${f1(H.temperature_2m[i])}</td><td>${H.precipitation_probability[i]??"-"}%</td>${sea?`<td>${tide||"-"}</td>`:""}</tr>`;
   });
@@ -784,33 +856,98 @@ function windChart(H,idx,sr,ss,nh,wr){
   idx.forEach((i,k)=>{
     const cx=left+cw*k+cw/2, t=H.time[i];
     if(k%2===0){const deg=H.wind_direction_10m[i]; if(deg!=null)g+=`<g transform="translate(${cx} ${Hh-bot+13}) rotate(${deg})"><path d="M0 -6v12M-4.5 1.5 0 6l4.5-4.5" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>`}
-    if(hh(t)%3===0)g+=`<text x="${cx}" y="${Hh-6}" font-size="12" text-anchor="middle" fill="var(--sub)">${hh(t)}</text>`;
+    // 目盛りは潮位のグラフとそろえ、その時刻ちょうどの位置（棒の左端）に書く
+    if(hh(t)%3===0)g+=`<text x="${left+cw*k}" y="${Hh-6}" font-size="12" text-anchor="middle" fill="var(--sub)">${hh(t)}</text>`;
   });
-  if(nh){const k=idx.findIndex(i=>H.time[i]===nh);if(k>=0)g+=`<line x1="${left+cw*k+cw/2}" x2="${left+cw*k+cw/2}" y1="${top}" y2="${Hh-bot}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 3"/><text x="${left+cw*k+cw/2+4}" y="${top+12}" font-size="12" fill="var(--ink)" font-weight="700">いま</text>`}
+  // いま：潮位のグラフとそろえ、今の時刻（分まで）の位置に線を引き、上に「いま」と書く
+  if(nh){const nx=left+cw*nowMin()/60, end=nx>W-40;g+=`<line x1="${nx.toFixed(1)}" x2="${nx.toFixed(1)}" y1="${top}" y2="${Hh-bot}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 3"/><text x="${(nx+(end?-4:4)).toFixed(1)}" y="${top+12}" font-size="12" fill="var(--ink)" font-weight="700" text-anchor="${end?"end":"start"}">いま</text>`}
   return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="1時間ごとの平均風速と風向">${g}</svg>`;
 }
 
-function tideChart(T,L,s,e,nowI){
-  const time=T.slice(s,e+1), vals=L.slice(s,e+1), n=time.length;
-  const ok=vals.filter(v=>v!=null); if(n<3||!ok.length)return"";
-  const mn=Math.min(...ok),mx=Math.max(...ok),W=360,Hh=130,top=10,bot=22,left=2,right=2;
-  const x=i=>left+(W-left-right)*i/(n-1), y=v=>Hh-bot-(Hh-top-bot)*(v-mn)/((mx-mn)||1);
-  const pts=vals.map((v,i)=>v==null?null:[x(i),y(v)]).filter(Boolean);
+// 潮位の出どころをそろえる。気象庁の潮位表が取れていればそれ（見出しに地点名を出す）、なければ予報モデルの値に基準面との差を足した目安。
+// at(日付,時)＝その時刻の潮位（cm、潮位表基準面から。24時は翌日の0時）。ext＝満潮・干潮 {k,d:日付,min:0時からの分,v:cm} を時刻順に
+function tideSrc(p,d){
+  const st=tideStation(p), td=st&&getTide(st);
+  if(st&&!td)fetchTide(st);
+  const at1=f=>(dd,h)=>{if(h>=24){dd=addDays(dd,1);h-=24}return f(dd,h)};
+  if(td){
+    const ext=[];
+    Object.keys(td).sort().forEach(dd=>td[dd].x.forEach(([hi,min,v])=>ext.push({k:hi?"満潮":"干潮",d:dd,min,v})));
+    ext.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.min-b.min);
+    return {label:st.label||st.name, at:at1((dd,h)=>td[dd]?td[dd].h[h]:null), ext};
+  }
+  const M=d.m, L=M&&M.sea_level_height_msl; if(!L||!L.some(v=>v!=null))return null;
+  // 予報モデルの潮位は平均潮位が0。地点の z0（平均潮位が基準面より何cm高いか）を足す
+  const MT=M.time, z0=st?st.z0:0, cm=v=>v==null?null:v*100+z0, ext=[];
+  // 満潮・干潮：1時間ごとの潮位の山と谷。前後の値で放物線をあてはめ、時刻（10分単位）と高さを補う
+  for(let i=1;i<L.length-1;i++){
+    const a=L[i-1],b=L[i],c=L[i+1];if(a==null||b==null||c==null)continue;
+    const k=b>a&&b>=c?"満潮":b<a&&b<=c?"干潮":"";if(!k)continue;
+    const den=a-2*b+c, dl=den?Math.max(-.5,Math.min(.5,(a-c)/(2*den))):0;
+    let m=Math.round((hh(MT[i])+dl)*6)*10, dd=MT[i].slice(0,10);
+    if(m<0){m+=1440;dd=addDays(dd,-1)}else if(m>=1440){m-=1440;dd=addDays(dd,1)}
+    ext.push({k,d:dd,min:m,v:cm(b-(a-c)*dl/4)});
+  }
+  return {label:null, at:at1((dd,h)=>{const j=MT.indexOf(`${dd}T${String(h).padStart(2,"0")}:00`);return j<0?null:cm(L[j])}), ext};
+}
+const nowMin=()=>{const s=jstNow();return +s.slice(11,13)*60+ +s.slice(14,16)};
+
+// その日の0〜24時の潮位。横の位置は風のグラフにそろえる（左右の余白も同じ）。nm は今の時刻（0時からの分。今日でなければ null）
+function tideChart(ts,date,nm){
+  const vals=[...Array(25)].map((_,h)=>ts.at(date,h)), ok=vals.filter(v=>v!=null); if(ok.length<3)return"";
+  // その日の満潮・干潮。グラフの両端（0時・24時にいちばん近いもの）は山・谷として扱わない
+  const ex=ts.ext.filter(o=>o.d===date&&Math.round(o.min/60)>=1&&Math.round(o.min/60)<=23);
+  const W=360,Hh=150,top=24,bot=22,pad=20,left=18,right=2,cw=(W-left-right)/24;
+  const all=ok.concat(ex.map(o=>o.v)), mn=Math.min(...all),mx=Math.max(...all);
+  // 干潮の書き込みのぶん、いちばん低い所を下の線から pad だけ浮かせる
+  const x=m=>left+cw*m/60, y=v=>Hh-bot-pad-(Hh-top-bot-pad)*(v-mn)/((mx-mn)||1);
+  // 線は1時間ごとの値に満潮・干潮の点を足して引く（山と谷の点が線の上に乗るように）
+  const pts=vals.map((v,h)=>v==null?null:[h*60,v]).filter(Boolean).concat(ex.map(o=>[o.min,o.v])).sort((a,b)=>a[0]-b[0]).map(([m,v])=>[x(m),y(v)]);
   const line=pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
   const area=`${pts[0][0].toFixed(1)},${Hh-bot} ${line} ${pts[pts.length-1][0].toFixed(1)},${Hh-bot}`;
   let g="";
-  time.forEach((t,i)=>{
-    if(hh(t)===0)g+=`<line x1="${x(i)}" x2="${x(i)}" y1="${top}" y2="${Hh-bot}" stroke="var(--ink)" opacity=".35"/><text x="${x(i)+3}" y="${Hh-7}" font-size="12" fill="var(--ink)">${md(t)}</text>`;
-    else if(hh(t)%6===0&&x(i)>16&&x(i)<W-16)g+=`<text x="${x(i)}" y="${Hh-7}" font-size="12" fill="var(--sub)" text-anchor="middle">${hh(t)}時</text>`;
+  // 目盛りと「いま」は風のグラフとそろえる（3時間ごとの数字をその時刻ちょうどの位置に。「いま」は線の上の方に書く）
+  const nowX=nm==null?null:x(nm);
+  for(let h=0;h<24;h+=3)g+=`<text x="${x(h*60)}" y="${Hh-6}" font-size="12" fill="var(--sub)" text-anchor="middle">${h}</text>`;
+  if(nowX!=null)g+=`<line x1="${nowX.toFixed(1)}" x2="${nowX.toFixed(1)}" y1="${top}" y2="${Hh-bot}" stroke="var(--magenta)" stroke-width="2"/>`;
+  const boxes=[];  // 満潮・干潮の書き込みの範囲。「いま」と重ならないようにする
+  // 山と谷に時刻と高さ（cm）。満潮は上、干潮は下に書く。端に近いものは枠からはみ出さないよう寄せる
+  ex.forEach(o=>{
+    const px=x(o.min), py=y(o.v), hi=o.k==="満潮", [tx,anc]=px<48?[0,"start"]:px>W-48?[W,"end"]:[px,"middle"];
+    const ty=hi?py-9:py+17, tw=7.5*(fmtMin(o.min).length+String(Math.round(o.v)).length+3), bx=anc==="start"?tx:anc==="end"?tx-tw:tx-tw/2;
+    boxes.push([bx-6,ty-12,bx+tw+6,ty+2]);  // 文字幅は目安なので、左右に少し余裕を取る
+    g+=`<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="3.5" fill="var(--water-line)"/><text x="${tx.toFixed(1)}" y="${(hi?py-9:py+17).toFixed(1)}" font-size="12" text-anchor="${anc}" fill="var(--ink)"><tspan font-weight="700">${fmtMin(o.min)}</tspan> ${Math.round(o.v)}cm</text>`;
   });
-  const k=nowI>=0?nowI-s:-1;
-  if(k>=0&&k<n){const nx=x(k),end=nx>W-40;g+=`<line x1="${nx}" x2="${nx}" y1="${top-4}" y2="${Hh-bot}" stroke="var(--magenta)" stroke-width="2"/><text x="${nx+(end?-5:5)}" y="${top+10}" font-size="13" font-weight="700" fill="var(--magenta)" text-anchor="${end?"end":"start"}">いま</text>`}
+  // 「いま」は風のグラフと同じく線の右上。満潮・干潮の書き込みと重なるときは、線の左上、右下、左下の順に逃がす
+  if(nowX!=null){
+    const hit=(x1,y1,x2,y2)=>boxes.some(b=>x1<b[2]&&x2>b[0]&&y1<b[3]&&y2>b[1]);
+    const cand=[[1,top+12],[-1,top+12],[1,Hh-bot-6],[-1,Hh-bot-6]].filter(([d])=>d>0?nowX+30<W:nowX-30>0);
+    const [d,ty]=cand.find(([d,ty])=>{const x1=d>0?nowX+4:nowX-30;return !hit(x1,ty-12,x1+26,ty+2)})||cand[0]||[1,top+12];
+    g+=`<text x="${(nowX+d*4).toFixed(1)}" y="${ty}" font-size="12" font-weight="700" fill="var(--magenta)" text-anchor="${d>0?"start":"end"}">いま</text>`;
+  }
   return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="潮位の推移"><polygon points="${area}" fill="var(--water-line)" opacity=".25"/><polyline points="${line}" fill="none" stroke="var(--water-line)" stroke-width="2.5" stroke-linejoin="round"/><line x1="${left}" x2="${W-right}" y1="${Hh-bot}" y2="${Hh-bot}" stroke="var(--water-line)"/>${g}</svg>`;
 }
 
-// days は表示中の日を真ん中（7番目）にした15日分。cur は今年、prev は前年（未取得なら null）
-function sstChart(days,cur,prev,t){
-  const n=days.length, c=7, all=cur.concat(prev||[]).filter(v=>v!=null); if(!cur.some(v=>v!=null))return"";
+// 潮回り：旧暦の日（新月の日を1日とする）から決める。新月の時刻は Meeus の近似式（誤差は数分）
+const SHIO="大大大中中中小小小長若中中大大大大中中中中小小小長若中中中大";  // 旧暦1日〜30日
+function newMoonJD(k){
+  const T=k/1236.85, r=Math.PI/180, E=1-0.002516*T, s=Math.sin;
+  const M=(2.5534+29.1053567*k)*r, Mp=(201.5643+385.81693528*k)*r, F=(160.7108+390.67050284*k)*r, O=(124.7746-1.56375588*k)*r;
+  return 2451550.09766+29.530588861*k+0.00015437*T*T
+    -0.4072*s(Mp)+0.17241*E*s(M)+0.01608*s(2*Mp)+0.01039*s(2*F)+0.00739*E*s(Mp-M)-0.00514*E*s(Mp+M)+0.00208*E*E*s(2*M)
+    -0.00111*s(Mp-2*F)-0.00057*s(Mp+2*F)+0.00056*E*s(2*Mp+M)-0.00042*s(3*Mp)+0.00042*E*s(M+2*F)+0.00038*E*s(M-2*F)-0.00024*E*s(2*Mp-M)-0.00017*s(O);
+}
+function shio(date){
+  const day=Date.parse(date+"T00:00:00Z")/864e5, nmDay=k=>Math.floor(newMoonJD(k)-2440587.5+9/24);  // 1970-01-01からの日数（日本時間の日付）
+  let k=Math.floor((day+2440587.5-2451550.1)/29.530588861)+1;
+  while(nmDay(k)>day)k--;
+  const n=day-nmDay(k);
+  return n>=0&&n<30?SHIO[n]+"潮":"";
+}
+
+// days は表示中の日を真ん中（7番目）にした15日分。cur は今年、prev は過去の {avg,lo,hi}（日ごと。未取得なら null）、ny は使った年数
+function sstChart(days,cur,prev,t,ny){
+  const n=days.length, c=7, all=cur.concat(...(prev||[]).map(o=>o?[o.lo,o.hi]:[])).filter(v=>v!=null); if(!cur.some(v=>v!=null))return"";
   const W=360,Hh=150,top=24,bot=22,left=24,right=6;
   let mn=Math.floor(Math.min(...all)-.3), mx=Math.ceil(Math.max(...all)+.3); if(mx-mn<3)mx=mn+3;
   const step=mx-mn>8?2:1;
@@ -822,14 +959,20 @@ function sstChart(days,cur,prev,t){
   days.forEach((d,i)=>{if(i%2===1)g+=`<text x="${x(i)}" y="${Hh-6}" font-size="12" text-anchor="middle" fill="var(--${i===c?"ink":"sub"})" font-weight="${i===c?700:400}">${md(d)}</text>`});
   const ti=days.indexOf(t);
   if(ti>=0&&ti!==c)g+=`<line x1="${x(ti)}" x2="${x(ti)}" y1="${top-6}" y2="${Hh-bot}" stroke="var(--magenta)" stroke-width="1.5" stroke-dasharray="3 3"/><text x="${x(ti)+(ti>c?-4:4)}" y="${top+6}" font-size="12" font-weight="700" fill="var(--magenta)" text-anchor="${ti>c?"end":"start"}">今日</text>`;
-  if(prev)g+=`<path d="${path(prev)}" fill="none" stroke="var(--faint)" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round"/>`;
+  if(prev){
+    // 過去の最低〜最高を帯で、平均を点線で。値のない日で帯を切る
+    let seg=[];
+    const band=()=>{if(seg.length>1)g+=`<polygon points="${seg.map(i=>`${x(i).toFixed(1)},${y(prev[i].hi).toFixed(1)}`).concat(seg.slice().reverse().map(i=>`${x(i).toFixed(1)},${y(prev[i].lo).toFixed(1)}`)).join(" ")}" fill="var(--faint)" opacity=".3"/>`;seg=[]};
+    prev.forEach((o,i)=>{if(o)seg.push(i);else band()});band();
+    g+=`<path d="${path(prev.map(o=>o&&o.avg))}" fill="none" stroke="var(--faint)" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round"/>`;
+  }
   g+=`<path d="${path(cur)}" fill="none" stroke="var(--water-line)" stroke-width="2.5" stroke-linejoin="round"/>`;
   cur.forEach((v,i)=>{if(v!=null)g+=`<circle cx="${x(i)}" cy="${y(v)}" r="${i===c?4.5:2.5}" fill="var(--water-line)"/>`});
-  // 真ん中の日の値。前年の値は、今年の値と重ならない側に書く
-  const a=cur[c], b=prev&&prev[c], up=b==null||a==null||a>=b;
-  if(a!=null)g+=`<text x="${x(c)}" y="${y(a)+(up?-9:20)}" font-size="14" font-weight="700" text-anchor="middle" fill="var(--ink)">${f1(a)}</text>`;
-  if(b!=null)g+=`<circle cx="${x(c)}" cy="${y(b)}" r="3" fill="var(--faint)"/><text x="${x(c)}" y="${y(b)+(up?18:-8)}" font-size="12" text-anchor="middle" fill="var(--sub)">${f1(b)}</text>`;
-  return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="${md(days[c])}の前後1週間の水温${a!=null?`。この日は${f1(a)}℃`:""}${b!=null?`、前年の同じ日は${f1(b)}℃`:""}">${g}</svg>`;
+  // 真ん中の日の値に「今年」「過去N年」と名前を付ける。過去の値は、今年の値と重ならない側に書く
+  const a=cur[c], b=prev&&prev[c]?prev[c].avg:null, up=b==null||a==null||a>=b;
+  if(a!=null)g+=`<text x="${x(c)}" y="${y(a)+(up?-9:20)}" font-size="14" font-weight="700" text-anchor="middle" fill="var(--ink)"><tspan font-size="12" font-weight="400">今年 </tspan>${f1(a)}</text>`;
+  if(b!=null)g+=`<circle cx="${x(c)}" cy="${y(b)}" r="3" fill="var(--faint)"/><text x="${x(c)}" y="${y(b)+(up?18:-8)}" font-size="12" text-anchor="middle" fill="var(--sub)">過去${ny}年 ${f1(b)}</text>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="${md(days[c])}の前後1週間の水温${a!=null?`。この日は${f1(a)}℃`:""}${b!=null?`、過去${ny}年の同じ日の平均は${f1(b)}℃（${f1(prev[c].lo)}〜${f1(prev[c].hi)}℃）`:""}">${g}</svg>`;
 }
 
 /* ---------- アプリの設定 ---------- */
@@ -1097,7 +1240,14 @@ function route(){
   else if(view==="add")renderAdd(+s[1]);
   else renderList();
 }
-window.addEventListener("hashchange",()=>{route();window.scrollTo(0,0);if(!$("v-list").hidden)loadAll(false)});
+// 詳細で前の日・次の日に移ったときは、見ている位置を保つ（上部は常に出ているので、同じところを日ごとに見比べられる）。ほかは一番上から
+let lastHash=location.hash;
+window.addEventListener("hashchange",()=>{
+  const spotOf=h=>(h.match(/^#\/d\/(\d+)\//)||[])[1], keep=spotOf(lastHash)!=null&&spotOf(lastHash)===spotOf(location.hash);
+  lastHash=location.hash;
+  route(); if(!keep)window.scrollTo(0,0);
+  if(!$("v-list").hidden)loadAll(false);
+});
 $("to-spots").onclick=()=>{location.hash="#/settings"};
 $("back1").onclick=()=>{location.hash="#/"};
 $("set-back").onclick=()=>{location.hash="#/"};

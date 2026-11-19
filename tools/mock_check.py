@@ -1,6 +1,6 @@
 """ナギカル：仮データでの表示確認スクリプト
 
-Open-Meteo・祝日API・Google Fonts への通信を横取りし、仮の予報データを返して
+Open-Meteo・気象庁の潮位表・祝日API・Google Fonts への通信を横取りし、仮のデータを返して
 スマホ幅（390px）で各画面を開く。スクリーンショットを shots/ に保存し、
 JSエラー・横スクロールの有無・予報APIへの取得回数を表示する。
 
@@ -8,6 +8,7 @@ JSエラー・横スクロールの有無・予報APIへの取得回数を表示
   pip install playwright && python -m playwright install chromium
   python3 tools/mock_check.py            # 雨のある仮データ
   python3 tools/mock_check.py --snow     # 大雪の日を混ぜる
+  python3 tools/mock_check.py --tide-fail  # 気象庁の潮位表を取れないとき（予報モデルの「目安」で出す）
 """
 import argparse
 import datetime
@@ -23,6 +24,7 @@ SHOTS = ROOT / "shots"
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--snow", action="store_true", help="大雪（weather_code 75）の日を混ぜる")
+ap.add_argument("--tide-fail", action="store_true", help="気象庁の潮位表の取得を失敗させる")
 args = ap.parse_args()
 
 JST = datetime.timezone(datetime.timedelta(hours=9))
@@ -60,18 +62,50 @@ MARINE = {"hourly": {"time": T7, "sea_surface_temperature": [15.3] * N7,
                      "sea_level_height_msl": [0.2 * math.sin(i / 12.4 * 6.28) for i in range(N7)]},
           "daily": {"time": D7, "sea_surface_temperature_mean": [round(17.5 - 0.2 * i, 1) if i < 16 else None for i in range(18)]}}
 
-count = {"forecast": 0, "lastyear": 0}
+count = {"forecast": 0, "lastyear": 0, "tide": 0}
+
+
+def jma_text(year, code):
+    """気象庁の潮位表のテキスト（1行136文字）を仮に作る。半日周期の潮に日周潮を少し混ぜる"""
+    def lv(t):  # t は年初からの分
+        return 50 + 30 * math.sin(t / 60 / 12.42 * 2 * math.pi) + 8 * math.sin(t / 60 / 24.84 * 2 * math.pi)
+    d0 = datetime.date(year, 1, 1)
+    lines = []
+    for n in range((datetime.date(year + 1, 1, 1) - d0).days):
+        d = d0 + datetime.timedelta(days=n)
+        base = n * 1440
+        hourly = "".join(f"{round(lv(base + h * 60)):3d}" for h in range(24))
+        hi, lo = [], []
+        for m in range(1440):
+            a, b, c = lv(base + m - 1), lv(base + m), lv(base + m + 1)
+            if b > a and b >= c:
+                hi.append(f"{m // 60:2d}{m % 60:2d}{round(b):3d}")
+            elif b < a and b <= c:
+                lo.append(f"{m // 60:2d}{m % 60:2d}{round(b):3d}")
+        pad = lambda x: "".join((x + ["9999999"] * 4)[:4])
+        lines.append(hourly + f"{d.year % 100:02d}{d.month:2d}{d.day:2d}" + code + pad(hi) + pad(lo))
+    return "\n".join(lines) + "\n"
+
+
+def on_jma(route):
+    count["tide"] += 1
+    if args.tide_fail:
+        return route.abort()
+    year, code = route.request.url.rsplit("/", 2)[1:]
+    route.fulfill(body=jma_text(int(year), code[:2]), content_type="text/plain; charset=UTF-8")
 
 
 def on_marine(route):
     url = route.request.url
-    if "start_date=" in url:  # 前年の水温（日付を指定）
+    if "start_date=" in url:  # 過去の水温（日付を指定。1年ごとに1回、最大5年）
         count["lastyear"] += 1
         q = dict(x.split("=", 1) for x in url.split("?", 1)[1].split("&"))
         a = datetime.date.fromisoformat(q["start_date"])
         b = datetime.date.fromisoformat(q["end_date"])
         days = [(a + datetime.timedelta(days=i)).isoformat() for i in range((b - a).days + 1)]
-        body = {"daily": {"time": days, "sea_surface_temperature_mean": [round(18.6 - 0.18 * i, 1) for i in range(len(days))]}}
+        base = 17.4 + (a.year - datetime.date.today().year + 2) * 0.9  # 年ごとに値をずらし、帯に幅を出す
+        # 本物と同じく 2022-11-24 より前は null
+        body = {"daily": {"time": days, "sea_surface_temperature_mean": [None if x < "2022-11-24" else round(base - 0.18 * i, 1) for i, x in enumerate(days)]}}
     else:
         body = MARINE
     route.fulfill(body=json.dumps(body), content_type="application/json")
@@ -94,6 +128,7 @@ with sync_playwright() as p:
     page.route("**/fonts.googleapis.com/**", lambda r: r.abort())
     page.route("**/holidays-jp.github.io/**", lambda r: r.abort())
     page.route("**/api.open-meteo.com/**", on_forecast)
+    page.route("**/www.data.jma.go.jp/**", on_jma)
     page.route("**/marine-api.open-meteo.com/**", on_marine)
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
@@ -110,17 +145,18 @@ with sync_playwright() as p:
     page.reload()
     page.wait_for_timeout(500)
     print("すぐリロードした後の取得回数（増えないこと）:", count["forecast"])
+    print("潮位表の取得回数（地点の数だけ。リロードでは増えないこと）:", count["tide"])
 
     page.click("button.cell[data-d] >> nth=0")
     page.wait_for_timeout(300)
     page.screenshot(path=str(SHOTS / "2-detail.png"), full_page=True)
-    print("詳細を開いた後の前年水温の取得回数（1）:", count["lastyear"])
+    print("詳細を開いた後の過去の水温の取得回数（値のある年の数。最大5）:", count["lastyear"])
     page.click("#next")
     page.wait_for_timeout(300)
     page.reload()
     page.wait_for_timeout(500)
     page.screenshot(path=str(SHOTS / "2b-detail-next.png"), full_page=True)
-    print("次の日・リロード後の前年水温の取得回数（1のまま）:", count["lastyear"])
+    print("次の日・リロード後の過去の水温の取得回数（増えないこと）:", count["lastyear"])
 
     page.goto(HTML + "#/spots")
     page.wait_for_timeout(400)

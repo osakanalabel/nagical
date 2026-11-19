@@ -15,6 +15,7 @@ https://osakanalabel.github.io/nagical/
 ## データと注意
 
 - 予報：[Open-Meteo](https://open-meteo.com/)（[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)）
+- 潮位：[気象庁 潮位表](https://www.data.jma.go.jp/kaiyou/db/tide/suisan/index.php)（出典：気象庁ホームページ。近くの観測地点の予測を表示）
 - 祝日：[holidays-jp](https://github.com/holidays-jp/api)
 - 予報は目安です。出かける前と現地で必ず確かめてください。
 
